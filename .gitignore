@@ -3,6 +3,7 @@
 .project
 /.settings/
 *.iml
+workflowFile
 /target
 /.idea/
 dependency-reduced-pom.xml
