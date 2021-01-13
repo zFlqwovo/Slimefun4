@@ -37,13 +37,13 @@ public final class SlimefunGuide {
 
     public static void openGuide(@Nonnull Player p, @Nonnull ItemStack guide) {
         if (getItem(SlimefunGuideMode.SURVIVAL_MODE).equals(guide)) {
-            openGuide(p, SlimefunGuideMode.CHEAT_MODE);
+            openGuide(p, SlimefunGuideMode.SURVIVAL_MODE);
         } else {
             /**
              * When using /sf cheat or /sf open_guide the ItemStack is null anyway,
              * so we don't even need to check here at this point.
              */
-            openGuide(p, SlimefunGuideMode.SURVIVAL_MODE);
+            openGuide(p, SlimefunGuideMode.CHEAT_MODE);
         }
     }
 
