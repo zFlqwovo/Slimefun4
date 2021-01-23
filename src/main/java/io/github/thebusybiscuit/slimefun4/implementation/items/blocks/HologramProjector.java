@@ -2,12 +2,13 @@ package io.github.thebusybiscuit.slimefun4.implementation.items.blocks;
 
 import io.github.thebusybiscuit.cscorelib2.chat.ChatColors;
 import io.github.thebusybiscuit.cscorelib2.item.CustomItem;
-import io.github.thebusybiscuit.cscorelib2.math.DoubleHandler;
+import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
+import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 import io.github.thebusybiscuit.slimefun4.utils.holograms.SimpleHologram;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
@@ -24,7 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class HologramProjector extends SlimefunItem {
+public class HologramProjector extends SlimefunItem implements HologramOwner {
 
     private static final String OFFSET_PARAMETER = "offset";
 
@@ -88,9 +89,9 @@ public class HologramProjector extends SlimefunItem {
             return false;
         });
 
-        menu.addItem(1, new CustomItem(Material.CLOCK, "&7高度: &e" + DoubleHandler.fixDouble(Double.valueOf(BlockStorage.getLocationInfo(projector.getLocation(), OFFSET_PARAMETER)) + 1.0D), "", "&rLeft Click: &7+0.1", "&rRight Click: &7-0.1"));
+        menu.addItem(1, new CustomItem(Material.CLOCK, "&7高度: &e" + NumberUtils.reparseDouble(Double.valueOf(BlockStorage.getLocationInfo(projector.getLocation(), OFFSET_PARAMETER)) + 1.0D), "", "&rLeft Click: &7+0.1", "&rRight Click: &7-0.1"));
         menu.addMenuClickHandler(1, (pl, slot, item, action) -> {
-            double offset = DoubleHandler.fixDouble(Double.valueOf(BlockStorage.getLocationInfo(projector.getLocation(), OFFSET_PARAMETER)) + (action.isRightClicked() ? -0.1F : 0.1F));
+            double offset = NumberUtils.reparseDouble(Double.valueOf(BlockStorage.getLocationInfo(projector.getLocation(), OFFSET_PARAMETER)) + (action.isRightClicked() ? -0.1F : 0.1F));
             ArmorStand hologram = getArmorStand(projector, true);
             Location l = new Location(projector.getWorld(), projector.getX() + 0.5, projector.getY() + offset, projector.getZ() + 0.5);
             hologram.teleport(l);

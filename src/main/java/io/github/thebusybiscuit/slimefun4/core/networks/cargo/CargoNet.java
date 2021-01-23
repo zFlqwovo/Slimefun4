@@ -2,10 +2,9 @@ package io.github.thebusybiscuit.slimefun4.core.networks.cargo;
 
 import io.github.thebusybiscuit.slimefun4.api.network.Network;
 import io.github.thebusybiscuit.slimefun4.api.network.NetworkComponent;
+import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
-import io.github.thebusybiscuit.slimefun4.utils.holograms.SimpleHologram;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
-import me.mrCookieSlime.Slimefun.api.Slimefun;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +15,7 @@ import java.util.logging.Level;
 
 /**
  * The {@link CargoNet} is a type of {@link Network} which deals with {@link ItemStack} transportation.
- * It is also an extension of {@link ChestTerminalNetwork} which provides methods to deal
+ * It is also an extension of {@link AbstractItemNetwork} which provides methods to deal
  * with the addon ChestTerminal.
  *
  * @author meiamsome
@@ -27,9 +26,8 @@ import java.util.logging.Level;
  * @author TheBusyBiscuit
  * @author Walshy
  * @author DNx5
- *
  */
-public class CargoNet extends ChestTerminalNetwork {
+public class CargoNet extends AbstractItemNetwork implements HologramOwner {
 
     private static final int RANGE = 5;
     private static final int TICK_DELAY = SlimefunPlugin.getCfg().getInt("networks.cargo-ticker-delay");
@@ -134,16 +132,16 @@ public class CargoNet extends ChestTerminalNetwork {
 
     public void tick(Block b) {
         if (!regulator.equals(b.getLocation())) {
-            SimpleHologram.update(b, "&4检测到有多个货运管理器");
+            updateHologram(b, "&4检测到有多个货运管理器");
             return;
         }
 
         super.tick();
 
         if (connectorNodes.isEmpty() && terminusNodes.isEmpty()) {
-            SimpleHologram.update(b, "&c找不到货运节点");
+            updateHologram(b, "&c找不到货运节点");
         } else {
-            SimpleHologram.update(b, "&7状态: &a&l在线");
+            updateHologram(b, "&7状态: &a&l在线");
 
             // Skip ticking if the threshold is not reached. The delay is not same as minecraft tick,
             // but it's based on 'custom-ticker-delay' config.
@@ -241,8 +239,13 @@ public class CargoNet extends ChestTerminalNetwork {
             String str = BlockStorage.getLocationInfo(node).getString("frequency");
             return str == null ? 0 : Integer.parseInt(str);
         } catch (Exception x) {
-            Slimefun.getLogger().log(Level.SEVERE, x, () -> "An Error occurred while parsing a Cargo Node Frequency (" + node.getWorld().getName() + " - " + node.getBlockX() + "," + node.getBlockY() + "," + +node.getBlockZ() + ")");
+            SlimefunPlugin.logger().log(Level.SEVERE, x, () -> "An Error occurred while parsing a Cargo Node Frequency (" + node.getWorld().getName() + " - " + node.getBlockX() + "," + node.getBlockY() + "," + +node.getBlockZ() + ")");
             return 0;
         }
+    }
+
+    @Override
+    public String getId() {
+        return "CARGO_NETWORK";
     }
 }

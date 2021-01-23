@@ -1,6 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.tools;
 
-import io.github.starwishsama.sfmagic.ProtectionChecker;
+import io.github.starwishsama.utils.ProtectionChecker;
 import io.github.thebusybiscuit.cscorelib2.item.CustomItem;
 import io.github.thebusybiscuit.cscorelib2.protection.ProtectableAction;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemSetting;
@@ -84,6 +84,8 @@ class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements NotPla
         } else if (SlimefunTag.UNBREAKABLE_MATERIALS.isTagged(b.getType())) {
             return false;
         } else if (!b.getWorld().getWorldBorder().isInside(b.getLocation())) {
+            return false;
+        } else if (SlimefunPlugin.getIntegrations().isCustomBlock(b)) {
             return false;
         } else {
             return SlimefunPlugin.getProtectionManager().hasPermission(p, b.getLocation(), ProtectableAction.BREAK_BLOCK)

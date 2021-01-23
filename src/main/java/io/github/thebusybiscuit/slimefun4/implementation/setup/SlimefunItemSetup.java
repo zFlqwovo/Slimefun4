@@ -24,6 +24,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.electric.generato
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines.*;
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.reactors.NetherStarReactor;
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.reactors.NuclearReactor;
+import io.github.thebusybiscuit.slimefun4.implementation.items.elevator.ElevatorPlate;
 import io.github.thebusybiscuit.slimefun4.implementation.items.food.*;
 import io.github.thebusybiscuit.slimefun4.implementation.items.geo.GEOMiner;
 import io.github.thebusybiscuit.slimefun4.implementation.items.geo.GEOScanner;
@@ -201,7 +202,7 @@ public final class SlimefunItemSetup {
                 new ItemStack[]{SlimefunItems.ENDER_LUMP_1, new ItemStack(Material.ENDER_EYE), SlimefunItems.ENDER_LUMP_1, new ItemStack(Material.OBSIDIAN), null, new ItemStack(Material.OBSIDIAN), new ItemStack(Material.OBSIDIAN), null, new ItemStack(Material.OBSIDIAN)})
                 .register(plugin);
 
-        new SlimefunItem(categories.magicalArmor, SlimefunItems.ENDER_BOOTS, RecipeType.ARMOR_FORGE,
+        new EnderBoots(categories.magicalArmor, SlimefunItems.ENDER_BOOTS, RecipeType.ARMOR_FORGE,
                 new ItemStack[]{null, null, null, SlimefunItems.ENDER_LUMP_1, null, SlimefunItems.ENDER_LUMP_1, new ItemStack(Material.OBSIDIAN), null, new ItemStack(Material.OBSIDIAN)})
                 .register(plugin);
 
@@ -230,7 +231,7 @@ public final class SlimefunItemSetup {
                 new PotionEffect[]{new PotionEffect(PotionEffectType.SPEED, 300, 2)})
                 .register(plugin);
 
-        new SlimefunArmorPiece(categories.magicalArmor, SlimefunItems.SLIME_BOOTS, RecipeType.ARMOR_FORGE,
+        new LongFallBoots(categories.magicalArmor, SlimefunItems.SLIME_BOOTS, RecipeType.ARMOR_FORGE,
                 new ItemStack[]{null, null, null, new ItemStack(Material.SLIME_BALL), null, new ItemStack(Material.SLIME_BALL), new ItemStack(Material.IRON_INGOT), null, new ItemStack(Material.IRON_INGOT)},
                 new PotionEffect[]{new PotionEffect(PotionEffectType.JUMP, 300, 5)})
                 .register(plugin);
@@ -893,7 +894,7 @@ public final class SlimefunItemSetup {
                 new PotionEffect[]{new PotionEffect(PotionEffectType.SPEED, 300, 2)})
                 .register(plugin);
 
-        new SlimefunArmorPiece(categories.magicalArmor, SlimefunItems.SLIME_BOOTS_STEEL, RecipeType.ARMOR_FORGE,
+        new LongFallBoots(categories.magicalArmor, SlimefunItems.SLIME_BOOTS_STEEL, RecipeType.ARMOR_FORGE,
                 new ItemStack[]{null, null, null, new ItemStack(Material.SLIME_BALL), null, new ItemStack(Material.SLIME_BALL), new ItemStack(Material.SLIME_BALL), SlimefunItems.STEEL_PLATE, new ItemStack(Material.SLIME_BALL)},
                 new PotionEffect[]{new PotionEffect(PotionEffectType.JUMP, 300, 5)})
                 .register(plugin);
@@ -1764,7 +1765,7 @@ public final class SlimefunItemSetup {
                 new ItemStack[]{null, SlimefunItems.GPS_TRANSMITTER, null, new ItemStack(Material.DIAMOND_SWORD), SlimefunItems.PROGRAMMABLE_ANDROID_2, new ItemStack(Material.DIAMOND_SWORD), null, SlimefunItems.ELECTRIC_MOTOR, null})
                 .register(plugin);
 
-        new AdvancedFarmerAndroid(categories.androids, 2, SlimefunItems.PROGRAMMABLE_ANDROID_2_FARMER, RecipeType.ENHANCED_CRAFTING_TABLE,
+        new FarmerAndroid(categories.androids, 2, SlimefunItems.PROGRAMMABLE_ANDROID_2_FARMER, RecipeType.ENHANCED_CRAFTING_TABLE,
                 new ItemStack[]{null, SlimefunItems.GPS_TRANSMITTER, null, new ItemStack(Material.DIAMOND_HOE), SlimefunItems.PROGRAMMABLE_ANDROID_2, new ItemStack(Material.DIAMOND_HOE), null, SlimefunItems.ELECTRIC_MOTOR, null})
                 .register(plugin);
 
@@ -2395,7 +2396,29 @@ public final class SlimefunItemSetup {
                 new ItemStack[]{SlimefunItems.SILICON, new ItemStack(Material.YELLOW_DYE), SlimefunItems.SILICON, new ItemStack(Material.YELLOW_DYE), new ItemStack(Material.STRING), new ItemStack(Material.YELLOW_DYE), SlimefunItems.GILDED_IRON, new ItemStack(Material.YELLOW_DYE), SlimefunItems.SILICON})
                 .register(plugin);
 
-        if (SlimefunPlugin.getMinecraftVersion().isAtLeast(MinecraftVersion.MINECRAFT_1_16)) {
+        MinecraftVersion minecraftVersion = SlimefunPlugin.getMinecraftVersion();
+
+        if (minecraftVersion.isAtLeast(MinecraftVersion.MINECRAFT_1_15)) {
+            new SlimefunItem(categories.magicalArmor, SlimefunItems.BEE_HELMET, RecipeType.ARMOR_FORGE,
+                    new ItemStack[]{SlimefunItems.GOLD_8K, new ItemStack(Material.HONEY_BLOCK), SlimefunItems.GOLD_8K, new ItemStack(Material.HONEYCOMB_BLOCK), null, new ItemStack(Material.HONEYCOMB_BLOCK), null, null, null})
+                    .register(plugin);
+
+            new BeeWings(categories.magicalArmor, SlimefunItems.BEE_WINGS, RecipeType.ARMOR_FORGE,
+                    new ItemStack[]{SlimefunItems.GOLD_8K, null, SlimefunItems.GOLD_8K, new ItemStack(Material.HONEYCOMB_BLOCK), new ItemStack(Material.ELYTRA), new ItemStack(Material.HONEYCOMB_BLOCK), new ItemStack(Material.HONEY_BLOCK), SlimefunItems.GOLD_8K, new ItemStack(Material.HONEY_BLOCK)})
+                    .register(plugin);
+
+            new SlimefunItem(categories.magicalArmor, SlimefunItems.BEE_LEGGINGS, RecipeType.ARMOR_FORGE,
+                    new ItemStack[]{SlimefunItems.GOLD_8K, new ItemStack(Material.HONEY_BLOCK), SlimefunItems.GOLD_8K, new ItemStack(Material.HONEYCOMB_BLOCK), null, new ItemStack(Material.HONEYCOMB_BLOCK), new ItemStack(Material.HONEYCOMB_BLOCK), null, new ItemStack(Material.HONEYCOMB_BLOCK)})
+                    .register(plugin);
+
+            new LongFallBoots(categories.magicalArmor, SlimefunItems.BEE_BOOTS, RecipeType.ARMOR_FORGE,
+                    new ItemStack[]{null, null, null, SlimefunItems.GOLD_8K, null, SlimefunItems.GOLD_8K, new ItemStack(Material.HONEY_BLOCK), null, new ItemStack(Material.HONEY_BLOCK)},
+                    new PotionEffect[]{new PotionEffect(PotionEffectType.JUMP, 300, 2)})
+                    .register(plugin);
+        }
+
+
+        if (minecraftVersion.isAtLeast(MinecraftVersion.MINECRAFT_1_16)) {
             new StrangeNetherGoo(categories.magicalResources, SlimefunItems.STRANGE_NETHER_GOO, RecipeType.BARTER_DROP,
                     new ItemStack[]{null, null, null, null, new CustomItem(HeadTexture.PIGLIN_HEAD.getAsItemStack(), "&fPiglin"), null, null, null, null})
                     .register(plugin);

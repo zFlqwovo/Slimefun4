@@ -1,6 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.androids;
 
-import io.github.starwishsama.sfmagic.ProtectionChecker;
+import io.github.starwishsama.utils.ProtectionChecker;
 import io.github.thebusybiscuit.cscorelib2.chat.ChatColors;
 import io.github.thebusybiscuit.cscorelib2.chat.ChatInput;
 import io.github.thebusybiscuit.cscorelib2.inventory.ItemUtils;
@@ -26,7 +26,6 @@ import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.Objects.handlers.ItemHandler;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
-import me.mrCookieSlime.Slimefun.api.Slimefun;
 import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -68,6 +67,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
     protected final String texture;
     private final int tier;
 
+    @ParametersAreNonnullByDefault
     public ProgrammableAndroid(Category category, int tier, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(category, item, recipeType, recipe);
 
@@ -422,7 +422,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                             openScriptEditor(player, b);
                         }
                     } catch (Exception x) {
-                        Slimefun.getLogger().log(Level.SEVERE, "An Exception was thrown when a User tried to download a Script!", x);
+                        SlimefunPlugin.logger().log(Level.SEVERE, "An Exception was thrown when a User tried to download a Script!", x);
                     }
 
                     return false;
@@ -474,7 +474,12 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
         menu.addItem(1, new CustomItem(HeadTexture.SCRIPT_FORWARD.getAsItemStack(), "&2> 编辑脚本", "", "&a修改你现有的脚本"));
         menu.addMenuClickHandler(1, (pl, slot, item, action) -> {
-            openScript(pl, b, getScript(b.getLocation()));
+            if (PatternUtils.DASH.split(BlockStorage.getLocationInfo(b.getLocation()).getString("script")).length <= MAX_SCRIPT_LENGTH) {
+                openScript(pl, b, getScript(b.getLocation()));
+            } else {
+                pl.closeInventory();
+                SlimefunPlugin.getLocalization().sendMessage(pl, "android.scripts.too-long");
+            }
             return false;
         });
 
@@ -690,6 +695,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
         }
     }
 
+    @ParametersAreNonnullByDefault
     private void executeInstruction(Instruction instruction, Block b, BlockMenu inv, Config data, int index) {
         if (getAndroidType().isType(instruction.getRequiredType())) {
             String rotationData = data.getString("rotation");
@@ -846,16 +852,22 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
         preset.addItem(34, getFuelSource().getItem(), ChestMenuUtils.getEmptyClickHandler());
     }
 
+    @ParametersAreNonnullByDefault
     public void addItems(Block b, ItemStack... items) {
+        Validate.notNull(b, "The Block cannot be null.");
+
         BlockMenu inv = BlockStorage.getInventory(b);
 
-        for (ItemStack item : items) {
-            inv.pushItem(item, getOutputSlots());
+        if (inv != null) {
+            for (ItemStack item : items) {
+                inv.pushItem(item, getOutputSlots());
+            }
         }
     }
 
+    @ParametersAreNonnullByDefault
     protected void move(Block b, BlockFace face, Block block) {
-        Player p = Bukkit.getPlayer(ProtectionChecker.parseOwnerByJson(BlockStorage.getBlockInfoAsJson(b.getLocation())));
+        Player p = Bukkit.getPlayer(ProtectionChecker.getOwnerFromJson(BlockStorage.getBlockInfoAsJson(b.getLocation())));
 
         if (p != null && !ProtectionChecker.canInteract(p, block, ProtectableAction.PLACE_BLOCK)) {
             BlockStorage.addBlockInfo(b, "paused", "false");
@@ -899,11 +911,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
         throw new UnsupportedOperationException("Non-woodcutter Android tried to chop a Tree!");
     }
 
-    protected void farm(BlockMenu menu, Block block) {
-        throw new UnsupportedOperationException("Non-farming Android tried to farm!");
-    }
-
-    protected void exoticFarm(BlockMenu menu, Block block) {
+    protected void farm(Block b, BlockMenu menu, Block block, boolean isAdvanced) {
         throw new UnsupportedOperationException("Non-farming Android tried to farm!");
     }
 

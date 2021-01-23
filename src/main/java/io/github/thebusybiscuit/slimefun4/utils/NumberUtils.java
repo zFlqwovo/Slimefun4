@@ -214,8 +214,13 @@ public final class NumberUtils {
         }
     }
 
+    @Nonnull
     public static String roundDecimalNumber(double number) {
         return DECIMAL_FORMAT.format(number);
+    }
+
+    public static double reparseDouble(double number) {
+        return Double.parseDouble(roundDecimalNumber(number));
     }
 
     public static long getLong(@Nullable Long value, long defaultValue) {

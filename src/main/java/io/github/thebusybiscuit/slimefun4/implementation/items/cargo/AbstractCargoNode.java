@@ -1,50 +1,42 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.cargo;
 
-import io.github.starwishsama.sfmagic.ProtectionChecker;
+import io.github.starwishsama.utils.ProtectionChecker;
 import io.github.thebusybiscuit.cscorelib2.item.CustomItem;
 import io.github.thebusybiscuit.cscorelib2.protection.ProtectableAction;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
+import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.*;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
 import me.mrCookieSlime.Slimefun.Objects.Category;
-import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.SlimefunItem;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import org.apache.commons.lang.Validate;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * This abstract class is the super class of all cargo nodes.
  *
  * @author TheBusyBiscuit
  */
-abstract class AbstractCargoNode extends SlimefunItem {
+abstract class AbstractCargoNode extends SimpleSlimefunItem<BlockPlaceHandler> implements CargoNode {
 
     protected static final String FREQUENCY = "frequency";
 
-    public AbstractCargoNode(Category category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, ItemStack recipeOutput) {
+    @ParametersAreNonnullByDefault
+    AbstractCargoNode(Category category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, @Nullable ItemStack recipeOutput) {
         super(category, item, recipeType, recipe, recipeOutput);
-
-        addItemHandler(new BlockPlaceHandler(false) {
-
-            @Override
-            public void onPlayerPlace(BlockPlaceEvent e) {
-                Block b = e.getBlock();
-
-                // The owner and frequency are required by every node
-                BlockStorage.addBlockInfo(b, "owner", e.getPlayer().getUniqueId().toString());
-                BlockStorage.addBlockInfo(b, FREQUENCY, "0");
-
-                onPlace(e);
-            }
-
-        });
 
         new BlockMenuPreset(getId(), ChatUtils.removeColorCodes(item.getItemMeta().getDisplayName())) {
 
@@ -55,6 +47,7 @@ abstract class AbstractCargoNode extends SlimefunItem {
 
             @Override
             public void newInstance(BlockMenu menu, Block b) {
+                menu.addMenuCloseHandler(p -> markDirty(b.getLocation()));
                 updateBlockMenu(menu, b);
             }
 
@@ -72,8 +65,27 @@ abstract class AbstractCargoNode extends SlimefunItem {
         };
     }
 
+    @Override
+    public BlockPlaceHandler getItemHandler() {
+        return new BlockPlaceHandler(false) {
+
+            @Override
+            public void onPlayerPlace(BlockPlaceEvent e) {
+                Block b = e.getBlock();
+
+                // The owner and frequency are required by every node
+                BlockStorage.addBlockInfo(b, "owner", e.getPlayer().getUniqueId().toString());
+                BlockStorage.addBlockInfo(b, FREQUENCY, "0");
+
+                onPlace(e);
+            }
+
+        };
+    }
+
+    @ParametersAreNonnullByDefault
     protected void addChannelSelector(Block b, BlockMenu menu, int slotPrev, int slotCurrent, int slotNext) {
-        boolean isChestTerminalInstalled = SlimefunPlugin.getThirdPartySupportService().isChestTerminalInstalled();
+        boolean isChestTerminalInstalled = SlimefunPlugin.getIntegrations().isChestTerminalInstalled();
         int channel = getSelectedChannel(b);
 
         menu.replaceExistingItem(slotPrev, new CustomItem(HeadTexture.CARGO_ARROW_LEFT.getAsItemStack(), "&b上一信道", "", "&e> 单击将信道ID减一"));
@@ -119,7 +131,10 @@ abstract class AbstractCargoNode extends SlimefunItem {
         });
     }
 
-    private int getSelectedChannel(Block b) {
+    @Override
+    public int getSelectedChannel(@Nonnull Block b) {
+        Validate.notNull(b, "Block must not be null");
+
         if (!BlockStorage.hasBlockInfo(b)) {
             return 0;
         } else {
@@ -134,10 +149,12 @@ abstract class AbstractCargoNode extends SlimefunItem {
         }
     }
 
-    protected abstract void onPlace(BlockPlaceEvent e);
+    abstract void onPlace(BlockPlaceEvent e);
 
-    protected abstract void createBorder(BlockMenuPreset preset);
+    abstract void createBorder(BlockMenuPreset preset);
 
-    protected abstract void updateBlockMenu(BlockMenu menu, Block b);
+    abstract void updateBlockMenu(@Nonnull BlockMenu menu, @Nonnull Block b);
+
+    abstract void markDirty(@Nonnull Location loc);
 
 }

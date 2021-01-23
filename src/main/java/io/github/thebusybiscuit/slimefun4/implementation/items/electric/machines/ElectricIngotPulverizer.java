@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines;
 
+import io.github.thebusybiscuit.slimefun4.core.attributes.NotHopperable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.RecipeDisplayItem;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
@@ -20,7 +21,7 @@ import java.util.List;
  * @author John000708
  * @see ElectricIngotFactory
  */
-public class ElectricIngotPulverizer extends AContainer implements RecipeDisplayItem {
+public class ElectricIngotPulverizer extends AContainer implements RecipeDisplayItem, NotHopperable {
 
     public ElectricIngotPulverizer(Category category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(category, item, recipeType, recipe);
@@ -45,7 +46,7 @@ public class ElectricIngotPulverizer extends AContainer implements RecipeDisplay
 
     @Override
     protected void registerDefaultRecipes() {
-        // this is an sfmagic recipe on top of PostSetup.loadSmelteryRecipes() for converting
+        // this is an utils recipe on top of PostSetup.loadSmelteryRecipes() for converting
 
         // Vanilla Gold Ingot to Slimefun gold dust
         registerRecipe(3, new ItemStack(Material.GOLD_INGOT), SlimefunItems.GOLD_DUST);
