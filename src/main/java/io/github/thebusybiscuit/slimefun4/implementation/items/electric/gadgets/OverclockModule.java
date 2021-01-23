@@ -6,6 +6,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
 import me.mrCookieSlime.Slimefun.Objects.Category;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.SlimefunItem;
+import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.AContainer;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 import org.bukkit.block.Block;
@@ -29,19 +30,30 @@ public class OverclockModule extends SimpleSlimefunItem<ItemUseHandler> {
             if (block.isPresent()) {
                 Block b = block.get();
 
-                String json = BlockStorage.getBlockInfoAsJson(b);
-                e.getPlayer().sendMessage(json);
+                //String json = BlockStorage.getBlockInfoAsJson(b);
+                //e.getPlayer().sendMessage(json);
 
-                if (SlimefunItem.getByID("") != null && BlockStorage.hasBlockInfo(b)) {
+                if (BlockStorage.hasBlockInfo(b)) {
                     Config cfg = BlockStorage.getLocationInfo(b.getLocation());
-                    int multiply = cfg.getInt(OVERCLOCK_PATH);
 
-                    if (multiply >= 10) {
-                        e.getPlayer().sendMessage("超频倍率已达上限: 10x");
+                    SlimefunItem item = SlimefunItem.getByID(cfg.getString("id"));
+
+                    if (item instanceof AContainer) {
+                        AContainer machine = (AContainer) item;
+                        int multiply = Integer.parseInt(cfg.getString(OVERCLOCK_PATH));
+
+                        if (multiply >= 10) {
+                            e.getPlayer().sendMessage("超频倍率已达上限: 10x");
+                        } else {
+                            cfg.setValue(OVERCLOCK_PATH, multiply + 1);
+                            machine.setProcessingSpeed(machine.getSpeed() * multiply + 1);
+                            e.getPlayer().sendMessage("超频机器成功, 目前倍率: " + machine.getSpeed() + "x");
+                        }
                     } else {
-                        cfg.setValue(OVERCLOCK_PATH, multiply + 1);
-                        e.getPlayer().sendMessage("超频机器成功, 目前速度: ");
+                        e.getPlayer().sendMessage("抱歉, 该方块无法被超频");
                     }
+                } else {
+                    e.getPlayer().sendMessage("抱歉, 该方块无法被超频");
                 }
             }
         };
