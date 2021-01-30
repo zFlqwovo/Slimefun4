@@ -6,7 +6,7 @@
     <groupId>com.github.thebusybiscuit</groupId>
     <artifactId>Slimefun</artifactId>
 
-    <version>4.8-nightly</version>
+    <version>4.9-nightly</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -15,12 +15,17 @@
         <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
 
         <!-- Bukkit properties -->
-        <spigot.version>1.16.4</spigot.version>
+        <spigot.version>1.16.5</spigot.version>
         <spigot.javadocs>https://hub.spigotmc.org/javadocs/bukkit/</spigot.javadocs>
 
     </properties>
 
     <repositories>
+        <repository>
+            <id>lss233-minecraft</id>
+            <name>Lss233's Minecraft Repository</name>
+            <url>http://lss233.littleservice.cn/repositories/minecraft</url>
+        </repository>
         <repository>
             <id>destroystokyo-repo</id>
             <url>https://repo.destroystokyo.com/repository/maven-public</url>
@@ -58,11 +63,6 @@
             <id>walshy-public</id>
             <url>https://repo.walshy.dev/public</url>
         </repository>
-        <repository>
-            <id>lss233-minecraft</id>
-            <name>Lss233's Minecraft Repository</name>
-            <url>http://lss233.littleservice.cn/repositories/minecraft</url>
-        </repository>
     </repositories>
 
     <build>
@@ -82,12 +82,6 @@
                         <exclude>**/package-info.java</exclude>
                     </excludes>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
             </plugin>
 
             <plugin>
@@ -223,7 +217,7 @@
         <dependency>
             <groupId>com.gmail.nossr50.mcMMO</groupId>
             <artifactId>mcMMO</artifactId>
-            <version>2.1.172</version>
+            <version>2.1.173</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
