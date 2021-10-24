@@ -1,17 +1,17 @@
 package io.github.thebusybiscuit.slimefun4.implementation;
 
-import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
+
 /**
  * This class stores some startup warnings we occasionally need to print.
  * If you setup your server the recommended way, you are never going to see
  * any of these messages.
- *
+ * 
  * @author TheBusyBiscuit
  *
  */
@@ -41,7 +41,7 @@ final class StartupWarnings {
         logger.log(Level.SEVERE, PREFIX);
         logger.log(Level.SEVERE, PREFIX + "你正在使用 Minecraft 1.{0}.x", majorVersion);
         logger.log(Level.SEVERE, PREFIX + "但 Slimefun {0} 只支持", slimefunVersion);
-        logger.log(Level.SEVERE, PREFIX + "Minecraft {0}", String.join(" / ", SlimefunPlugin.getSupportedVersions()));
+        logger.log(Level.SEVERE, PREFIX + "Minecraft {0}", String.join(" / ", Slimefun.getSupportedVersions()));
         logger.log(Level.SEVERE, BORDER);
     }
 

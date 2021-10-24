@@ -1,14 +1,9 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.multiblocks;
 
-import io.github.thebusybiscuit.cscorelib2.inventory.ItemUtils;
-import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
-import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import io.papermc.lib.PaperLib;
-import me.mrCookieSlime.Slimefun.Lists.RecipeType;
-import me.mrCookieSlime.Slimefun.Objects.Category;
-import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.SlimefunItem;
-import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
+import java.util.List;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -19,14 +14,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.List;
+import io.github.bakedlibs.dough.items.ItemUtils;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import io.papermc.lib.PaperLib;
 
 public class EnhancedCraftingTable extends AbstractCraftingTable {
 
     @ParametersAreNonnullByDefault
-    public EnhancedCraftingTable(Category category, SlimefunItemStack item) {
-        super(category, item, new ItemStack[]{null, null, null, null, new ItemStack(Material.CRAFTING_TABLE), null, null, new ItemStack(Material.DISPENSER), null}, BlockFace.SELF);
+    public EnhancedCraftingTable(ItemGroup itemGroup, SlimefunItemStack item) {
+        super(itemGroup, item, new ItemStack[] { null, null, null, null, new ItemStack(Material.CRAFTING_TABLE), null, null, new ItemStack(Material.DISPENSER), null }, BlockFace.SELF);
     }
 
     @Override
@@ -37,12 +39,12 @@ public class EnhancedCraftingTable extends AbstractCraftingTable {
         if (state instanceof Dispenser) {
             Dispenser disp = (Dispenser) state;
             Inventory inv = disp.getInventory();
-
             List<ItemStack[]> inputs = RecipeType.getRecipeInputList(this);
 
             for (int i = 0; i < inputs.size(); i++) {
                 if (isCraftable(inv, inputs.get(i))) {
                     ItemStack output = RecipeType.getRecipeOutputList(this, inputs.get(i)).clone();
+
                     if (SlimefunUtils.canPlayerUseItem(p, output, true)) {
                         craft(inv, dispenser, p, b, output);
                     }
@@ -51,11 +53,10 @@ public class EnhancedCraftingTable extends AbstractCraftingTable {
                 }
             }
 
-            // Fallback for 1.16 below, fixes
-            if (inv.getContents().length == 0) {
-                SlimefunPlugin.getLocalization().sendMessage(p, "machines.inventory-empty", true);
+            if (SlimefunUtils.isInventoryEmpty(inv)) {
+                Slimefun.getLocalization().sendMessage(p, "machines.inventory-empty", true);
             } else {
-                SlimefunPlugin.getLocalization().sendMessage(p, "machines.pattern-not-found", true);
+                Slimefun.getLocalization().sendMessage(p, "machines.pattern-not-found", true);
             }
         }
     }
@@ -78,11 +79,14 @@ public class EnhancedCraftingTable extends AbstractCraftingTable {
                     ItemUtils.consumeItem(item, true);
                 }
             }
+
             p.getWorld().playSound(b.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1, 1);
 
             outputInv.addItem(output);
 
-        } else SlimefunPlugin.getLocalization().sendMessage(p, "machines.full-inventory", true);
+        } else {
+            Slimefun.getLocalization().sendMessage(p, "machines.full-inventory", true);
+        }
     }
 
     private boolean isCraftable(Inventory inv, ItemStack[] recipe) {
