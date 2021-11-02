@@ -91,7 +91,7 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
     public @Nonnull Optional<Item> getPlacedItem(@Nonnull Block pedestal) {
         Optional<Item> cache = pedestalItemCache.get(new BlockPosition(pedestal));
 
-        if (cache.isPresent()) {
+        if (cache != null && cache.isPresent()) {
             return cache;
         }
 
