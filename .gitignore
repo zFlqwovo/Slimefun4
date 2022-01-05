@@ -7,5 +7,4 @@
 /.idea/
 dependency-reduced-pom.xml
 .factorypath
-
-/src/test/
+/src/test/implementation/items/autocrafters/TestAutoCrafter.java

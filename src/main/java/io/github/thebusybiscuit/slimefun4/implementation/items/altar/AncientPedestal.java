@@ -1,13 +1,15 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.altar;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -40,11 +42,11 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
  * The {@link AncientPedestal} is a part of the {@link AncientAltar}.
  * You can place any {@link ItemStack} onto the {@link AncientPedestal} to provide it to
  * the altar as a crafting ingredient.
- *
+ * 
  * @author Redemption198
  * @author TheBusyBiscuit
  * @author StarWishsama
- *
+ * 
  * @see AncientAltar
  * @see AncientAltarListener
  * @see AncientAltarTask
@@ -54,7 +56,7 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
 
     public static final String ITEM_PREFIX = ChatColors.color("&dALTAR &3Probe - &e");
 
-    private static final Map<BlockPosition, Item> pedestalItemCache = new HashMap<>();
+    private static final Map<BlockPosition, UUID> pedestalVirtualItemCache = new ConcurrentHashMap<>();
 
     @ParametersAreNonnullByDefault
     public AncientPedestal(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, ItemStack recipeOutput) {
@@ -76,7 +78,7 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
                     if (stack.isValid()) {
                         stack.removeMetadata("no_pickup", Slimefun.instance());
                         b.getWorld().dropItem(b.getLocation(), getOriginalItemStack(stack));
-                        stopDisplayItem(b.getLocation(), stack);
+                        removeVirtualItem(b.getLocation(), stack);
                     }
                 }
             }
@@ -89,20 +91,23 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
     }
 
     public @Nonnull Optional<Item> getPlacedItem(@Nonnull Block pedestal) {
-        Optional<Item> cache = getItemCache(new BlockPosition(pedestal));
+        UUID itemUUID = pedestalVirtualItemCache.get(new BlockPosition(pedestal));
 
-        if (cache.isPresent()) {
-            return cache;
+        if (itemUUID != null) {
+            Entity cache = Bukkit.getEntity(itemUUID);
+            if (cache instanceof Item) {
+                return Optional.of((Item) cache);
+            }
         }
 
         // If cache was deleted, use old method to find nearby possible display item entity.
         Location l = pedestal.getLocation().clone().add(0.5, 1.2, 0.5);
 
         for (Entity n : l.getWorld().getNearbyEntities(l, 0.5, 0.5, 0.5, this::testItem)) {
-            if (n instanceof Item) {
+            if (n instanceof Item && n.isValid()) {
                 Optional<Item> item = Optional.of((Item) n);
 
-                startWatcher(pedestal.getLocation(), item.get());
+                startItemWatcher(pedestal.getLocation(), (Item) n);
                 return item;
             }
         }
@@ -161,36 +166,35 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
             SlimefunUtils.markAsNoPickup(entity, "altar_item");
             p.playSound(pedestalLocation, Sound.ENTITY_ITEM_PICKUP, 0.3F, 0.3F);
 
-            startWatcher(pedestalLocation, entity);
+            startItemWatcher(pedestalLocation, entity);
         }
     }
 
     /**
-     * Stop display item upon pedestal
+     * Remove virtual item upon pedestal
      *
      * @param pedestal ancient pedestal location
-     * @param item display item
+     * @param item virtual item
      */
-    public void stopDisplayItem(@Nonnull Location pedestal, @Nonnull Entity item) {
+    public void removeVirtualItem(@Nonnull Location pedestal, @Nonnull Entity item) {
         item.remove();
-        pedestalItemCache.remove(new BlockPosition(pedestal));
+        if (Bukkit.getEntity(item.getUniqueId()) != null) {
+            Bukkit.getEntity(item.getUniqueId()).remove();
+        }
+        pedestalVirtualItemCache.remove(new BlockPosition(pedestal));
     }
 
-    public @Nonnull Map<BlockPosition, Item> getCachedDisplayItems() {
-        return pedestalItemCache;
+    public @Nonnull Map<BlockPosition, UUID> getVirtualItemCache() {
+        return pedestalVirtualItemCache;
     }
 
     /**
-     * Start a watcher to monitor the location of a displayed item
+     * Start a watcher to monitor the location of a virtual item
      *
      * @param pedestalLocation the location of pedestal
-     * @param item displayed item
+     * @param item virtual item
      */
-    private void startWatcher(@Nonnull Location pedestalLocation, @Nonnull Item item) {
-        pedestalItemCache.put(new BlockPosition(pedestalLocation), item);
-    }
-
-    private Optional<Item> getItemCache(BlockPosition position) {
-        return Optional.ofNullable(pedestalItemCache.get(position));
+    private void startItemWatcher(@Nonnull Location pedestalLocation, @Nonnull Item item) {
+        pedestalVirtualItemCache.put(new BlockPosition(pedestalLocation), item.getUniqueId());
     }
 }

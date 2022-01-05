@@ -138,6 +138,8 @@ import ren.natsuyuk1.utils.VaultHelper;
  */
 public final class Slimefun extends JavaPlugin implements SlimefunAddon {
 
+    private static final int RECOMMENDED_JAVA_VERSION = 17;
+
     /**
      * Our static instance of {@link Slimefun}.
      * Make sure to clean this up in {@link #onDisable()}!
@@ -270,9 +272,9 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon {
             StartupWarnings.discourageCSCoreLib(logger);
         }
 
-        // Encourage Java 16
-        if (NumberUtils.getJavaVersion() < 16) {
-            StartupWarnings.oldJavaVersion(logger);
+        // Encourage newer Java version
+        if (NumberUtils.getJavaVersion() < RECOMMENDED_JAVA_VERSION) {
+            StartupWarnings.oldJavaVersion(logger, RECOMMENDED_JAVA_VERSION);
         }
 
         // If the server has no "data-storage" folder, it's _probably_ a new install. So mark it for metrics.
@@ -361,7 +363,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon {
 
         // Pedestal item watcher Task
 
-        getServer().getScheduler().runTaskTimerAsynchronously(this, new AncientPedestalTask(), 5 * 20L, 5 * 20L);
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new AncientPedestalTask((AncientPedestal) SlimefunItems.ANCIENT_PEDESTAL.getItem()), 5 * 20L, 5 * 20L);
 
         // Starting our tasks
         autoSavingService.start(this, config.getInt("options.auto-save-delay-in-minutes"));
