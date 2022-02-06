@@ -5,8 +5,6 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuide;
-import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideMode;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -63,22 +61,14 @@ public class SlimefunItemInteractListener implements Listener {
             PlayerRightClickEvent event = new PlayerRightClickEvent(e);
             Bukkit.getPluginManager().callEvent(event);
 
-            boolean isOffHand = e.getHand() == EquipmentSlot.OFF_HAND;
-            Material offHandItem = e.getPlayer().getInventory().getItemInOffHand().getType();
-
-            // Temp workaround for #245
-            if (!isOffHand && !offHandItem.isAir()) {
-                if (offHandItem == Material.FISHING_ROD || offHandItem == Material.BOW || offHandItem == Material.TRIDENT || offHandItem == Material.CROSSBOW) {
-                    return;
-                }
-            }
+            boolean itemUsed = e.getHand() == EquipmentSlot.OFF_HAND;
 
             // Only handle the Item if it hasn't been denied
             if (event.useItem() != Result.DENY) {
-                rightClickItem(e, event, isOffHand);
+                rightClickItem(e, event, itemUsed);
             }
 
-            if (!isOffHand && event.useBlock() != Result.DENY && !rightClickBlock(event)) {
+            if (!itemUsed && event.useBlock() != Result.DENY && !rightClickBlock(event)) {
                 return;
             }
 
