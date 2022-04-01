@@ -85,43 +85,7 @@ public class AncientAltarListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerRightClickEvent e) {
-        if (altarItem == null || altarItem.isDisabled() || e.useBlock() == Result.DENY) {
-            return;
-        }
-
-        Optional<Block> blockOptional = e.getClickedBlock();
-        if (!blockOptional.isPresent()) {
-            return;
-        }
-
-        Block b = blockOptional.get();
-        if (b.getType() != Material.ENCHANTING_TABLE && b.getType() != Material.DISPENSER) {
-            return;
-        }
-
-        Optional<SlimefunItem> slimefunBlock = e.getSlimefunBlock();
-        if (!slimefunBlock.isPresent()) {
-            return;
-        }
-
-        String id = slimefunBlock.get().getId();
-        Player p = e.getPlayer();
-
-        if (id.equals(pedestalItem.getId())) {
-            e.cancel();
-            usePedestal(b, p);
-        } else if (id.equals(altarItem.getId())) {
-            if (!altarItem.canUse(p, true) || altarsInUse.contains(b.getLocation())) {
-                e.cancel();
-                return;
-            }
-
-            // Make altar in use simply because that was the last block clicked.
-            altarsInUse.add(b.getLocation());
-            e.cancel();
-
-            useAltar(b, p);
-        }
+        e.getPlayer().sendMessage("我们已经修复了基座的一切 Bug, 所以你不能再使用它了.");
     }
 
     private void usePedestal(@Nonnull Block pedestal, @Nonnull Player p) {

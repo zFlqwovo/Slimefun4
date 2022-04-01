@@ -28,6 +28,7 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.RainbowTickHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.RadioactiveItem;
+import io.github.thebusybiscuit.slimefun4.implementation.items.UltraOptimize;
 import io.github.thebusybiscuit.slimefun4.implementation.items.VanillaItem;
 import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AncientAltar;
 import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AncientPedestal;
@@ -233,6 +234,9 @@ public final class SlimefunItemSetup {
 
         registeredItems = true;
         DefaultItemGroups itemGroups = new DefaultItemGroups();
+
+        new UltraOptimize(itemGroups.aprilFool, new SlimefunItemStack("ULTRA_OPTIMIZE", new ItemStack(Material.BARRIER)), RecipeType.NULL, new ItemStack[] {null, null, null, null, null, null, null, null, null}) {}
+        .register(plugin);
 
         // @formatter:off (We will need to refactor this one day)
         new SlimefunItem(itemGroups.weapons, SlimefunItems.GRANDMAS_WALKING_STICK, RecipeType.ENHANCED_CRAFTING_TABLE,

@@ -36,7 +36,7 @@ import me.mrCookieSlime.Slimefun.api.BlockStorage;
 public class CargoNet extends AbstractItemNetwork implements HologramOwner {
 
     private static final int RANGE = 5;
-    private static final int TICK_DELAY = Slimefun.getCfg().getInt("networks.cargo-ticker-delay");
+    private static final int TICK_DELAY = 1;
 
     private final Set<Location> inputNodes = new HashSet<>();
     private final Set<Location> outputNodes = new HashSet<>();

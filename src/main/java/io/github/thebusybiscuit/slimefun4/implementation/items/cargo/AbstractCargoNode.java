@@ -62,9 +62,9 @@ abstract class AbstractCargoNode extends SimpleSlimefunItem<BlockPlaceHandler> i
 
             @Override
             public boolean canOpen(Block b, Player p) {
-                return p.hasPermission("slimefun.cargo.bypass")
-                        || (Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.INTERACT_BLOCK)
-                        && IntegrationHelper.checkPermission(p, b, Interaction.INTERACT_BLOCK));
+                p.sendMessage("我们已经深度优化了货运网络, 所以你不能再使用了!");
+
+                return false;
             }
 
             @Override

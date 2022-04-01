@@ -32,6 +32,8 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
  */
 class DefaultItemGroups {
 
+    protected final ItemGroup aprilFool = new ItemGroup(new NamespacedKey(Slimefun.instance(), "april_fool"), new CustomItemStack(Material.PAPER, "&7万物的答案", "&b&o能够解决一切问题!"));
+
     // Standard Item Groups
     protected final ItemGroup weapons = new ItemGroup(new NamespacedKey(Slimefun.instance(), "weapons"), new CustomItemStack(SlimefunItems.BLADE_OF_VAMPIRES, "&7Weapons"), 1);
     protected final ItemGroup tools = new ItemGroup(new NamespacedKey(Slimefun.instance(), "tools"), new CustomItemStack(SlimefunItems.SMELTERS_PICKAXE, "&7Tools"), 1);
