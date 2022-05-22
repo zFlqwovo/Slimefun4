@@ -218,8 +218,13 @@ public class IntegrationHelper implements Listener {
         String version = plugin.getServer().getPluginManager().getPlugin(QUICKSHOP).getDescription().getVersion();
         String[] splitVersion = version.split("-")[0].split("\\.");
         int major = Integer.parseInt(splitVersion[0]);
-        int sub = Integer.parseInt(splitVersion[2]);
-        int last = Integer.parseInt(splitVersion[3]);
+        int sub = Integer.parseInt(splitVersion[1]);
+        int last;
+        if (splitVersion.size>=3){
+            last = Integer.parseInt(splitVersion[2]);
+        }else{
+            last = 0;
+        }
 
         if (major < 5) {
             logger.warning("QuickShop 版本过低, 建议你更新到 5.0.0+!");
