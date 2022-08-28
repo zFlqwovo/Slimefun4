@@ -58,6 +58,12 @@ public class BackpackListener implements Listener {
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
         Player p = (Player) e.getPlayer();
+        
+        //判断关闭的Inv是不是背包inv，如果不是则跳出此方法不执行markBackpackDirty，从而避免使用便携工作台刷背包物品
+        //判断是不是背包Inv是靠背包inv的Title，因此，如果更改Title，请一并更改此处，考虑到背包Inv的Title一般不会修改，于是此处直接startWith("背包 [大小")
+        if (!p.getOpenInventory().getTitle().startsWith("背包 [大小")) {
+            return;
+        }
 
         if (markBackpackDirty(p)) {
             p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
