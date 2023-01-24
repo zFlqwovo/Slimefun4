@@ -18,7 +18,10 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.androids.menu.AndroidShareMenu;
-import io.github.thebusybiscuit.slimefun4.utils.*;
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import io.github.thebusybiscuit.slimefun4.utils.HeadTexture;
+import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.papermc.lib.PaperLib;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
@@ -895,7 +898,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
             }
         }
 
-        if (block.getY() > WorldUtils.getMinHeight(block.getWorld()) && block.getY() < block.getWorld().getMaxHeight() && block.isEmpty()) {
+        if (block.getY() > block.getWorld().getMinHeight() && block.getY() < block.getWorld().getMaxHeight() && block.isEmpty()) {
 
             if (!block.getWorld().getWorldBorder().isInside(block.getLocation())) {
                 return;
