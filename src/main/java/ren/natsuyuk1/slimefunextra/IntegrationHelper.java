@@ -3,6 +3,7 @@ package ren.natsuyuk1.slimefunextra;
 import com.bekvon.bukkit.residence.Residence;
 import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.FlagPermissions;
+import com.elmakers.mine.bukkit.api.block.BlockData;
 import io.github.bakedlibs.dough.protection.ActionType;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidFarmEvent;
@@ -14,7 +15,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.maxgamer.quickshop.api.QuickShopAPI;
@@ -36,36 +36,40 @@ public class IntegrationHelper implements Listener {
 
     private static final String RESIDENCE = "Residence";
     private static final String QUICKSHOP = "QuickShop";
+    private static final String MAGIC = "Magic";
 
-    private static boolean resInstalled;
-    private static boolean qsInstalled;
+    private static boolean resInstalled = false;
+    private static boolean qsInstalled = false;
+    private static boolean magicInstalled = false;
     private static Method qsMethod = null;
     private static Object shopAPI = null;
+    private static Method magicBlockDataMethod = null;
     private static Logger logger;
 
     private static final IntegrationHelper instance = new IntegrationHelper();
 
-    private IntegrationHelper() {}
+    private IntegrationHelper() {
+    }
 
     public static void register(@Nonnull Slimefun plugin) {
         resInstalled = plugin.getServer().getPluginManager().getPlugin(RESIDENCE) != null;
         qsInstalled = plugin.getServer().getPluginManager().getPlugin(QUICKSHOP) != null;
+        magicInstalled = plugin.getServer().getPluginManager().getPlugin(MAGIC) != null;
         logger = plugin.getLogger();
 
-        if (!qsInstalled) {
-            plugin.getLogger().log(Level.WARNING, "未检测到 Quickshop-Reremake, 相关功能将自动关闭");
-        } else {
+        if (qsInstalled) {
+            logger.log(Level.INFO, "检测到 Quickshop, 相关功能已开启");
             registerQuickShop(plugin);
         }
 
-        if (!resInstalled) {
-            logger.log(Level.WARNING, "未检测到领地插件, 相关功能将自动关闭");
-            return;
+        if (resInstalled) {
+            logger.log(Level.INFO, "检测到 Residence, 相关功能已开启");
+            plugin.getServer().getPluginManager().registerEvents(instance, plugin);
         }
 
-        logger.log(Level.INFO, "检测到领地插件, 相关功能已开启");
-
-        plugin.getServer().getPluginManager().registerEvents(instance, plugin);
+        if (magicInstalled) {
+            logger.log(Level.INFO, "检测到 Magic, 相关功能已开启");
+        }
     }
 
     public static void shutdown() {
@@ -76,22 +80,23 @@ public class IntegrationHelper implements Listener {
 
     @EventHandler
     public void onAndroidFarm(AndroidFarmEvent e) {
-        handleAndroidBreak(e.getAndroid().getBlock(), e);
+        handleAndroidBreak(e);
     }
 
     @EventHandler
     public void onAndroidMine(AndroidMineEvent e) {
-        handleAndroidBreak(e.getAndroid().getBlock(), e);
+        handleAndroidBreak(e);
     }
 
     /**
      * 处理机器人破坏方块
      *
-     * @param android 机器人方块实例
      * @param event 机器人破坏事件
      */
-    private void handleAndroidBreak(@Nonnull Block android, @Nonnull Cancellable event) {
+    private void handleAndroidBreak(@Nonnull AndroidMineEvent event) {
         try {
+            var android = event.getAndroid().getBlock();
+            var block = event.getBlock();
             var p = Bukkit.getOfflinePlayer(getOwnerFromJson(BlockStorage.getBlockInfoAsJson(android)));
 
             if (!checkResidence(p, android, Interaction.BREAK_BLOCK)) {
@@ -100,6 +105,36 @@ public class IntegrationHelper implements Listener {
                     Slimefun.getLocalization().sendMessage(p.getPlayer(), "android.no-permission");
                 }
             }
+
+            if (!checkMagicBlock(block)) {
+                event.setCancelled(true);
+            }
+        } catch (Exception x) {
+            Slimefun.logger().log(Level.WARNING, "在处理机器人破坏方块时遇到了意外", x);
+        }
+    }
+
+    /**
+     * 处理机器人破坏方块
+     *
+     * @param event 机器人破坏事件
+     */
+    private void handleAndroidBreak(@Nonnull AndroidFarmEvent event) {
+        try {
+            var android = event.getAndroid().getBlock();
+            var block = event.getBlock();
+            var p = Bukkit.getOfflinePlayer(getOwnerFromJson(BlockStorage.getBlockInfoAsJson(android)));
+
+            if (!checkResidence(p, android, Interaction.BREAK_BLOCK)) {
+                event.setCancelled(true);
+                if (p.isOnline() && p.getPlayer() != null) {
+                    Slimefun.getLocalization().sendMessage(p.getPlayer(), "android.no-permission");
+                }
+            }
+
+            if (!checkMagicBlock(block)) {
+                event.setCancelled(true);
+            }
         } catch (Exception x) {
             Slimefun.logger().log(Level.WARNING, "在处理机器人破坏方块时遇到了意外", x);
         }
@@ -107,9 +142,9 @@ public class IntegrationHelper implements Listener {
 
     /**
      * 检查是否可以在领地内破坏/交互方块
-     *
+     * <p>
      * 领地已支持 Slimefun
-     *
+     * <p>
      * 详见: <a href="https://github.com/Zrips/Residence/blob/master/src/com/bekvon/bukkit/residence/slimeFun/SlimeFunResidenceModule.java">...</a>
      *
      * @param p      玩家
@@ -153,9 +188,7 @@ public class IntegrationHelper implements Listener {
                         return perms.playerHas(onlinePlayer, Flags.container, FlagPermissions.FlagCombo.OnlyTrue);
                     case PLACE_BLOCK:
                         // move 是为了机器人而检查的, 防止机器人跑进别人领地然后还出不来
-                        return perms.playerHas(onlinePlayer, Flags.place, FlagPermissions.FlagCombo.OnlyTrue)
-                                || perms.playerHas(onlinePlayer, Flags.build, FlagPermissions.FlagCombo.OnlyTrue)
-                                && perms.playerHas(onlinePlayer, Flags.move, FlagPermissions.FlagCombo.TrueOrNone);
+                        return perms.playerHas(onlinePlayer, Flags.place, FlagPermissions.FlagCombo.OnlyTrue) || perms.playerHas(onlinePlayer, Flags.build, FlagPermissions.FlagCombo.OnlyTrue) && perms.playerHas(onlinePlayer, Flags.move, FlagPermissions.FlagCombo.TrueOrNone);
                 }
             }
         }
@@ -186,8 +219,8 @@ public class IntegrationHelper implements Listener {
 
                 var result = qsMethod.invoke(shopAPI, l);
 
-                if (result instanceof Optional) {
-                    return ((Optional<?>) result).isPresent();
+                if (result instanceof Optional optional) {
+                    return optional.isPresent();
                 } else {
                     return result != null;
                 }
@@ -199,8 +232,8 @@ public class IntegrationHelper implements Listener {
 
         var qsPlugin = Bukkit.getPluginManager().getPlugin("QuickShop");
 
-        if (qsPlugin instanceof QuickShopAPI) {
-            return ((QuickShopAPI) qsPlugin).getShopManager().getShop(l) != null;
+        if (qsPlugin instanceof QuickShopAPI qsAPI) {
+            return qsAPI.getShopManager().getShop(l) != null;
         }
 
         logger.log(Level.WARNING, "与QuickShop的兼容出现问题，请避免使用热重载更换插件版本。如频繁出现该问题请反馈至粘液科技汉化版。");
@@ -253,6 +286,31 @@ public class IntegrationHelper implements Listener {
         } catch (ArrayIndexOutOfBoundsException e) {
             logger.log(Level.WARNING, "无法解析 Quickshop-Reremake 版本, 实际为 " + version + ".");
             qsInstalled = false;
+        }
+    }
+
+    public static boolean checkMagicBlock(@Nonnull Block block) {
+        var mp = Bukkit.getPluginManager().getPlugin("Magic");
+        if (mp != null) {
+            try {
+                if (magicBlockDataMethod == null) {
+                    magicBlockDataMethod = Class.forName("com.elmakers.mine.bukkit.block.UndoList").getDeclaredMethod("getBlockData", Location.class);
+                    magicBlockDataMethod.setAccessible(true);
+                }
+
+                var result = magicBlockDataMethod.invoke(null, block.getLocation());
+
+                if (result instanceof BlockData magicData) {
+                    return magicData.isFake();
+                } else {
+                    return true;
+                }
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "找不到 Magic 插件兼容所需类", e);
+                return true;
+            }
+        } else {
+            return true;
         }
     }
 }
