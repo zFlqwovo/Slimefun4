@@ -21,7 +21,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import ren.natsuyuk1.slimefunextra.inventoryholder.SlimefunBackpackHolder;
+import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

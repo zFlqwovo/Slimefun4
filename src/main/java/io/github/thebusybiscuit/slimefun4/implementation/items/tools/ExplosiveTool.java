@@ -24,7 +24,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefunextra.IntegrationHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -133,10 +132,6 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
         } else if (!b.getWorld().getWorldBorder().isInside(b.getLocation())) {
             return false;
         } else if (Slimefun.getIntegrations().isCustomBlock(b)) {
-            return false;
-        } else if (IntegrationHelper.checkQuickShop(b.getLocation())) {
-            return false;
-        } else if (!IntegrationHelper.checkResidence(p, b, Interaction.BREAK_BLOCK)) {
             return false;
         } else {
             return Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.BREAK_BLOCK);

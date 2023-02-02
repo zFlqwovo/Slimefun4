@@ -1,4 +1,4 @@
-package ren.natsuyuk1.slimefunextra;
+package ren.natsuyuk1.slimefun4;
 
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import net.milkbowl.vault.economy.Economy;
@@ -12,7 +12,7 @@ import java.util.logging.Level;
 public class VaultHelper {
     private static Economy econ = null;
 
-    public static void register(@Nonnull Slimefun plugin) {
+    protected static void register(@Nonnull Slimefun plugin) {
         if (plugin.getServer().getPluginManager().isPluginEnabled("Vault")) {
             var rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
             if (rsp != null) {
@@ -26,7 +26,7 @@ public class VaultHelper {
         }
     }
 
-    public static void shutdown() {
+    protected static void shutdown() {
         econ = null;
     }
 
