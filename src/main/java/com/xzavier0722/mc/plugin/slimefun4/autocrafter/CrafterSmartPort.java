@@ -24,7 +24,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import ren.natsuyuk1.slimefun4.ExtendedInteractManager;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -63,8 +62,7 @@ public class CrafterSmartPort extends SlimefunItem {
             @Override
             public boolean canOpen(@Nonnull Block b, @Nonnull Player p) {
                 return p.hasPermission("slimefun.inventory.bypass")
-                        || (Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.INTERACT_BLOCK)
-                        && ExtendedInteractManager.checkInteraction(p, b, Interaction.INTERACT_BLOCK));
+                        || Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.INTERACT_BLOCK);
             }
 
             @Override

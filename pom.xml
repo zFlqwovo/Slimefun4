@@ -84,12 +84,7 @@
             <url>https://repo.walshy.dev/public</url>
         </repository>
         <repository>
-            <!-- QuickShop-Reremake -->
-            <id>quickshop-repo</id>
-            <url>https://repo.codemc.io/repository/maven-public/</url>
-        </repository>
-        <repository>
-            <!-- Orebfuscator -->
+            <!-- Orebfuscator, QuickShop-Reremake -->
             <id>codemc-repo</id>
             <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>

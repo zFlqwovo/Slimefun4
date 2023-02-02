@@ -19,7 +19,6 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.*;
-import ren.natsuyuk1.slimefun4.ExtendedInteractManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -226,6 +225,10 @@ final class CargoUtils {
 
     @Nullable
     private static ItemStackAndInteger withdrawFromVanillaInventory(AbstractItemNetwork network, Block node, Inventory inv) {
+        if (Slimefun.getProtectionManager().hasPermission(null, node, Interaction.INTERACT_BLOCK)) {
+            return null;
+        }
+
         ItemStack[] contents = inv.getContents();
         int[] range = getOutputSlotRange(inv);
         int minSlot = range[0];
@@ -373,7 +376,7 @@ final class CargoUtils {
     }
 
     static boolean matchesFilter(@Nonnull AbstractItemNetwork network, @Nonnull Block node, @Nullable ItemStack item) {
-        if (item == null || item.getType() == Material.AIR || ExtendedInteractManager.checkInteraction(null, node, Interaction.INTERACT_BLOCK)) {
+        if (item == null || item.getType() == Material.AIR) {
             return false;
         }
 

@@ -32,7 +32,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefun4.ExtendedInteractManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,8 +66,7 @@ public abstract class AGenerator extends AbstractEnergyProvider implements Machi
             @Override
             public boolean canOpen(Block b, Player p) {
                 return p.hasPermission("slimefun.inventory.bypass")
-                        || Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.INTERACT_BLOCK)
-                        || ExtendedInteractManager.checkInteraction(p, b, Interaction.INTERACT_BLOCK);
+                        || Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.INTERACT_BLOCK);
             }
 
             @Override

@@ -26,7 +26,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import ren.natsuyuk1.slimefun4.ExtendedInteractManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -134,8 +133,7 @@ public class BlockPlacer extends SlimefunItem {
 
         // Get the corresponding OfflinePlayer
         OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(owner));
-        return Slimefun.getProtectionManager().hasPermission(player, target, Interaction.PLACE_BLOCK)
-                && ExtendedInteractManager.checkInteraction(player, target, Interaction.PLACE_BLOCK);
+        return Slimefun.getProtectionManager().hasPermission(player, target, Interaction.PLACE_BLOCK);
     }
 
     /**
