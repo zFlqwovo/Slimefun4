@@ -27,7 +27,7 @@ public class ResidenceHandler implements IExtendedInteractHandler {
 
     @Override
     public boolean checkEnvironment() {
-        return Bukkit.getPluginManager().isPluginEnabled("Residence");
+        return Bukkit.getPluginManager().getPlugin("Residence") != null;
     }
 
     @Override

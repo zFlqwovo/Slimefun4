@@ -3,10 +3,10 @@ package ren.natsuyuk1.slimefun4;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidFarmEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidMineEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import ren.natsuyuk1.slimefun4.event.AndroidMoveEvent;
 import ren.natsuyuk1.slimefun4.handler.IExtendedInteractHandler;
 import ren.natsuyuk1.slimefun4.handler.bulitin.MagicHandler;
@@ -19,10 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class ExtendedInteractManager implements Listener {
-    private static Logger logger = Logger.getLogger("SlimefunInteractManger");
     private static List<IExtendedInteractHandler> handlers = new ArrayList<>();
     private static final ExtendedInteractManager manager = new ExtendedInteractManager();
 
@@ -31,9 +29,9 @@ public final class ExtendedInteractManager implements Listener {
     }
 
     static {
-        handlers.add(new QuickShopHandler());
-        handlers.add(new ResidenceHandler());
-        handlers.add(new MagicHandler());
+        register(new MagicHandler());
+        register(new QuickShopHandler());
+        register(new ResidenceHandler());
     }
 
     @EventHandler
@@ -56,17 +54,28 @@ public final class ExtendedInteractManager implements Listener {
         handlers.forEach(handler -> handler.onExplosiveToolBreakBlocks(e));
     }
 
-    protected static void init(@Nonnull Plugin plugin) {
+    protected static void init(@Nonnull Slimefun plugin) {
         plugin.getServer().getPluginManager().registerEvents(manager, plugin);
     }
 
     public static void register(@Nonnull IExtendedInteractHandler handler) {
         Objects.requireNonNull(handler, "Interact handler cannot be null!");
+        loadHandler(handler);
+    }
 
+    private static void loadHandler(IExtendedInteractHandler handler) {
         if (!handlers.contains(handler) && handler.checkEnvironment()) {
-            handler.initEnvironment();
-            handlers.add(handler);
-            logger.log(Level.INFO, "已注册扩展处理器: " + handler.name());
+            try {
+                handler.initEnvironment();
+                handlers.add(handler);
+                SlimefunExtended.getLogger().log(Level.INFO, "已注册保护检查模块: " + handler.name());
+            } catch (Exception e) {
+                if (!(e instanceof ReflectiveOperationException)) {
+                    SlimefunExtended.getLogger().log(Level.WARNING, "加载保护检查模块 " + handler.name() + " 失败", e);
+                } else {
+                    SlimefunExtended.getLogger().log(Level.WARNING, "加载保护检查模块 " + handler.name() + " 失败");
+                }
+            }
         }
     }
 

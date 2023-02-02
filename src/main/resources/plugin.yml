@@ -20,6 +20,8 @@ softdepend:
   - ItemsAdder
   - Vault
   - Orebfuscator
+  - Quickshop
+  - Magic
 
 # We hook into these plugins too, but they depend on Slimefun.
 loadBefore:

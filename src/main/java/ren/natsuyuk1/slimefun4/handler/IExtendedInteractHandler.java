@@ -17,7 +17,7 @@ public interface IExtendedInteractHandler {
 
     boolean checkEnvironment();
 
-    void initEnvironment();
+    void initEnvironment() throws Exception;
 
     default void onAndroidMine(@Nonnull AndroidMineEvent event, @Nullable OfflinePlayer owner) {
     }

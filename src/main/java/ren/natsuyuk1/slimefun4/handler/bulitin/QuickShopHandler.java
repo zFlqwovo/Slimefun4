@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.maxgamer.quickshop.api.QuickShopAPI;
+import ren.natsuyuk1.slimefun4.SlimefunExtended;
 import ren.natsuyuk1.slimefun4.handler.IExtendedInteractHandler;
 
 import javax.annotation.Nonnull;
@@ -14,10 +15,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class QuickShopHandler implements IExtendedInteractHandler {
-    private static Logger logger = Logger.getLogger("SFQuickshopHandler");
     private static Object shopAPI = null;
     private static Method qsMethod = null;
 
@@ -28,11 +27,11 @@ public class QuickShopHandler implements IExtendedInteractHandler {
 
     @Override
     public boolean checkEnvironment() {
-        return Bukkit.getPluginManager().isPluginEnabled("Quickshop");
+        return Bukkit.getPluginManager().getPlugin("Quickshop") != null;
     }
 
     @Override
-    public void initEnvironment() {
+    public void initEnvironment() throws Exception {
         var plugin = Bukkit.getPluginManager().getPlugin("Quickshop");
         var version = plugin.getDescription().getVersion();
         var splitVersion = version.split("-")[0].split("\\.");
@@ -43,7 +42,7 @@ public class QuickShopHandler implements IExtendedInteractHandler {
             var last = Integer.parseInt(splitVersion[3]);
 
             if (major < 5) {
-                logger.warning("QuickShop 版本过低, 建议你更新到 5.0.0+!");
+                SlimefunExtended.getLogger().warning("QuickShop 版本过低, 建议你更新到 5.0.0+!");
 
                 try {
                     var shopAPIMethod = Class.forName("org.maxgamer.quickshop.QuickShopAPI").getDeclaredMethod("getShopAPI");
@@ -51,8 +50,9 @@ public class QuickShopHandler implements IExtendedInteractHandler {
                     shopAPI = shopAPIMethod.invoke(null);
 
                 } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                         InvocationTargetException ignored) {
-                    logger.log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                         InvocationTargetException e) {
+                    SlimefunExtended.getLogger().log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                    throw e;
                 }
 
                 if (sub >= 8 && last >= 2) {
@@ -60,21 +60,24 @@ public class QuickShopHandler implements IExtendedInteractHandler {
                     try {
                         qsMethod = Class.forName("org.maxgamer.quickshop.api.ShopAPI").getDeclaredMethod("getShop", Location.class);
                         qsMethod.setAccessible(true);
-                    } catch (ClassNotFoundException | NoSuchMethodException ignored) {
-                        logger.log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                    } catch (ClassNotFoundException | NoSuchMethodException e) {
+                        SlimefunExtended.getLogger().log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                        throw e;
                     }
                 } else {
                     // For 4.0.8-
                     try {
                         qsMethod = Class.forName("org.maxgamer.quickshop.api.ShopAPI").getDeclaredMethod("getShopWithCaching", Location.class);
                         qsMethod.setAccessible(true);
-                    } catch (ClassNotFoundException | NoSuchMethodException ignored) {
-                        logger.log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                    } catch (ClassNotFoundException | NoSuchMethodException e) {
+                        SlimefunExtended.getLogger().log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                        throw e;
                     }
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            logger.log(Level.WARNING, "解析 Quickshop-Reremake 版本失败, 实际为 " + version + ".");
+            SlimefunExtended.getLogger().log(Level.WARNING, "解析 Quickshop-Reremake 版本失败, 实际为 " + version + ".");
+            throw e;
         }
     }
 
@@ -123,7 +126,7 @@ public class QuickShopHandler implements IExtendedInteractHandler {
                     return result != null;
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
-                logger.log(Level.WARNING, "在获取箱子商店时出现了问题", e);
+                SlimefunExtended.getLogger().log(Level.WARNING, "在获取箱子商店时出现了问题", e);
                 return true;
             }
         }
@@ -131,7 +134,7 @@ public class QuickShopHandler implements IExtendedInteractHandler {
         if (qsPlugin instanceof QuickShopAPI qsAPI) {
             return qsAPI.getShopManager().getShop(l) != null;
         } else {
-            logger.log(Level.WARNING, "检查 QuickShop 失败，请避免使用热重载更换插件版本。如频繁出现该报错请反馈。");
+            SlimefunExtended.getLogger().log(Level.WARNING, "检查 QuickShop 失败，请避免使用热重载更换插件版本。如频繁出现该报错请反馈。");
             return false;
         }
     }
