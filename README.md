@@ -7,6 +7,7 @@ Looking for English (or Original) Version? [**Click here**](https://github.com/S
 MCBBS 链接: https://www.mcbbs.net/thread-827594-1-1.html
 
 ⚡ 汉化不易, 欢迎支持[爱发电](http://afdian.net/@name1ess)
+
 <img src="https://raw.githubusercontent.com/StarWishsama/StarWishsama/master/qrcode.png" width="25%" height="25%">
 
 QQ 交流群：807302496
