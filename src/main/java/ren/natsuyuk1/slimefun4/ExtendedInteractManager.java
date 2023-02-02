@@ -2,12 +2,14 @@ package ren.natsuyuk1.slimefun4;
 
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidFarmEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidMineEvent;
+import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import ren.natsuyuk1.slimefun4.event.AndroidMoveEvent;
 import ren.natsuyuk1.slimefun4.handler.IExtendedInteractHandler;
+import ren.natsuyuk1.slimefun4.handler.bulitin.MagicHandler;
 import ren.natsuyuk1.slimefun4.handler.bulitin.QuickShopHandler;
 import ren.natsuyuk1.slimefun4.handler.bulitin.ResidenceHandler;
 import ren.natsuyuk1.slimefun4.utils.AndroidUtil;
@@ -31,6 +33,7 @@ public final class ExtendedInteractManager implements Listener {
     static {
         handlers.add(new QuickShopHandler());
         handlers.add(new ResidenceHandler());
+        handlers.add(new MagicHandler());
     }
 
     @EventHandler
@@ -48,6 +51,11 @@ public final class ExtendedInteractManager implements Listener {
         handlers.forEach(handler -> handler.onAndroidMove(e, AndroidUtil.getAndroidOwner(BlockStorage.getBlockInfoAsJson(e.getAndroid().getBlock()))));
     }
 
+    @EventHandler
+    public void onExplosiveToolBreakBlock(ExplosiveToolBreakBlocksEvent e) {
+        handlers.forEach(handler -> handler.onExplosiveToolBreakBlocks(e));
+    }
+
     protected static void init(@Nonnull Plugin plugin) {
         plugin.getServer().getPluginManager().registerEvents(manager, plugin);
     }
@@ -56,6 +64,7 @@ public final class ExtendedInteractManager implements Listener {
         Objects.requireNonNull(handler, "Interact handler cannot be null!");
 
         if (!handlers.contains(handler) && handler.checkEnvironment()) {
+            handler.initEnvironment();
             handlers.add(handler);
             logger.log(Level.INFO, "已注册扩展处理器: " + handler.name());
         }

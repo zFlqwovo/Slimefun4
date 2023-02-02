@@ -31,6 +31,10 @@ public class ResidenceHandler implements IExtendedInteractHandler {
     }
 
     @Override
+    public void initEnvironment() {
+    }
+
+    @Override
     public void onAndroidMine(@Nonnull AndroidMineEvent event, @Nonnull OfflinePlayer owner) {
         var android = event.getAndroid().getBlock();
 
