@@ -81,6 +81,11 @@ public class ResidenceHandler implements IExtendedInteractHandler {
         event.getAdditionalBlocks().removeIf(block -> checkResidence(event.getPlayer(), block, Interaction.BREAK_BLOCK));
     }
 
+    @Override
+    public boolean checkInteraction(@Nullable OfflinePlayer player, @Nonnull Block block, @Nonnull Interaction interaction) {
+        return checkResidence(player, block, interaction);
+    }
+
     /**
      * 检查是否可以在领地内破坏/交互方块
      * <p>
@@ -93,7 +98,7 @@ public class ResidenceHandler implements IExtendedInteractHandler {
      * @param action 交互类型
      * @return 是否可以破坏
      */
-    public static boolean checkResidence(@Nullable OfflinePlayer p, @Nonnull Block block, Interaction action) {
+    private boolean checkResidence(@Nullable OfflinePlayer p, @Nonnull Block block, Interaction action) {
         if (!Bukkit.getPluginManager().isPluginEnabled("Residence") || p == null || !p.isOnline() || p.isOp()) {
             return true;
         }
@@ -133,6 +138,7 @@ public class ResidenceHandler implements IExtendedInteractHandler {
                 }
             }
         }
+
         return true;
     }
 }

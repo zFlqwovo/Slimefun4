@@ -1,9 +1,11 @@
 package ren.natsuyuk1.slimefun4.handler;
 
+import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidFarmEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidMineEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import ren.natsuyuk1.slimefun4.event.AndroidMoveEvent;
 
 import javax.annotation.Nonnull;
@@ -29,6 +31,10 @@ public interface IExtendedInteractHandler {
     }
 
     default void onExplosiveToolBreakBlocks(@Nonnull ExplosiveToolBreakBlocksEvent event) {
+    }
+
+    default boolean checkInteraction(@Nullable OfflinePlayer player, @Nonnull Block block, @Nonnull Interaction interaction) {
+        return true;
     }
 
     default void cleanup() {

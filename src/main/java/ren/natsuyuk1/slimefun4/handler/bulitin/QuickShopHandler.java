@@ -1,16 +1,19 @@
 package ren.natsuyuk1.slimefun4.handler.bulitin;
 
+import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidFarmEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidMineEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.maxgamer.quickshop.api.QuickShopAPI;
 import ren.natsuyuk1.slimefun4.SlimefunExtended;
 import ren.natsuyuk1.slimefun4.handler.IExtendedInteractHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -105,7 +108,16 @@ public class QuickShopHandler implements IExtendedInteractHandler {
         event.getAdditionalBlocks().removeIf(block -> isQuickshop(block.getLocation()));
     }
 
-    public static boolean isQuickshop(@Nonnull Location l) {
+    @Override
+    public boolean checkInteraction(@Nullable OfflinePlayer player, @Nonnull Block block, @Nonnull Interaction interaction) {
+        if (interaction == Interaction.BREAK_BLOCK || interaction == Interaction.INTERACT_BLOCK) {
+            return isQuickshop(block.getLocation());
+        } else {
+            return true;
+        }
+    }
+
+    private boolean isQuickshop(@Nonnull Location l) {
         var qsPlugin = Bukkit.getPluginManager().getPlugin("QuickShop");
 
         if (qsPlugin == null) {

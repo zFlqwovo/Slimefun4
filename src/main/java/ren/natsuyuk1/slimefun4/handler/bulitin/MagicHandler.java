@@ -45,30 +45,30 @@ public class MagicHandler implements IExtendedInteractHandler {
 
     @Override
     public void onAndroidMine(@Nonnull AndroidMineEvent event, @Nullable OfflinePlayer owner) {
-        var block = event.getBlock();
-        try {
-            var blockData = magicBlockDataMethod.invoke(null, block.getLocation());
-
-            if (blockData instanceof BlockData) {
-                event.setCancelled(true);
-            }
-        } catch (Exception e) {
-            SlimefunExtended.getLogger().log(Level.WARNING, "调用 Magic 插件 API 失败", e);
+        if (checkMagicBlock(event.getBlock().getLocation())) {
+            event.setCancelled(true);
         }
     }
 
     @Override
     public void onAndroidFarm(@Nonnull AndroidFarmEvent event, @Nullable OfflinePlayer owner) {
-        var block = event.getBlock();
+        if (checkMagicBlock(event.getBlock().getLocation())) {
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean checkMagicBlock(@Nonnull Location location) {
         try {
-            var blockData = magicBlockDataMethod.invoke(null, block.getLocation());
+            var blockData = magicBlockDataMethod.invoke(null, location);
 
             if (blockData instanceof BlockData) {
-                event.setCancelled(true);
+                return true;
             }
         } catch (Exception e) {
             SlimefunExtended.getLogger().log(Level.WARNING, "调用 Magic 插件 API 失败", e);
         }
+
+        return false;
     }
 
     @Override

@@ -1,10 +1,13 @@
 package ren.natsuyuk1.slimefun4;
 
+import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidFarmEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidMineEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import ren.natsuyuk1.slimefun4.event.AndroidMoveEvent;
@@ -61,6 +64,16 @@ public final class ExtendedInteractManager implements Listener {
     public static void register(@Nonnull IExtendedInteractHandler handler) {
         Objects.requireNonNull(handler, "Interact handler cannot be null!");
         loadHandler(handler);
+    }
+
+    public static boolean checkInteraction(@Nonnull OfflinePlayer player, @Nonnull Block block, @Nonnull Interaction interaction) {
+        for (IExtendedInteractHandler handler : handlers) {
+            if (!handler.checkInteraction(player, block, interaction)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static void loadHandler(IExtendedInteractHandler handler) {

@@ -19,7 +19,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefun4.handler.bulitin.ResidenceHandler;
+import ren.natsuyuk1.slimefun4.ExtendedInteractManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -57,7 +57,7 @@ abstract class AbstractCargoNode extends SimpleSlimefunItem<BlockPlaceHandler> i
             public boolean canOpen(Block b, Player p) {
                 return p.hasPermission("slimefun.cargo.bypass")
                         || (Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.INTERACT_BLOCK)
-                        && ResidenceHandler.checkResidence(p, b, Interaction.INTERACT_BLOCK));
+                        && ExtendedInteractManager.checkInteraction(p, b, Interaction.INTERACT_BLOCK));
             }
 
             @Override

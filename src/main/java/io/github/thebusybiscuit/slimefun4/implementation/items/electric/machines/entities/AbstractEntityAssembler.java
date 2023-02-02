@@ -33,7 +33,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefun4.handler.bulitin.ResidenceHandler;
+import ren.natsuyuk1.slimefun4.ExtendedInteractManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -86,7 +86,7 @@ public abstract class AbstractEntityAssembler<T extends Entity> extends SimpleSl
             public boolean canOpen(Block b, Player p) {
                 return p.hasPermission("slimefun.inventory.bypass")
                         || (Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.INTERACT_BLOCK))
-                        && ResidenceHandler.checkResidence(p, b, Interaction.INTERACT_BLOCK);
+                        && ExtendedInteractManager.checkInteraction(p, b, Interaction.INTERACT_BLOCK);
             }
 
             @Override

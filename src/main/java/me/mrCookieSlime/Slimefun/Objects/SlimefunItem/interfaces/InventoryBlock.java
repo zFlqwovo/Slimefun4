@@ -8,7 +8,7 @@ import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import ren.natsuyuk1.slimefun4.handler.bulitin.ResidenceHandler;
+import ren.natsuyuk1.slimefun4.ExtendedInteractManager;
 
 import java.lang.reflect.Array;
 import java.util.function.Consumer;
@@ -62,7 +62,7 @@ public interface InventoryBlock {
                     return true;
                 } else {
                     return item.canUse(p, false) && Slimefun.getProtectionManager().hasPermission(p, b.getLocation(), Interaction.INTERACT_BLOCK)
-                            && ResidenceHandler.checkResidence(p, b, Interaction.INTERACT_BLOCK);
+                            && ExtendedInteractManager.checkInteraction(p, b, Interaction.INTERACT_BLOCK);
                 }
             }
         };
