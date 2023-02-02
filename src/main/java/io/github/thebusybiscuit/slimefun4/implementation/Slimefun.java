@@ -53,8 +53,8 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.scheduler.BukkitTask;
-import ren.natsuyuk1.slimefunextra.LangUtil;
-import ren.natsuyuk1.slimefunextra.SlimefunExtra;
+import ren.natsuyuk1.slimefun4.SlimefunExtended;
+import ren.natsuyuk1.slimefun4.utils.LangUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -338,7 +338,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon {
             return;
         }
 
-        SlimefunExtra.shutdown();
+        SlimefunExtended.shutdown();
 
         // Cancel all tasks from this plugin immediately
         Bukkit.getScheduler().cancelTasks(this);
@@ -582,7 +582,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon {
         new SmithingTableListener(this);
 
         // Inject downstream extra staff
-        SlimefunExtra.register(this);
+        SlimefunExtended.register(this);
 
         // Item-specific Listeners
         new CoolerListener(this, (Cooler) SlimefunItems.COOLER.getItem());

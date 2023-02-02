@@ -8,8 +8,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefunextra.InventoryUtil;
-import ren.natsuyuk1.slimefunextra.inventoryholder.SlimefunBackpackHolder;
+import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
+import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
 
 import javax.annotation.Nonnull;
 import java.io.File;

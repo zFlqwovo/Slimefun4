@@ -1,4 +1,4 @@
-package ren.natsuyuk1.slimefunextra;
+package ren.natsuyuk1.slimefun4.utils;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;

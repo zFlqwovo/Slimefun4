@@ -1,0 +1,144 @@
+package ren.natsuyuk1.slimefun4.handler.bulitin;
+
+import io.github.thebusybiscuit.slimefun4.api.events.AndroidFarmEvent;
+import io.github.thebusybiscuit.slimefun4.api.events.AndroidMineEvent;
+import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.maxgamer.quickshop.api.QuickShopAPI;
+import ren.natsuyuk1.slimefun4.handler.IExtendedInteractHandler;
+
+import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class QuickShopHandler implements IExtendedInteractHandler {
+    private static Logger logger = Logger.getLogger("SFQuickshopHandler");
+    private static Object shopAPI = null;
+    private static Method qsMethod = null;
+
+    @Override
+    public String name() {
+        return "Quickshop";
+    }
+
+    @Override
+    public boolean checkEnvironment() {
+        return Bukkit.getPluginManager().isPluginEnabled("Quickshop");
+    }
+
+    @Override
+    public void initEnvironment() {
+        var plugin = Bukkit.getPluginManager().getPlugin("Quickshop");
+        var version = plugin.getDescription().getVersion();
+        var splitVersion = version.split("-")[0].split("\\.");
+
+        try {
+            var major = Integer.parseInt(splitVersion[0]);
+            var sub = Integer.parseInt(splitVersion[2]);
+            var last = Integer.parseInt(splitVersion[3]);
+
+            if (major < 5) {
+                logger.warning("QuickShop 版本过低, 建议你更新到 5.0.0+!");
+
+                try {
+                    var shopAPIMethod = Class.forName("org.maxgamer.quickshop.QuickShopAPI").getDeclaredMethod("getShopAPI");
+                    shopAPIMethod.setAccessible(true);
+                    shopAPI = shopAPIMethod.invoke(null);
+
+                } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                         InvocationTargetException ignored) {
+                    logger.log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                }
+
+                if (sub >= 8 && last >= 2) {
+                    // For 5.0.0-
+                    try {
+                        qsMethod = Class.forName("org.maxgamer.quickshop.api.ShopAPI").getDeclaredMethod("getShop", Location.class);
+                        qsMethod.setAccessible(true);
+                    } catch (ClassNotFoundException | NoSuchMethodException ignored) {
+                        logger.log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                    }
+                } else {
+                    // For 4.0.8-
+                    try {
+                        qsMethod = Class.forName("org.maxgamer.quickshop.api.ShopAPI").getDeclaredMethod("getShopWithCaching", Location.class);
+                        qsMethod.setAccessible(true);
+                    } catch (ClassNotFoundException | NoSuchMethodException ignored) {
+                        logger.log(Level.INFO, "无法接入 Quickshop-Reremake " + version + " , 请更新到最新版, 相关功能将自动关闭");
+                    }
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            logger.log(Level.WARNING, "解析 Quickshop-Reremake 版本失败, 实际为 " + version + ".");
+        }
+    }
+
+    @Override
+    public void onAndroidMine(@Nonnull AndroidMineEvent event, @Nonnull OfflinePlayer owner) {
+        if (isQuickshop(event.getBlock().getLocation())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @Override
+    public void onAndroidFarm(@Nonnull AndroidFarmEvent event, @Nonnull OfflinePlayer owner) {
+        if (isQuickshop(event.getBlock().getLocation())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @Override
+    public void onExplosiveToolBreakBlocks(@Nonnull ExplosiveToolBreakBlocksEvent event) {
+        if (isQuickshop(event.getPrimaryBlock().getLocation())) {
+            event.setCancelled(true);
+            return;
+        }
+
+        event.getAdditionalBlocks().removeIf(block -> isQuickshop(block.getLocation()));
+    }
+
+    public static boolean isQuickshop(@Nonnull Location l) {
+        var qsPlugin = Bukkit.getPluginManager().getPlugin("QuickShop");
+
+        if (qsPlugin == null) {
+            return false;
+        }
+
+        if (qsMethod != null) {
+            try {
+                if (shopAPI == null) {
+                    return false;
+                }
+
+                var result = qsMethod.invoke(shopAPI, l);
+
+                if (result instanceof Optional optional) {
+                    return optional.isPresent();
+                } else {
+                    return result != null;
+                }
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                logger.log(Level.WARNING, "在获取箱子商店时出现了问题", e);
+                return true;
+            }
+        }
+
+        if (qsPlugin instanceof QuickShopAPI qsAPI) {
+            return qsAPI.getShopManager().getShop(l) != null;
+        } else {
+            logger.log(Level.WARNING, "检查 QuickShop 失败，请避免使用热重载更换插件版本。如频繁出现该报错请反馈。");
+            return false;
+        }
+    }
+
+    @Override
+    public void cleanup() {
+        shopAPI = null;
+        qsMethod = null;
+    }
+}

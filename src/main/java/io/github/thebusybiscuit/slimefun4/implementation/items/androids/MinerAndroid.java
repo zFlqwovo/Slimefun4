@@ -16,7 +16,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefunextra.IntegrationHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -73,14 +72,6 @@ public class MinerAndroid extends ProgrammableAndroid {
             OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(BlockStorage.getLocationInfo(b.getLocation(), "owner")));
 
             if (Slimefun.getProtectionManager().hasPermission(owner, block.getLocation(), Interaction.BREAK_BLOCK)) {
-                if (IntegrationHelper.checkQuickShop(block.getLocation())) {
-                    return;
-                }
-
-                if (!IntegrationHelper.checkResidence(owner, block, Interaction.BREAK_BLOCK)) {
-                    return;
-                }
-
                 AndroidMineEvent event = new AndroidMineEvent(block, new AndroidInstance(this, b));
                 Bukkit.getPluginManager().callEvent(event);
 
@@ -105,14 +96,6 @@ public class MinerAndroid extends ProgrammableAndroid {
             OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(BlockStorage.getLocationInfo(b.getLocation(), "owner")));
 
             if (Slimefun.getProtectionManager().hasPermission(owner, block.getLocation(), Interaction.BREAK_BLOCK)) {
-                if (IntegrationHelper.checkQuickShop(block.getLocation())) {
-                    return;
-                }
-
-                if (!IntegrationHelper.checkResidence(owner, block, Interaction.BREAK_BLOCK)) {
-                    return;
-                }
-
                 AndroidMineEvent event = new AndroidMineEvent(block, new AndroidInstance(this, b));
                 Bukkit.getPluginManager().callEvent(event);
 

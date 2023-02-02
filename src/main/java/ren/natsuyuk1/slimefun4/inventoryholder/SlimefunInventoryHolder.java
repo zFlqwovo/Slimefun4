@@ -1,4 +1,4 @@
-package ren.natsuyuk1.slimefunextra.inventoryholder;
+package ren.natsuyuk1.slimefun4.inventoryholder;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;

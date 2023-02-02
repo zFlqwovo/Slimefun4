@@ -18,7 +18,7 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.*;
-import ren.natsuyuk1.slimefunextra.IntegrationHelper;
+import ren.natsuyuk1.slimefun4.handler.bulitin.QuickShopHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -386,7 +386,7 @@ final class CargoUtils {
     }
 
     static boolean matchesFilter(@Nonnull AbstractItemNetwork network, @Nonnull Block node, @Nullable ItemStack item) {
-        if (item == null || item.getType() == Material.AIR || IntegrationHelper.checkQuickShop(node.getLocation())) {
+        if (item == null || item.getType() == Material.AIR || QuickShopHandler.isQuickshop(node.getLocation())) {
             return false;
         }
 

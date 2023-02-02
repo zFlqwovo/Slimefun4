@@ -5,7 +5,6 @@ import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.common.CommonPatterns;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.bakedlibs.dough.items.ItemUtils;
-import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.bakedlibs.dough.skins.PlayerHead;
 import io.github.bakedlibs.dough.skins.PlayerSkin;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -50,7 +49,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import ren.natsuyuk1.slimefunextra.IntegrationHelper;
+import ren.natsuyuk1.slimefun4.event.AndroidMoveEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -884,18 +883,11 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
     @ParametersAreNonnullByDefault
     protected void move(Block b, BlockFace face, Block block) {
-        Player p = Bukkit.getPlayer(IntegrationHelper.getOwnerFromJson(BlockStorage.getBlockInfoAsJson(b.getLocation())));
+        var event = new AndroidMoveEvent(new AndroidInstance(this, b), block);
+        Bukkit.getPluginManager().callEvent(event);
 
-        if (p != null) {
-            if (!Slimefun.getProtectionManager().hasPermission(p, block, Interaction.PLACE_BLOCK)) {
-                return;
-            }
-
-            if (!IntegrationHelper.checkResidence(p, block, Interaction.PLACE_BLOCK)) {
-                BlockStorage.addBlockInfo(b, "paused", "false");
-                Slimefun.getLocalization().sendMessage(p, "messages.android-no-permission", true);
-                return;
-            }
+        if (event.isCancelled()) {
+            return;
         }
 
         if (block.getY() > block.getWorld().getMinHeight() && block.getY() < block.getWorld().getMaxHeight() && block.isEmpty()) {

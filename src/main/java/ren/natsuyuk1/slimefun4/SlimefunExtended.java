@@ -1,17 +1,17 @@
-package ren.natsuyuk1.slimefunextra;
+package ren.natsuyuk1.slimefun4;
 
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 
 import javax.annotation.Nonnull;
 
-public class SlimefunExtra {
+public final class SlimefunExtended {
     public static void register(@Nonnull Slimefun sf) {
-        IntegrationHelper.register(sf);
+        ExtendedInteractManager.init(sf);
         VaultHelper.register(sf);
     }
 
     public static void shutdown() {
-        IntegrationHelper.shutdown();
+        ExtendedInteractManager.shutdown();
         VaultHelper.shutdown();
     }
 }

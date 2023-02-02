@@ -1,4 +1,4 @@
-package ren.natsuyuk1.slimefunextra.inventoryholder;
+package ren.natsuyuk1.slimefun4.inventoryholder;
 
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 
