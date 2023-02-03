@@ -240,7 +240,7 @@ public class BlockListener implements Listener {
              * Small performance optimization:
              * ItemStack#getEnchantmentLevel() calls ItemStack#getItemMeta(), so if
              * we are handling more than one Enchantment, we should access the ItemMeta
-             * directly and re use it.
+             * directly and reuse it.
              */
             ItemMeta meta = item.getItemMeta();
             int fortuneLevel = meta.getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
