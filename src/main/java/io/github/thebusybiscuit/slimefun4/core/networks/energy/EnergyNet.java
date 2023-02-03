@@ -15,6 +15,7 @@ import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import ren.natsuyuk1.slimefun4.utils.MathUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -211,11 +212,7 @@ public class EnergyNet extends Network implements HologramOwner {
                 int energy = provider.getGeneratedOutput(loc, data);
 
                 if (provider.isChargeable()) {
-                    try {
-                        energy = Math.addExact(energy, provider.getCharge(loc));
-                    } catch (ArithmeticException e) {
-                        energy = Integer.MAX_VALUE;
-                    }
+                    energy = MathUtil.saturatedAdd(energy, provider.getCharge(loc));
                 }
 
                 if (provider.willExplode(loc, data)) {
@@ -227,11 +224,7 @@ public class EnergyNet extends Network implements HologramOwner {
                         loc.getWorld().createExplosion(loc, 0F, false);
                     });
                 } else {
-                    try {
-                        supply = Math.addExact(supply, energy);
-                    } catch (ArithmeticException e) {
-                        supply = Integer.MAX_VALUE;
-                    }
+                    supply = MathUtil.saturatedAdd(supply, energy);
                 }
             } catch (Exception | LinkageError throwable) {
                 explodedBlocks.add(loc);
@@ -254,11 +247,7 @@ public class EnergyNet extends Network implements HologramOwner {
         int supply = 0;
 
         for (Map.Entry<Location, EnergyNetComponent> entry : capacitors.entrySet()) {
-            try {
-                supply = Math.addExact(supply, entry.getValue().getCharge(entry.getKey()));
-            } catch (ArithmeticException e) {
-                supply = Integer.MAX_VALUE;
-            }
+            supply = MathUtil.saturatedAdd(supply, entry.getValue().getCharge(entry.getKey()));
         }
 
         return supply;
