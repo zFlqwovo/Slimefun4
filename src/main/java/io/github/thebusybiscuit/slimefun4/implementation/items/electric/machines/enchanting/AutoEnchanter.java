@@ -1,17 +1,5 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines.enchanting;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-
 import io.github.bakedlibs.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.api.events.AsyncAutoEnchanterProcessEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.AutoEnchantEvent;
@@ -20,9 +8,18 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemSetting;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecipe;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The {@link AutoEnchanter}, in contrast to the {@link AutoDisenchanter}, adds
@@ -96,15 +93,24 @@ public class AutoEnchanter extends AbstractEnchantmentMachine {
         EnchantmentStorageMeta meta = (EnchantmentStorageMeta) enchantedBook.getItemMeta();
         Map<Enchantment, Integer> enchantments = new HashMap<>();
 
+        if (!isEnchantmentCountAllowed(meta.getStoredEnchants().size())) {
+            showEnchantmentLimitWarning(menu);
+            return null;
+        }
+
         // Find applicable enchantments
         for (Map.Entry<Enchantment, Integer> entry : meta.getStoredEnchants().entrySet()) {
             if (entry.getKey().canEnchantItem(target)) {
                 if (isEnchantmentLevelAllowed(entry.getValue())) {
                     enchantments.put(entry.getKey(), entry.getValue());
-                } else if (!menu.toInventory().getViewers().isEmpty()) {
-                    showEnchantmentLevelWarning(menu);
-                    return null;
+                    continue;
                 }
+
+                if (!menu.toInventory().getViewers().isEmpty()) {
+                    showEnchantmentLevelWarning(menu);
+                }
+
+                return null;
             }
         }
 
