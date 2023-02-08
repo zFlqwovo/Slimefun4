@@ -11,12 +11,7 @@ public final class SlimefunExtended {
     private static Logger logger = null;
     public static void register(@Nonnull Slimefun sf) {
         logger = sf.getLogger();
-
-        if (Bukkit.getPluginManager().getPlugin("SlimeGlue") == null) {
-            logger.log(Level.INFO, "检测到没有安装 SlimeGlue (粘液胶), 你将缺失对一些插件的额外保护检查!");
-            logger.log(Level.INFO, "下载: https://github.com/Xzavier0722/SlimeGlue");
-        }
-
+        scheduleSlimeGlueCheck(sf);
         VaultHelper.register(sf);
     }
 
@@ -27,5 +22,14 @@ public final class SlimefunExtended {
 
     public static Logger getLogger() {
         return logger;
+    }
+
+    private static void scheduleSlimeGlueCheck(Slimefun sf) {
+        Bukkit.getScheduler().runTaskLater(sf, () -> {
+            if (Bukkit.getPluginManager().getPlugin("SlimeGlue") == null) {
+                logger.log(Level.WARNING, "检测到没有安装 SlimeGlue (粘液胶), 你将缺失对一些插件的额外保护检查!");
+                logger.log(Level.WARNING, "下载: https://github.com/Xzavier0722/SlimeGlue");
+            }
+        }, 1);
     }
 }
