@@ -454,5 +454,12 @@
             <version>2.6</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Slimefun Compatibility Lib -->
+        <dependency>
+            <groupId>com.github.Xzavier0722</groupId>
+            <artifactId>SlimefunCompLib</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

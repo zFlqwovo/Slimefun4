@@ -1,7 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.core.networks.cargo;
 
+import com.xzavier0722.mc.plugin.slimefuncomplib.event.CargoWithdrawEvent;
 import io.github.bakedlibs.dough.inventory.InvUtils;
-import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
 import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -13,16 +13,13 @@ import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.DirtyChestMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.inventory.BrewerInventory;
-import org.bukkit.inventory.FurnaceInventory;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -200,6 +197,12 @@ final class CargoUtils {
         DirtyChestMenu menu = getChestMenu(target);
 
         if (menu != null) {
+            var event = new CargoWithdrawEvent(node, target, menu.toInventory());
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return null;
+            }
+
             for (int slot : menu.getPreset().getSlotsAccessedByItemTransport(menu, ItemTransportFlow.WITHDRAW, null)) {
                 ItemStack is = menu.getItemInSlot(slot);
 
@@ -211,15 +214,19 @@ final class CargoUtils {
         } else if (hasInventory(target)) {
             Inventory inventory = inventories.get(target.getLocation());
 
-            if (inventory != null) {
-                return withdrawFromVanillaInventory(network, node, inventory);
+            if (inventory == null) {
+                BlockState state = PaperLib.getBlockState(target, false).getState();
+                if (!(state instanceof InventoryHolder holder)) {
+                    return null;
+                }
+
+                inventory = holder.getInventory();
+                inventories.put(target.getLocation(), inventory);
             }
 
-            BlockState state = PaperLib.getBlockState(target, false).getState();
-
-            if (state instanceof InventoryHolder inventoryHolder) {
-                inventory = inventoryHolder.getInventory();
-                inventories.put(target.getLocation(), inventory);
+            var event = new CargoWithdrawEvent(node, target, inventory);
+            Bukkit.getPluginManager().callEvent(event);
+            if (!event.isCancelled()) {
                 return withdrawFromVanillaInventory(network, node, inventory);
             }
         }
@@ -229,10 +236,6 @@ final class CargoUtils {
 
     @Nullable
     private static ItemStackAndInteger withdrawFromVanillaInventory(AbstractItemNetwork network, Block node, Inventory inv) {
-        if (Slimefun.getProtectionManager().hasPermission(null, node, Interaction.INTERACT_BLOCK)) {
-            return null;
-        }
-
         ItemStack[] contents = inv.getContents();
         int[] range = getOutputSlotRange(inv);
         int minSlot = range[0];
