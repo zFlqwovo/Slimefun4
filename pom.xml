@@ -88,11 +88,6 @@
             <id>codemc-repo</id>
             <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
-        <repository>
-            <!-- Magic -->
-            <id>elmakers-repo</id>
-            <url>https://maven.elmakers.com/repository/</url>
-        </repository>
     </repositories>
 
     <build>
@@ -425,19 +420,6 @@
             <groupId>org.maxgamer</groupId>
             <artifactId>QuickShop</artifactId>
             <version>5.1.0.9</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <!-- We don't need any of the dependencies -->
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.elmakers.mine.bukkit</groupId>
-            <artifactId>MagicAPI</artifactId>
-            <version>9.4-SNAPSHOT</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>

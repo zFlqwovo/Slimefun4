@@ -30,6 +30,6 @@ public final class SlimefunExtended {
                 logger.log(Level.WARNING, "检测到没有安装 SlimeGlue (粘液胶), 你将缺失对一些插件的额外保护检查!");
                 logger.log(Level.WARNING, "下载: https://github.com/Xzavier0722/SlimeGlue");
             }
-        }, 1);
+        }, 300); // 15s
     }
 }
