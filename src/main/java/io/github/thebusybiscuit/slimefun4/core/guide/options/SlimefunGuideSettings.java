@@ -1,19 +1,5 @@
 package io.github.thebusybiscuit.slimefun4.core.guide.options;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuide;
@@ -26,8 +12,19 @@ import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * This static utility class offers various methods that provide access to the
@@ -111,16 +108,18 @@ public final class SlimefunGuideSettings {
         });
 
         // @formatter:off
-        menu.addItem(4, new CustomItemStack(Material.WRITABLE_BOOK, 
-            ChatColor.GREEN + locale.getMessage(p, "guide.title.versions"),
-            "&7&o" + locale.getMessage(p, "guide.tooltips.versions-notice"),
-            "",
-            "&f汉化 By StarWishsama",
-            "&c请不要将此版本信息截图到 Discord/Github 反馈 Bug",
-            "&c而是优先到汉化页面反馈",
-            "",
-            "&fMinecraft: &a" + Bukkit.getBukkitVersion(),
-            "&fSlimefun: &a" + Slimefun.getVersion()),
+        menu.addItem(4, new CustomItemStack(Material.WRITABLE_BOOK,
+                        ChatColor.GREEN + locale.getMessage(p, "guide.title.versions"),
+                        "&7&o" + locale.getMessage(p, "guide.tooltips.versions-notice"),
+                        "",
+                        "&f汉化 By StarWishsama",
+                        "&c请不要将此版本信息截图到 Discord/Github 反馈 Bug",
+                        "&c而是优先到汉化页面反馈",
+                        "",
+                        "&cTHIS BUILD IS UNOFFICIAL BUILD, DO NOT REPORT TO SLIMEFUN DEV",
+                        "",
+                        "&fMinecraft: &a" + Bukkit.getBukkitVersion(),
+                        "&fSlimefun: &a" + Slimefun.getVersion()),
             ChestMenuUtils.getEmptyClickHandler()
         );
         // @formatter:on
