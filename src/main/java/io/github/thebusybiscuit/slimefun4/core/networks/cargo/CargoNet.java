@@ -154,10 +154,10 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
 
             var event = new CargoTickEvent(inputs, outputs);
             Bukkit.getPluginManager().callEvent(event);
+            event.getHologramMsg().ifPresent(msg -> updateHologram(b, msg));
             if (event.isCancelled()) {
                 return;
             }
-            event.getHologramMsg().ifPresent(msg -> updateHologram(b, msg));
 
             if (BlockStorage.getLocationInfo(b.getLocation(), "visualizer") == null) {
                 display();
