@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.core.networks.cargo;
 
-import com.xzavier0722.mc.plugin.slimefuncomplib.event.CargoWithdrawEvent;
+import com.xzavier0722.mc.plugin.slimefuncomplib.event.cargo.CargoInsertEvent;
+import com.xzavier0722.mc.plugin.slimefuncomplib.event.cargo.CargoWithdrawEvent;
 import io.github.bakedlibs.dough.inventory.InvUtils;
 import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
 import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
@@ -270,19 +271,27 @@ final class CargoUtils {
             if (hasInventory(target)) {
                 Inventory inventory = inventories.get(target.getLocation());
 
-                if (inventory != null) {
-                    return insertIntoVanillaInventory(stack, wrapper, smartFill, inventory);
-                }
-
-                BlockState state = PaperLib.getBlockState(target, false).getState();
-
-                if (state instanceof InventoryHolder inventoryHolder) {
-                    inventory = inventoryHolder.getInventory();
+                if (inventory == null) {
+                    BlockState state = PaperLib.getBlockState(target, false).getState();
+                    if (!(state instanceof InventoryHolder holder)) {
+                        return stack;
+                    }
+                    inventory = holder.getInventory();
                     inventories.put(target.getLocation(), inventory);
+                }
+                var event = new CargoInsertEvent(node, target, inventory);
+                Bukkit.getPluginManager().callEvent(event);
+                if (!event.isCancelled()) {
                     return insertIntoVanillaInventory(stack, wrapper, smartFill, inventory);
                 }
             }
 
+            return stack;
+        }
+
+        var event = new CargoInsertEvent(node, target, menu.toInventory());
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
             return stack;
         }
 

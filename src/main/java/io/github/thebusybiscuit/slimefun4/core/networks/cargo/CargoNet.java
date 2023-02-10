@@ -12,6 +12,8 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.xzavier0722.mc.plugin.slimefuncomplib.event.cargo.CargoTickEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
@@ -149,6 +151,13 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
 
             Map<Location, Integer> inputs = mapInputNodes();
             Map<Integer, List<Location>> outputs = mapOutputNodes();
+
+            var event = new CargoTickEvent(inputs, outputs);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return;
+            }
+            event.getHologramMsg().ifPresent(msg -> updateHologram(b, msg));
 
             if (BlockStorage.getLocationInfo(b.getLocation(), "visualizer") == null) {
                 display();
