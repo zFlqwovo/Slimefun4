@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation;
 
+import com.xzavier0722.mc.plugin.slimefuncomplib.ICompatibleSlimefun;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.bakedlibs.dough.protection.ProtectionManager;
 import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
@@ -132,7 +133,7 @@ import java.util.stream.Collectors;
  *
  * @author TheBusyBiscuit
  */
-public final class Slimefun extends JavaPlugin implements SlimefunAddon {
+public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompatibleSlimefun {
 
     /**
      * This is the Java version we recommend server owners to use.
