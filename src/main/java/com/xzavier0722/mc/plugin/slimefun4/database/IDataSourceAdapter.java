@@ -10,4 +10,5 @@ public interface IDataSourceAdapter {
     void shutdown();
     void setData(RecordKey key, RecordSet item);
     Set<RecordSet> getData(RecordKey key);
+    void deleteData(RecordKey key);
 }
