@@ -11,39 +11,52 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 public class RecordSet {
-    private final Map<String, String> data;
+    private final Map<FieldKey, String> data;
+    private boolean readonly = false;
 
     public RecordSet() {
         data = new HashMap<>();
     }
 
     @ParametersAreNonnullByDefault
-    public void setData(String key, String val) {
+    public void put(FieldKey key, String val) {
+        checkReadonly();
         data.put(key, val);
     }
 
     @ParametersAreNonnullByDefault
-    public void setData(String key, ItemStack itemStack) {
+    public void put(FieldKey key, ItemStack itemStack) {
+        checkReadonly();
         data.put(key, DataUtils.itemStack2String(itemStack));
     }
 
-    public Map<String, String> getAll() {
+    public Map<FieldKey, String> getAll() {
         return Collections.unmodifiableMap(data);
     }
 
     @ParametersAreNonnullByDefault
-    public Optional<String> get(String key) {
+    public Optional<String> get(FieldKey key) {
         return Optional.ofNullable(data.get(key));
     }
 
     @ParametersAreNonnullByDefault
-    public OptionalInt getInt(String key) {
+    public OptionalInt getInt(FieldKey key) {
         return get(key).map(s -> OptionalInt.of(Integer.parseInt(s))).orElseGet(OptionalInt::empty);
     }
 
     @ParametersAreNonnullByDefault
-    public Optional<ItemStack> getItemStack(String key) {
+    public Optional<ItemStack> getItemStack(FieldKey key) {
         return get(key).flatMap(DataUtils::string2ItemStack);
+    }
+
+    public void readonly() {
+        readonly = true;
+    }
+
+    private void checkReadonly() {
+        if (readonly) {
+            throw new IllegalStateException("RecordSet cannot be modified after readonly() called.");
+        }
     }
 
 }
