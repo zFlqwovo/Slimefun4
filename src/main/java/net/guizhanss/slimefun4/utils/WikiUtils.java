@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.JsonUtils;
-import net.guizhanss.slimefun4.interfaces.WikiPageFormatter;
 import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedReader;
@@ -13,6 +12,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -32,7 +32,7 @@ public final class WikiUtils {
      * @param addon 附属 {@link SlimefunAddon} 实例
      */
     public static void setupJson(Plugin addon) {
-        setupJson(addon, (page) -> page);
+        setupJson(addon, page -> page);
     }
 
     /**
@@ -42,7 +42,7 @@ public final class WikiUtils {
      * @param plugin 附属 {@link SlimefunAddon} 实例
      * @param formatter 对页面地址进行更改
      */
-    public static void setupJson(Plugin plugin, WikiPageFormatter formatter) {
+    public static void setupJson(Plugin plugin, Function<String, String> formatter) {
         if (!(plugin instanceof SlimefunAddon)) {
             throw new IllegalArgumentException("该插件不是 Slimefun 附属");
         }
@@ -57,7 +57,7 @@ public final class WikiUtils {
 
                 if (item != null) {
                     String page = entry.getValue().getAsString();
-                    page = formatter.format(page);
+                    page = formatter.apply(page);
                     item.addWikiPage(page);
                     count++;
                 }

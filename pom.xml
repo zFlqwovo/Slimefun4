@@ -146,6 +146,10 @@
                             <pattern>org.apache.commons.lang</pattern>
                             <shadedPattern>io.github.thebusybiscuit.slimefun4.libraries.commons.lang</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>net.guizhanss.guizhanlib.updater</pattern>
+                            <shadedPattern>io.github.thebusybiscuit.slimefun4.libraries.guizhanlib.updater</shadedPattern>
+                        </relocation>
                     </relocations>
 
                     <!-- Exclude unneeded metadata files from shaded dependencies -->
@@ -429,6 +433,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>net.guizhanss</groupId>
+            <artifactId>GuizhanLib-updater</artifactId>
+            <version>1.0.4</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- TODO: Remove this dependency -->
         <dependency>
             <groupId>commons-lang</groupId>
