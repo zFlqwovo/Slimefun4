@@ -1,9 +1,10 @@
-package com.xzavier0722.mc.plugin.slimefun4.database.data;
+package com.xzavier0722.mc.plugin.slimefun4.database.common;
 
 import com.xzavier0722.mc.plugin.slimefun4.util.DataUtils;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +25,10 @@ public class RecordSet {
     @ParametersAreNonnullByDefault
     public void setData(String key, ItemStack itemStack) {
         data.put(key, DataUtils.itemStack2String(itemStack));
+    }
+
+    public Map<String, String> getAll() {
+        return Collections.unmodifiableMap(data);
     }
 
     @ParametersAreNonnullByDefault

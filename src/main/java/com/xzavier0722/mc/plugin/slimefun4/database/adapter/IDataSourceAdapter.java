@@ -1,7 +1,7 @@
 package com.xzavier0722.mc.plugin.slimefun4.database.adapter;
 
-import com.xzavier0722.mc.plugin.slimefun4.database.data.RecordSet;
-import com.xzavier0722.mc.plugin.slimefun4.database.data.RecordKey;
+import com.xzavier0722.mc.plugin.slimefun4.database.common.RecordSet;
+import com.xzavier0722.mc.plugin.slimefun4.database.common.RecordKey;
 
 import java.util.Set;
 
