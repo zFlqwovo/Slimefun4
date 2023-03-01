@@ -109,7 +109,8 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
         return executeQuery(
                 "SELECT " + buildFieldStr(key.getFields()).orElse("*") +
                 " FROM " + mapTable(key.getScope()) +
-                buildConditionStr(key.getConditions()) + ";");
+                buildConditionStr(key.getConditions()) + ";"
+        );
     }
 
     @Override
@@ -213,7 +214,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                         }
                         var row = new RecordSet();
                         for (var i = 1; i <= columnCount; i++) {
-                            row.put(mapper.get(metaData.getCatalogName(i)), result.getString(i));
+                            row.put(mapper.get(metaData.getColumnName(i)), result.getString(i));
                         }
                         row.readonly();
                         re.add(row);
