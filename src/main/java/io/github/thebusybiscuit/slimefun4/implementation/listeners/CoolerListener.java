@@ -18,7 +18,6 @@ import org.bukkit.potion.PotionEffect;
 
 import io.github.thebusybiscuit.slimefun4.api.events.CoolerFeedPlayerEvent;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
-import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Cooler;
 import io.github.thebusybiscuit.slimefun4.implementation.items.food.Juice;
@@ -90,11 +89,7 @@ public class CoolerListener implements Listener {
      *            The {@link Cooler} {@link ItemStack} to take the {@link Juice} from
      */
     private void takeJuiceFromCooler(@Nonnull Player p, @Nonnull ItemStack cooler) {
-        PlayerProfile.getBackpack(cooler, backpack -> {
-            if (backpack != null) {
-                Slimefun.runSync(() -> consumeJuice(p, cooler, backpack));
-            }
-        });
+        PlayerBackpack.getAsync(cooler, backpack -> consumeJuice(p, cooler, backpack), true);
     }
 
     private boolean consumeJuice(@Nonnull Player p, @Nonnull ItemStack coolerItem, @Nonnull PlayerBackpack backpack) {

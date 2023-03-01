@@ -61,13 +61,13 @@ public class BackpackListener implements Listener {
         if (e.getInventory().getHolder() instanceof SlimefunBackpackHolder holder) {
             var item = backpacks.get(p.getUniqueId());
 
-            PlayerProfile.getBackpack(item, (bp -> {
+            PlayerBackpack.getAsync(item, (bp -> {
                 if (bp == holder.getBackpack()) {
                     if (markBackpackDirty(p)) {
                         p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
                     }
                 }
-            }));
+            }), true);
         }
     }
 
@@ -75,7 +75,7 @@ public class BackpackListener implements Listener {
         ItemStack backpack = backpacks.remove(p.getUniqueId());
 
         if (backpack != null) {
-            PlayerProfile.getBackpack(backpack, PlayerBackpack::markDirty);
+            PlayerBackpack.getAsync(backpack, PlayerBackpack::markDirty, false);
             return true;
         } else {
             return false;
@@ -174,11 +174,7 @@ public class BackpackListener implements Listener {
         if (!backpacks.containsValue(item)) {
             p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
 
-            PlayerProfile.getBackpack(item, backpack -> {
-                if (backpack != null) {
-                    backpack.open(p, () -> backpacks.put(p.getUniqueId(), item));
-                }
-            });
+            PlayerBackpack.getAsync(item, backpack -> backpack.open(p, () -> backpacks.put(p.getUniqueId(), item)), false);
         } else {
             Slimefun.getLocalization().sendMessage(p, "backpack.already-open", true);
         }

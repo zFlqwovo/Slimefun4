@@ -1,35 +1,35 @@
-package com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql;
+package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql;
 
-import com.xzavier0722.mc.plugin.slimefun4.database.adapter.IDataSourceAdapter;
-import com.xzavier0722.mc.plugin.slimefun4.database.common.DataScope;
-import com.xzavier0722.mc.plugin.slimefun4.database.common.FieldKey;
-import com.xzavier0722.mc.plugin.slimefun4.database.common.FieldMapper;
-import com.xzavier0722.mc.plugin.slimefun4.database.common.RecordKey;
-import com.xzavier0722.mc.plugin.slimefun4.database.common.RecordSet;
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldMapper;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import io.github.bakedlibs.dough.collections.Pair;
 
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.FIELD_BACKPACK_ID;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.FIELD_BACKPACK_NUM;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.FIELD_BACKPACK_SIZE;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.FIELD_INVENTORY_ITEM;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.FIELD_INVENTORY_SLOT;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.FIELD_PLAYER_NAME;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.FIELD_PLAYER_UUID;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.FIELD_RESEARCH_KEY;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.TABLE_NAME_BACKPACK;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.TABLE_NAME_BACKPACK_INVENTORY;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.TABLE_NAME_PLAYER_PROFILE;
-import static com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql.SqlConstants.TABLE_NAME_PLAYER_RESEARCH;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_BACKPACK_ID;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_BACKPACK_NUM;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_BACKPACK_SIZE;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_INVENTORY_ITEM;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_INVENTORY_SLOT;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_PLAYER_NAME;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_PLAYER_UUID;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_RESEARCH_KEY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.TABLE_NAME_BACKPACK;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.TABLE_NAME_BACKPACK_INVENTORY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.TABLE_NAME_PLAYER_PROFILE;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.TABLE_NAME_PLAYER_RESEARCH;
 
 public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
     private FieldMapper<String> mapper;
@@ -95,17 +95,17 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + (updateFields.isEmpty() ? "" : " ON DUPLICATE KEY UPDATE "
                         + String.join(", ", updateFields.stream().map(field -> {
                             var val = item.get(field);
-                            if (val.isEmpty()) {
+                            if (val == null) {
                                 throw new IllegalArgumentException("Cannot find value in RecordSet for the specific key: " + field);
                             }
-                            return buildKvStr(field, val.get());
+                            return buildKvStr(field, val);
                         }).toList())
                 ) + ";"
         );
     }
 
     @Override
-    public Set<RecordSet> getData(RecordKey key) {
+    public List<RecordSet> getData(RecordKey key) {
         return executeQuery(
                 "SELECT " + buildFieldStr(key.getFields()).orElse("*") +
                 " FROM " + mapTable(key.getScope()) +
@@ -197,18 +197,18 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
         }
     }
 
-    private Set<RecordSet> executeQuery(String sql) {
+    private List<RecordSet> executeQuery(String sql) {
         Connection conn = null;
         try {
             conn = pool.getConn();
             try (var stmt = conn.createStatement()) {
                 try (var result = stmt.executeQuery(sql)) {
-                    Set<RecordSet> re = null;
+                    List<RecordSet> re = null;
                     ResultSetMetaData metaData = null;
                     int columnCount = 0;
                     while (result.next()) {
                         if (re == null) {
-                            re = new HashSet<>();
+                            re = new ArrayList<>();
                             metaData = result.getMetaData();
                             columnCount = metaData.getColumnCount();
                         }
@@ -219,7 +219,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                         row.readonly();
                         re.add(row);
                     }
-                    return re == null ? Collections.emptySet() : Collections.unmodifiableSet(re);
+                    return re == null ? Collections.emptyList() : Collections.unmodifiableList(re);
                 }
             }
         } catch (SQLException | InterruptedException e) {

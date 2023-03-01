@@ -9,6 +9,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -124,11 +126,21 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
                     String id = line.replace(ChatColors.color("&7ID: "), "");
                     String[] idSplit = CommonPatterns.HASH.split(id);
 
-                    PlayerProfile.fromUUID(UUID.fromString(idSplit[0]), profile -> {
-                        Optional<PlayerBackpack> optional = profile.getBackpack(Integer.parseInt(idSplit[1]));
-                        optional.ifPresent(playerBackpack -> playerBackpack.setSize(size));
-                    });
+                    PlayerProfileDataController.getInstance().getBackpackAsync(
+                            Bukkit.getOfflinePlayer(UUID.fromString(idSplit[0])),
+                            Integer.parseInt(idSplit[1]),
+                            new IAsyncReadCallback<>() {
+                                @Override
+                                public boolean runOnMainThread() {
+                                    return true;
+                                }
 
+                                @Override
+                                public void onResult(PlayerBackpack result) {
+                                    result.setSize(size);
+                                }
+                            }
+                    );
                     return Optional.of(id);
                 }
             }

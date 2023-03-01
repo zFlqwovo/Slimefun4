@@ -8,7 +8,6 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Optional;
 
 public class DataUtils {
     public static String itemStack2String(ItemStack itemStack) {
@@ -22,17 +21,17 @@ public class DataUtils {
         }
     }
 
-    public static Optional<ItemStack> string2ItemStack(String base64Str) {
+    public static ItemStack string2ItemStack(String base64Str) {
         if (base64Str == null || base64Str.isEmpty() || base64Str.isBlank()) {
-            return Optional.empty();
+            return null;
         }
 
         var stream = new ByteArrayInputStream(Base64Coder.decodeLines(base64Str));
         try (var bs = new BukkitObjectInputStream(stream)) {
-            return Optional.of((ItemStack) bs.readObject());
+            return (ItemStack) bs.readObject();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-            return Optional.empty();
+            return null;
         }
     }
 }

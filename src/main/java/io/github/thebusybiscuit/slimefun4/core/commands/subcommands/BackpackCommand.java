@@ -2,6 +2,9 @@ package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
+import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -9,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import io.github.bakedlibs.dough.common.CommonPatterns;
-import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -62,18 +64,24 @@ class BackpackCommand extends SubCommand {
 
                 int id = Integer.parseInt(args[2]);
 
-                PlayerProfile.get(backpackOwner, profile -> {
-                    if (!profile.getBackpack(id).isPresent()) {
-                        Slimefun.getLocalization().sendMessage(sender, "commands.backpack.backpack-does-not-exist");
-                        return;
+                PlayerProfileDataController.getInstance().getBackpackAsync(player, id, new IAsyncReadCallback<PlayerBackpack>() {
+                    @Override
+                    public boolean runOnMainThread() {
+                        return true;
                     }
 
-                    Slimefun.runSync(() -> {
+                    @Override
+                    public void onResult(PlayerBackpack result) {
                         ItemStack item = SlimefunItems.RESTORED_BACKPACK.clone();
                         Slimefun.getBackpackListener().setBackpackId(backpackOwner, item, 2, id);
                         player.getInventory().addItem(item);
                         Slimefun.getLocalization().sendMessage(sender, "commands.backpack.restored-backpack-given");
-                    });
+                    }
+
+                    @Override
+                    public void onResultNotFound() {
+                        Slimefun.getLocalization().sendMessage(sender, "commands.backpack.backpack-does-not-exist");
+                    }
                 });
             } else {
                 Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);

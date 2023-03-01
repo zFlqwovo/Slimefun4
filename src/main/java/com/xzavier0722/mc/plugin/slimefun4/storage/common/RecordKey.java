@@ -1,17 +1,13 @@
-package com.xzavier0722.mc.plugin.slimefun4.database.common;
+package com.xzavier0722.mc.plugin.slimefun4.storage.common;
 
-import com.xzavier0722.mc.plugin.slimefun4.database.common.DataScope;
-import com.xzavier0722.mc.plugin.slimefun4.database.common.FieldKey;
 import io.github.bakedlibs.dough.collections.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class RecordKey {

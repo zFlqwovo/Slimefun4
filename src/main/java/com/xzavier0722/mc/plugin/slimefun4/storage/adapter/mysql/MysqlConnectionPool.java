@@ -1,4 +1,4 @@
-package com.xzavier0722.mc.plugin.slimefun4.database.adapter.mysql;
+package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
