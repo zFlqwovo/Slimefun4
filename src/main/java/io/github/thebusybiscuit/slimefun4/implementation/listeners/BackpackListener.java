@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
@@ -13,6 +14,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -27,8 +29,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -49,6 +53,7 @@ import java.util.UUID;
 public class BackpackListener implements Listener {
 
     private final Map<UUID, ItemStack> backpacks = new HashMap<>();
+    private final Map<UUID, Set<Integer>> changedSlots = new HashMap<>();
 
     public void register(@Nonnull Slimefun plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -63,23 +68,20 @@ public class BackpackListener implements Listener {
 
             PlayerBackpack.getAsync(item, (bp -> {
                 if (bp == holder.getBackpack()) {
-                    if (markBackpackDirty(p)) {
-                        p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
-                    }
+                    saveBackpackInv(bp);
+                    p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
                 }
             }), true);
         }
     }
 
-    private boolean markBackpackDirty(@Nonnull Player p) {
-        ItemStack backpack = backpacks.remove(p.getUniqueId());
-
-        if (backpack != null) {
-            PlayerBackpack.getAsync(backpack, PlayerBackpack::markDirty, false);
-            return true;
-        } else {
-            return false;
+    private void saveBackpackInv(PlayerBackpack bp) {
+        var slots = changedSlots.remove(bp.getUniqueId());
+        if (slots == null) {
+            return;
         }
+
+        PlayerProfileDataController.getInstance().saveBackpackInventory(bp, slots);
     }
 
     @EventHandler
@@ -132,6 +134,26 @@ public class BackpackListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemChanged(InventoryClickEvent e) {
+        var p = e.getWhoClicked();
+        if (!backpacks.containsKey(p.getUniqueId())) {
+            return;
+        }
+
+        if (!(e.getInventory().getHolder() instanceof SlimefunBackpackHolder holder)) {
+            return;
+        }
+
+        var bp = holder.getBackpack();
+        var slot = e.getRawSlot();
+        if (slot >= bp.getSize()) {
+            return;
+        }
+
+        changedSlots.computeIfAbsent(bp.getUniqueId(), k -> new HashSet<>()).add(slot);
+    }
+
     private boolean isAllowed(@Nonnull SlimefunBackpack backpack, @Nullable ItemStack item) {
         if (item == null || item.getType() == Material.AIR) {
             return true;
@@ -157,7 +179,12 @@ public class BackpackListener implements Listener {
 
         for (int line = 0; line < lore.size(); line++) {
             if (lore.get(line).equals(ChatColor.GRAY + "ID: <ID>")) {
-                setBackpackId(p, item, line, profile.createBackpack(size).getId());
+                setBackpackId(
+                        p,
+                        item,
+                        line,
+                        PlayerProfileDataController.getInstance().createBackpack(p, profile.nextBackpackNum(), size).getId()
+                );
                 break;
             }
         }
@@ -166,7 +193,7 @@ public class BackpackListener implements Listener {
          * If the current Player is already viewing a backpack (for whatever reason),
          * terminate that view.
          */
-        if (markBackpackDirty(p)) {
+        if (backpacks.containsKey(p.getUniqueId())) {
             p.closeInventory();
         }
 

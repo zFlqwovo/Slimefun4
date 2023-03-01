@@ -23,4 +23,8 @@ class PlayerBackpackCache {
         return map == null ? null : map.get(num);
     }
 
+    void clean() {
+        cache.clear();
+    }
+
 }

@@ -7,7 +7,7 @@ public enum FieldKey {
 
     RESEARCH_ID,
 
-    BACKPACK_ID(true),
+    BACKPACK_ID,
     BACKPACK_NUMBER(true),
     BACKPACK_SIZE(true),
 

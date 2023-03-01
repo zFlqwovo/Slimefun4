@@ -108,7 +108,7 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
                     int target = line;
 
                     PlayerProfile.get(p, profile -> {
-                        int backpackId = profile.createBackpack(size).getId();
+                        int backpackId = PlayerProfileDataController.getInstance().createBackpack(p, profile.nextBackpackNum(), size).getId();
                         Slimefun.getBackpackListener().setBackpackId(p, output, target, backpackId);
                     });
 

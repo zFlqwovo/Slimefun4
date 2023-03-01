@@ -145,7 +145,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
                 + "REFERENCES " + profileTable + "(" + FIELD_PLAYER_UUID + ") "
                 + "ON UPDATE CASCADE ON DELETE CASCADE, "
-                + "INDEX player_uuid (" + FIELD_PLAYER_UUID + ")"
+                + "INDEX player_researches (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ")"
                 + ");"
         );
     }
@@ -154,7 +154,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                 + backpackTable + "("
-                + FIELD_BACKPACK_ID + " BIGINT UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT, "
+                + FIELD_BACKPACK_ID + " CHAR(64) PRIMARY KEY NOT NULL, "
                 + FIELD_PLAYER_UUID + " CHAR(64) NOT NULL, "
                 + FIELD_BACKPACK_NUM + " INT UNSIGNED NOT NULL, "
                 + FIELD_BACKPACK_SIZE + " TINYINT UNSIGNED NOT NULL, "
@@ -170,7 +170,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                 + inventoryTable + "("
-                + FIELD_BACKPACK_ID + " BIGINT UNSIGNED NOT NULL, "
+                + FIELD_BACKPACK_ID + " CHAR(64) NOT NULL, "
                 + FIELD_INVENTORY_SLOT + " TINYINT UNSIGNED NOT NULL, "
                 + FIELD_INVENTORY_ITEM + " TEXT NOT NULL, "
                 + "FOREIGN KEY (" + FIELD_BACKPACK_ID + ") "

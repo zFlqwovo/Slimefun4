@@ -133,6 +133,7 @@ public class PlayerProfile {
      * This method will save the Player's Researches and Backpacks to the hard drive
      */
     public void save() {
+        // As waypoints still store in file, just keep this method here for now...
         waypointsFile.save();
         dirty = false;
     }
@@ -150,12 +151,12 @@ public class PlayerProfile {
         Validate.notNull(research, "Research must not be null!");
         dirty = true;
 
-        // TODO: save to data storage
         if (unlock) {
             researches.add(research);
         } else {
             researches.remove(research);
         }
+        PlayerProfileDataController.getInstance().setResearch(owner.getUniqueId().toString(), research.getKey(), unlock);
     }
 
     /**
@@ -267,9 +268,14 @@ public class PlayerProfile {
         dirty = true;
     }
 
-    public @Nonnull PlayerBackpack createBackpack(int size) {
-        // TODO: save backpack num
-        return new PlayerBackpack(owner, ++backpackNum, size, null);
+    public int nextBackpackNum() {
+        backpackNum++;
+        PlayerProfileDataController.getInstance().saveProfileBackpackCount(this);
+        return backpackNum;
+    }
+
+    public int getBackpackCount() {
+        return backpackNum;
     }
 
     public @Nonnull String getTitle() {
@@ -303,7 +309,7 @@ public class PlayerProfile {
      * @return The {@link Player} of this {@link PlayerProfile} or null
      */
     public @Nullable Player getPlayer() {
-        return Bukkit.getPlayer(getUUID());
+        return owner.getPlayer();
     }
 
     /**
@@ -447,6 +453,10 @@ public class PlayerProfile {
     @Override
     public String toString() {
         return "PlayerProfile {" + owner.getUniqueId() + "}";
+    }
+
+    public OfflinePlayer getOwner() {
+        return owner;
     }
 
 }

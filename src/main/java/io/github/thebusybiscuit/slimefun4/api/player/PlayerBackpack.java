@@ -37,6 +37,7 @@ import java.util.function.Consumer;
  */
 public class PlayerBackpack {
     private final OfflinePlayer owner;
+    private final UUID uuid;
     private final int id;
     private Inventory inventory;
     private int size;
@@ -81,12 +82,13 @@ public class PlayerBackpack {
     }
 
     @ParametersAreNonnullByDefault
-    public PlayerBackpack(OfflinePlayer owner, int id, int size, @Nullable ItemStack[] contents) {
+    public PlayerBackpack(OfflinePlayer owner, UUID uuid, int id, int size, @Nullable ItemStack[] contents) {
         if (size < 9 || size > 54 || size % 9 != 0) {
             throw new IllegalArgumentException("Invalid size! Size must be one of: [9, 18, 27, 36, 45, 54]");
         }
 
         this.owner = owner;
+        this.uuid = uuid;
         this.id = id;
         this.size = size;
 
@@ -168,8 +170,10 @@ public class PlayerBackpack {
      * @param callback The operation after backpack was open
      */
     public void open(Player player, Runnable callback) {
-        Slimefun.runSync(() -> player.openInventory(inventory));
-        Slimefun.runSync(callback);
+        Slimefun.runSync(() -> {
+            player.openInventory(inventory);
+            callback.run();
+        });
     }
 
     /**
@@ -196,7 +200,7 @@ public class PlayerBackpack {
         for (int slot = 0; slot < this.inventory.getSize(); slot++) {
             inv.setItem(slot, this.inventory.getItem(slot));
         }
-        // TODO: save size
+        PlayerProfileDataController.getInstance().saveBackpackSize(this);
     }
 
     /**
@@ -212,6 +216,10 @@ public class PlayerBackpack {
      */
     public void markDirty() {
         // TODO: remove this method
+    }
+
+    public UUID getUniqueId() {
+        return uuid;
     }
 
 }
