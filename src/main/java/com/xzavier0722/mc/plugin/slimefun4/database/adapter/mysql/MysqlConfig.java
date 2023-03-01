@@ -13,6 +13,6 @@ public record MysqlConfig(
     public String jdbcUrl() {
         return "jdbc:mysql://"
                 + host + ":" + port + "/" + database
-                + "?serverTimezone=CTT&characterEncoding=utf8&useSSL="+ useSsl;
+                + "?characterEncoding=utf8&useSSL="+ useSsl;
     }
 }

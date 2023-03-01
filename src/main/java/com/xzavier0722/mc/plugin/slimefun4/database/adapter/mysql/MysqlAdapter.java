@@ -118,6 +118,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + FIELD_PLAYER_UUID + " CHAR(64) REFERENCES "
                     + profileTable + "(" + FIELD_PLAYER_UUID + ") "
                     + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + FIELD_BACKPACK_NUM + " INT UNSIGNED NOT NULL, "
                 + FIELD_BACKPACK_SIZE + " TINYINT UNSIGNED NOT NULL, "
                 + "INDEX player_backpack (" + FIELD_PLAYER_UUID + ", " + FIELD_BACKPACK_NUM + ")"
                 + ");"
