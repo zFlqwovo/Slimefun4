@@ -40,7 +40,7 @@ public class MysqlConnectionPool {
             usingConn.add(re);
             return re;
         } else {
-            var re = freeConn.getFirst();
+            var re = freeConn.poll();
             if (!testConn(re)) {
                 currConnCount--;
                 return getConn();
@@ -60,7 +60,7 @@ public class MysqlConnectionPool {
         freeConn.add(conn);
 
         if (waitingCount > 0) {
-            notifyAll();
+            notify();
             waitingCount--;
         }
     }
