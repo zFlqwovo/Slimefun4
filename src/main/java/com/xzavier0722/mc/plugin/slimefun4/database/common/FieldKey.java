@@ -1,16 +1,29 @@
 package com.xzavier0722.mc.plugin.slimefun4.database.common;
 
 public enum FieldKey {
-    PLAYER_UUID,                    // Player UUID
-    PLAYER_NAME,                    // Player Name
-    PLAYER_BACKPACK_NUM,            // Last backpack number (use for create backpack)
+    PLAYER_UUID,
+    PLAYER_NAME,
+    PLAYER_BACKPACK_NUM(true),
 
-    RESEARCH_ID,                    // Research key
+    RESEARCH_ID,
 
-    BACKPACK_ID,                    // Backpack key
-    BACKPACK_NUMBER,                // Backpack number in a player profile
-    BACKPACK_SIZE,                  // Backpack size
+    BACKPACK_ID(true),
+    BACKPACK_NUMBER(true),
+    BACKPACK_SIZE(true),
 
-    INVENTORY_SLOT,                 // Backpack inventory slot
-    INVENTORY_ITEM,                 // Backpack inventory item
+    INVENTORY_SLOT(true),
+    INVENTORY_ITEM;
+
+    private final boolean isNumType;
+    FieldKey() {
+        this(false);
+    }
+
+    FieldKey(boolean isNumType) {
+        this.isNumType = isNumType;
+    }
+
+    public boolean isNumType() {
+        return isNumType;
+    }
 }
