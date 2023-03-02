@@ -182,7 +182,6 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
     }
 
     private void executeSql(String sql) {
-        System.out.println(sql);
         Connection conn = null;
         try {
             conn = pool.getConn();
@@ -199,7 +198,6 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
     }
 
     private List<RecordSet> executeQuery(String sql) {
-        System.out.println(sql);
         Connection conn = null;
         try {
             conn = pool.getConn();
