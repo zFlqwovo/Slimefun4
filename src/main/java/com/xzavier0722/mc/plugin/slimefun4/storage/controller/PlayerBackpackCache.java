@@ -7,24 +7,31 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 class PlayerBackpackCache {
-    private final Map<String, Map<Integer, PlayerBackpack>> cache;
+    private final Map<String, Map<Integer, PlayerBackpack>> numCache;
+    private final Map<String, PlayerBackpack> uuidCache;
 
     PlayerBackpackCache() {
-        cache = new ConcurrentHashMap<>();
+        numCache = new ConcurrentHashMap<>();
+        uuidCache = new ConcurrentHashMap<>();
     }
 
-    void put(String uuid, int num, PlayerBackpack backpack) {
-        var map = cache.computeIfAbsent(uuid, k -> new HashMap<>());
-        map.put(num, backpack);
+    void put(PlayerBackpack backpack) {
+        numCache.computeIfAbsent(backpack.getOwner().getUniqueId().toString(), k -> new HashMap<>()).put(backpack.getId(), backpack);
+        uuidCache.put(backpack.getUniqueId().toString(), backpack);
     }
 
-    PlayerBackpack get(String uuid, int num) {
-        var map = cache.get(uuid);
+    PlayerBackpack get(String pUuid, int num) {
+        var map = numCache.get(pUuid);
         return map == null ? null : map.get(num);
     }
 
+    PlayerBackpack get(String uuid) {
+        return uuidCache.get(uuid);
+    }
+
     void clean() {
-        cache.clear();
+        numCache.clear();
+        uuidCache.clear();
     }
 
 }

@@ -11,6 +11,7 @@ import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
@@ -132,19 +133,65 @@ public class PlayerProfileDataController {
             return null;
         }
 
-        var id = UUID.fromString(bResult.get(0).get(FieldKey.BACKPACK_ID));
-        key = new RecordKey(DataScope.BACKPACK_INVENTORY);
+        var idStr= bResult.get(0).get(FieldKey.BACKPACK_ID);
+        var size = Integer.parseInt(bResult.get(0).get(FieldKey.BACKPACK_SIZE));
+
+        re = new PlayerBackpack(
+                owner,
+                UUID.fromString(idStr),
+                num,
+                size,
+                getBackpackInv(idStr, size)
+        );
+        backpackCache.put(re);
+        return re;
+    }
+
+    public PlayerBackpack getBackpack(String uuid) {
+        var re = backpackCache.get(uuid);
+        if (re != null) {
+            return re;
+        }
+
+        var key = new RecordKey(DataScope.BACKPACK_PROFILE);
+        key.addField(FieldKey.BACKPACK_ID);
+        key.addField(FieldKey.BACKPACK_SIZE);
+        key.addField(FieldKey.BACKPACK_NUMBER);
+        key.addField(FieldKey.PLAYER_UUID);
+        key.addCondition(FieldKey.BACKPACK_ID, uuid);
+
+        var resultSet = dataAdapter.getData(key);
+        if (resultSet.isEmpty()) {
+            return null;
+        }
+
+        var result = resultSet.get(0);
+        var idStr= result.get(FieldKey.BACKPACK_ID);
+        var size = result.getInt(FieldKey.BACKPACK_SIZE);
+
+        re = new PlayerBackpack(
+                Bukkit.getOfflinePlayer(UUID.fromString(result.get(FieldKey.PLAYER_UUID))),
+                UUID.fromString(idStr),
+                result.getInt(FieldKey.BACKPACK_NUMBER),
+                size,
+                getBackpackInv(idStr, size)
+        );
+        backpackCache.put(re);
+        return re;
+
+    }
+
+    private ItemStack[] getBackpackInv(String uuid, int size) {
+        var key = new RecordKey(DataScope.BACKPACK_INVENTORY);
         key.addField(FieldKey.INVENTORY_SLOT);
         key.addField(FieldKey.INVENTORY_ITEM);
-        key.addCondition(FieldKey.BACKPACK_ID, id + "");
+        key.addCondition(FieldKey.BACKPACK_ID, uuid);
 
         var invResult = dataAdapter.getData(key);
+        var re = new ItemStack[size];
+        invResult.forEach(each -> re[each.getInt(FieldKey.INVENTORY_SLOT)] = each.getItemStack(FieldKey.INVENTORY_ITEM));
 
-        var size = bResult.get(0).getInt(FieldKey.BACKPACK_SIZE);
-        var items = new ItemStack[size];
-        invResult.forEach(each -> items[each.getInt(FieldKey.INVENTORY_SLOT)] = each.getItemStack(FieldKey.INVENTORY_ITEM));
-
-        return new PlayerBackpack(owner, id, num, size, items);
+        return re;
     }
 
     private Set<NamespacedKey> getUnlockedResearchKeys(String uuid) {
@@ -166,6 +213,25 @@ public class PlayerProfileDataController {
         checkDestroy();
         readExecutor.submit(() -> {
             var re = getBackpack(owner, num);
+            Runnable cb;
+            if (re == null) {
+                cb = callback::onResultNotFound;
+            } else {
+                cb = () -> callback.onResult(re);
+            }
+
+            if (callback.runOnMainThread()) {
+                Slimefun.runSync(cb);
+            } else {
+                callbackExecutor.submit(cb);
+            }
+        });
+    }
+
+    public void getBackpackAsync(String uuid, IAsyncReadCallback<PlayerBackpack> callback) {
+        checkDestroy();
+        readExecutor.submit(() -> {
+            var re = getBackpack(uuid);
             Runnable cb;
             if (re == null) {
                 cb = callback::onResultNotFound;
