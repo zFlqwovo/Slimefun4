@@ -24,7 +24,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -342,6 +341,10 @@ public class PlayerProfileDataController {
                 scheduleWriteTask(key, data);
             }
         });
+    }
+
+    public void saveBackpackInventory(PlayerBackpack bp, Integer... slots) {
+        saveBackpackInventory(bp, Set.of(slots));
     }
 
     private void checkDestroy() {
