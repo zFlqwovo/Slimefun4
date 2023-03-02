@@ -6,6 +6,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
+import com.xzavier0722.mc.plugin.slimefun4.storage.task.AsyncWriteTask;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
@@ -31,7 +32,8 @@ public class PlayerProfileDataController {
 
     private final PlayerBackpackCache backpackCache;
     private final Map<String, PlayerProfile> profileCache;
-    private IDataSourceAdapter<?> dataAdapter;
+    private final Map<RecordKey, AsyncWriteTask> scheduledWriteTasks;
+    private volatile IDataSourceAdapter<?> dataAdapter;
     private ExecutorService readExecutor;
     private ExecutorService writeExecutor;
     private ExecutorService callbackExecutor;
@@ -52,6 +54,7 @@ public class PlayerProfileDataController {
     private PlayerProfileDataController() {
         backpackCache = new PlayerBackpackCache();
         profileCache = new ConcurrentHashMap<>();
+        scheduledWriteTasks = new ConcurrentHashMap<>();
     }
 
     public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
@@ -189,9 +192,9 @@ public class PlayerProfileDataController {
         var re = new PlayerProfile(p, 0);
         profileCache.put(uuid, re);
 
-        writeExecutor.submit(() -> {
-            dataAdapter.setData(new RecordKey(DataScope.PLAYER_PROFILE), getRecordSet(re));
-        });
+        var key = new RecordKey(DataScope.PLAYER_PROFILE);
+        key.addCondition(FieldKey.PLAYER_UUID, uuid);
+        scheduleWriteTask(key, getRecordSet(re));
         return re;
     }
 
@@ -200,79 +203,78 @@ public class PlayerProfileDataController {
             return;
         }
         destroyed = true;
-        dataAdapter = null;
         readExecutor.shutdownNow();
         callbackExecutor.shutdownNow();
-        writeExecutor.shutdown();
         try {
-            writeExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+            var pendingTask = scheduledWriteTasks.size();
+            while (pendingTask > 0) {
+                Slimefun.logger().log(Level.SEVERE, "数据保存中，请稍候... 剩余 " + pendingTask + " 个任务");
+                Thread.sleep(3000);
+                pendingTask = scheduledWriteTasks.size();
+            }
         } catch (InterruptedException e) {
             Slimefun.logger().log(Level.SEVERE, "Exception thrown while saving data: ", e);
         }
+        writeExecutor.shutdown();
+        dataAdapter = null;
         backpackCache.clean();
         profileCache.clear();
     }
 
     public void setResearch(String uuid, NamespacedKey researchKey, boolean unlocked) {
-        writeExecutor.submit(() -> {
-            if (unlocked) {
-                var data = new RecordSet();
-                data.put(FieldKey.PLAYER_UUID, uuid);
-                data.put(FieldKey.RESEARCH_ID, researchKey.toString());
-                dataAdapter.setData(new RecordKey(DataScope.PLAYER_RESEARCH), data);
-            } else {
-                var key = new RecordKey(DataScope.PLAYER_RESEARCH);
-                key.addCondition(FieldKey.PLAYER_UUID, uuid);
-                key.addCondition(FieldKey.RESEARCH_ID, researchKey.toString());
-                dataAdapter.deleteData(key);
-            }
-        });
+        var key = new RecordKey(DataScope.PLAYER_RESEARCH);
+        key.addCondition(FieldKey.PLAYER_UUID, uuid);
+        key.addCondition(FieldKey.RESEARCH_ID, researchKey.toString());
+        if (unlocked) {
+            var data = new RecordSet();
+            data.put(FieldKey.PLAYER_UUID, uuid);
+            data.put(FieldKey.RESEARCH_ID, researchKey.toString());
+            dataAdapter.setData(key, data);
+        } else {
+            scheduleWriteTask(key);
+        }
     }
 
     public PlayerBackpack createBackpack(OfflinePlayer p, int num, int size) {
         var re = new PlayerBackpack(p, UUID.randomUUID(), num, size, null);
-        writeExecutor.submit(() -> dataAdapter.setData(new RecordKey(DataScope.BACKPACK_PROFILE), getRecordSet(re)));
+        var key = new RecordKey(DataScope.BACKPACK_PROFILE);
+        key.addCondition(FieldKey.BACKPACK_ID, re.getUniqueId().toString());
+        scheduleWriteTask(key, getRecordSet(re));
         return re;
     }
 
     public void saveBackpackSize(PlayerBackpack bp) {
-        writeExecutor.submit(() -> {
-            var key = new RecordKey(DataScope.BACKPACK_PROFILE);
-            key.addField(FieldKey.BACKPACK_SIZE);
-            dataAdapter.setData(key, getRecordSet(bp));
-        });
+        var key = new RecordKey(DataScope.BACKPACK_PROFILE);
+        key.addCondition(FieldKey.BACKPACK_ID, bp.getUniqueId().toString());
+        key.addField(FieldKey.BACKPACK_SIZE);
+        scheduleWriteTask(key, getRecordSet(bp));
     }
 
     public void saveProfileBackpackCount(PlayerProfile profile) {
-        writeExecutor.submit(() -> {
-            var key = new RecordKey(DataScope.PLAYER_PROFILE);
-            key.addField(FieldKey.PLAYER_BACKPACK_NUM);
-            dataAdapter.setData(key, getRecordSet(profile));
-        });
+        var key = new RecordKey(DataScope.PLAYER_PROFILE);
+        key.addField(FieldKey.PLAYER_BACKPACK_NUM);
+        key.addCondition(FieldKey.PLAYER_UUID, profile.getUUID().toString());
+        scheduleWriteTask(key, getRecordSet(profile));
     }
 
     public void saveBackpackInventory(PlayerBackpack bp, Set<Integer> slots) {
-        writeExecutor.submit(() -> {
-            var id = bp.getUniqueId().toString();
+        var id = bp.getUniqueId().toString();
+        var inv = bp.getInventory();
+        slots.forEach(slot -> {
             var key = new RecordKey(DataScope.BACKPACK_INVENTORY);
+            key.addCondition(FieldKey.BACKPACK_ID, id);
+            key.addCondition(FieldKey.INVENTORY_SLOT, slot + "");
             key.addField(FieldKey.INVENTORY_ITEM);
-
-            var inv = bp.getInventory();
-            slots.forEach(slot -> {
-                var is = inv.getItem(slot);
-                if (is == null) {
-                    var removeKey = new RecordKey(DataScope.BACKPACK_INVENTORY);
-                    removeKey.addCondition(FieldKey.BACKPACK_ID, id);
-                    removeKey.addCondition(FieldKey.INVENTORY_SLOT, slot + "");
-                    dataAdapter.deleteData(removeKey);
-                } else {
-                    var data = new RecordSet();
-                    data.put(FieldKey.BACKPACK_ID, id);
-                    data.put(FieldKey.INVENTORY_SLOT, slot + "");
-                    data.put(FieldKey.INVENTORY_ITEM, is);
-                    dataAdapter.setData(key, data);
-                }
-            });
+            var is = inv.getItem(slot);
+            if (is == null) {
+                scheduleWriteTask(key);
+            } else {
+                var data = new RecordSet();
+                data.put(FieldKey.BACKPACK_ID, id);
+                data.put(FieldKey.INVENTORY_SLOT, slot + "");
+                data.put(FieldKey.INVENTORY_ITEM, is);
+                scheduleWriteTask(key, data);
+            }
         });
     }
 
@@ -297,5 +299,40 @@ public class PlayerProfileDataController {
         re.put(FieldKey.PLAYER_NAME, profile.getOwner().getName());
         re.put(FieldKey.PLAYER_BACKPACK_NUM, profile.getBackpackCount() + "");
         return re;
+    }
+
+    public void scheduleWriteTask(RecordKey key) {
+        scheduleWriteTask(key, () -> dataAdapter.deleteData(key));
+    }
+
+    private void scheduleWriteTask(RecordKey key, RecordSet data) {
+        scheduleWriteTask(key, () -> dataAdapter.setData(key, data));
+    }
+
+    private void scheduleWriteTask(RecordKey key, Runnable task) {
+        var writeTask = new AsyncWriteTask() {
+            @Override
+            protected boolean execute() {
+                var lastScheduledTask = scheduledWriteTasks.get(key);
+                if (lastScheduledTask != null && lastScheduledTask != this) {
+                    return false;
+                }
+                task.run();
+                return true;
+            }
+
+            @Override
+            protected void onSuccess() {
+                scheduledWriteTasks.remove(key);
+            }
+
+            @Override
+            protected void onError(Throwable e) {
+                Slimefun.logger().log(Level.SEVERE, "Exception thrown while executing write task: ");
+                e.printStackTrace();
+            }
+        };
+        scheduledWriteTasks.put(key, writeTask);
+        writeExecutor.submit(writeTask);
     }
 }

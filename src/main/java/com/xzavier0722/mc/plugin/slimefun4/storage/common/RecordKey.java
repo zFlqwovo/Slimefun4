@@ -56,4 +56,55 @@ public class RecordKey {
     public List<Pair<FieldKey, String>> getConditions() {
         return Collections.unmodifiableList(conditions);
     }
+
+    public String getKeyStr() {
+        var re = new StringBuilder();
+        re.append(scope).append("/");
+        conditions.forEach(c -> re.append(c.getFirstValue()).append("=").append(c.getSecondValue()).append("/"));
+        fields.forEach(f -> re.append(f).append("/"));
+        return re.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return getKeyStr().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof RecordKey other)) {
+            return false;
+        }
+
+        if (this.scope != other.scope) {
+            return false;
+        }
+
+        if (this.fields.size() != other.fields.size()) {
+            return false;
+        }
+
+        var conditionSize = this.conditions.size();
+        if (conditionSize != other.conditions.size()) {
+            return false;
+        }
+
+        for (var field : this.fields) {
+            if (!other.fields.contains(field)) {
+                return false;
+            }
+        }
+
+        for (var i = 0; i < conditionSize; i++) {
+            if (!this.conditions.get(i).equals(other.conditions.get(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
