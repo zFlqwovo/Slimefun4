@@ -18,7 +18,10 @@ class ScopedLock {
     }
 
     void destroyLock(ScopeKey scopeKey) {
-        locks.remove(scopeKey);
+        var removed = locks.remove(scopeKey);
+        if (removed != null) {
+            removed.unlock();
+        }
     }
 
     void lock(ScopeKey scopeKey) {

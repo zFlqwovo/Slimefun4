@@ -353,6 +353,7 @@ public class PlayerProfileDataController {
     }
 
     private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, Runnable task, boolean forceScopeKey) {
+        lock.createLock(scopeKey);
         lock.lock(scopeKey);
         try {
             var queuedTask = scheduledWriteTasks.get(scopeKey);
@@ -364,12 +365,14 @@ public class PlayerProfileDataController {
             queuedTask = new QeuedAsyncWriteTask() {
                 @Override
                 protected void onSuccess() {
-                    lock.lock(scopeToUse);
+                    lock.lock(scopeKey);
                     var last = scheduledWriteTasks.remove(scopeToUse);
-                    if (this != last) {
+                    if (this == last) {
+                        lock.destroyLock(scopeKey);
+                    } else {
                         scheduledWriteTasks.put(scopeToUse, last);
                     }
-                    lock.unlock(scopeToUse);
+                    lock.unlock(scopeKey);
                 }
 
                 @Override
