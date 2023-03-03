@@ -174,18 +174,17 @@ public class BackpackListener implements Listener {
 
     @ParametersAreNonnullByDefault
     private void openBackpack(Player p, ItemStack item, PlayerProfile profile, int size) {
-        List<String> lore = item.getItemMeta().getLore();
-
-        for (int line = 0; line < lore.size(); line++) {
-            if (lore.get(line).equals(ChatColor.GRAY + "ID: <ID>")) {
-                setBackpackId(
-                        p,
-                        item,
-                        line,
-                        Slimefun.getRegistry().getProfileDataController().createBackpack(p, profile.nextBackpackNum(), size).getId()
-                );
-                break;
-            }
+        var meta = item.getItemMeta();
+        if (PlayerBackpack.getUuid(meta).isEmpty() && PlayerBackpack.getNum(meta).isEmpty()) {
+            // Create backpack
+            PlayerBackpack.setUuid(
+                    item,
+                    Slimefun.getRegistry().getProfileDataController().createBackpack(
+                            p,
+                            profile.nextBackpackNum(),
+                            size
+                    ).getUniqueId().toString()
+            );
         }
 
         /*
@@ -200,7 +199,10 @@ public class BackpackListener implements Listener {
         if (!backpacks.containsValue(item)) {
             p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
 
-            PlayerBackpack.getAsync(item, backpack -> backpack.open(p, () -> backpacks.put(p.getUniqueId(), item)), false);
+            PlayerBackpack.getAsync(
+                    item,
+                    backpack -> backpack.open(p, () -> backpacks.put(p.getUniqueId(), item)),
+                    false);
         } else {
             Slimefun.getLocalization().sendMessage(p, "backpack.already-open", true);
         }

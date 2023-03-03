@@ -44,7 +44,6 @@ import java.util.logging.Level;
  * 
  * @see Research
  * @see Waypoint
- * @see PlayerBackpack
  * @see HashedArmorpiece
  *
  */

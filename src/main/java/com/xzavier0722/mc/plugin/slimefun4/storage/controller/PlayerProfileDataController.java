@@ -124,6 +124,7 @@ public class PlayerProfileDataController {
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);
         key.addField(FieldKey.BACKPACK_ID);
         key.addField(FieldKey.BACKPACK_SIZE);
+        key.addField(FieldKey.BACKPACK_NAME);
         key.addField(FieldKey.BACKPACK_NUMBER);
         key.addField(FieldKey.PLAYER_UUID);
         key.addCondition(FieldKey.BACKPACK_ID, uuid);
@@ -140,6 +141,7 @@ public class PlayerProfileDataController {
         re = new PlayerBackpack(
                 Bukkit.getOfflinePlayer(UUID.fromString(result.get(FieldKey.PLAYER_UUID))),
                 UUID.fromString(idStr),
+                result.getOrDef(FieldKey.BACKPACK_NAME, ""),
                 result.getInt(FieldKey.BACKPACK_NUMBER),
                 size,
                 getBackpackInv(idStr, size)

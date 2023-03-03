@@ -7,16 +7,20 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.BackpackListener;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
 import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -34,9 +38,11 @@ import java.util.function.Consumer;
  * @see BackpackListener
  */
 public class PlayerBackpack {
+    private static final NamespacedKey KEY_BACKPACK_UUID = new NamespacedKey(Slimefun.instance(), "B_UUID");
     private final OfflinePlayer owner;
     private final UUID uuid;
     private final int id;
+    private final SlimefunBackpackHolder holder;
     private String name;
     private Inventory inventory;
     private int size;
@@ -46,6 +52,26 @@ public class PlayerBackpack {
             return;
         }
 
+        var bUuid = getUuid(item.getItemMeta());
+        if (bUuid.isPresent()) {
+            Slimefun.getRegistry().getProfileDataController().getBackpackAsync(
+                    bUuid.get(),
+                    new IAsyncReadCallback<>() {
+                        @Override
+                        public boolean runOnMainThread() {
+                            return runCbOnMainThread;
+                        }
+
+                        @Override
+                        public void onResult(PlayerBackpack result) {
+                            callback.accept(result);
+                        }
+                    }
+            );
+            return;
+        }
+
+        // Old backpack item
         OptionalInt id = OptionalInt.empty();
         String uuid = "";
 
@@ -73,11 +99,60 @@ public class PlayerBackpack {
 
                         @Override
                         public void onResult(PlayerBackpack result) {
+                            var meta = item.getItemMeta();
+                            meta.getPersistentDataContainer().set(KEY_BACKPACK_UUID, PersistentDataType.STRING, result.uuid.toString());
+                            item.setItemMeta(meta);
+                            // TODO: upgrade lore
                             callback.accept(result);
                         }
                     }
             );
         }
+    }
+
+    public static Optional<String> getUuid(ItemMeta meta) {
+        if (meta == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(meta.getPersistentDataContainer().get(KEY_BACKPACK_UUID, PersistentDataType.STRING));
+    }
+
+    public static OptionalInt getNum(ItemMeta meta) {
+        if (meta == null) {
+            return OptionalInt.empty();
+        }
+
+        for (String line : meta.getLore()) {
+            if (line.startsWith(ChatColors.color("&7ID: ")) && line.contains("#")) {
+                try {
+                    return OptionalInt.of(Integer.parseInt(CommonPatterns.HASH.split(line.replace(ChatColors.color("&7ID: "), ""))[1]));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return OptionalInt.empty();
+    }
+
+    public static void setUuid(ItemStack item, String uuid) {
+        ItemMeta im = item.getItemMeta();
+        im.getPersistentDataContainer().set(PlayerBackpack.KEY_BACKPACK_UUID, PersistentDataType.STRING, uuid);
+        item.setItemMeta(im);
+    }
+
+    private static IAsyncReadCallback<PlayerBackpack> asReadCallback(Consumer<PlayerBackpack> callback, boolean runOnMain) {
+        return new IAsyncReadCallback<>() {
+            @Override
+            public boolean runOnMainThread() {
+                return runOnMain;
+            }
+
+            @Override
+            public void onResult(PlayerBackpack result) {
+                callback.accept(result);
+            }
+        };
     }
 
     @ParametersAreNonnullByDefault
@@ -96,12 +171,8 @@ public class PlayerBackpack {
         this.name = name;
         this.id = id;
         this.size = size;
-
-        var holder = new SlimefunBackpackHolder();
-        inventory = Bukkit.createInventory(holder, size, "背包 [大小 " + size + "]");
-
-        holder.setBackpack(this);
-        holder.setInventory(inventory);
+        this. holder = new SlimefunBackpackHolder();
+        inventory = newInv();
 
         if (contents == null) {
             return;
@@ -192,20 +263,7 @@ public class PlayerBackpack {
             throw new IllegalArgumentException("Invalid size! Size must be one of: [9, 18, 27, 36, 45, 54]");
         }
 
-        this.size = size;
-
-        var holder = new SlimefunBackpackHolder();
-        Inventory inv = Bukkit.createInventory(holder, size, "背包 [大小 " + size + "]");
-
-        holder.setInventory(inv);
-        holder.setBackpack(this);
-
-        InventoryUtil.closeInventory(inventory);
-
-        for (int slot = 0; slot < this.inventory.getSize(); slot++) {
-            inv.setItem(slot, this.inventory.getItem(slot));
-        }
-        this.inventory = inv;
+        updateInv();
         Slimefun.getRegistry().getProfileDataController().saveBackpackInfo(this);
     }
 
@@ -215,11 +273,26 @@ public class PlayerBackpack {
 
     public void setName(String name) {
         this.name = name;
+        updateInv();
         Slimefun.getRegistry().getProfileDataController().saveBackpackInfo(this);
     }
 
     public String getName() {
         return name;
+    }
+
+    private Inventory newInv() {
+        var re = Bukkit.createInventory(holder, size, (name.isEmpty() ? "背包" : name) + " [大小 " + size + "]");
+        holder.setInventory(re);
+        return re;
+    }
+
+    private void updateInv() {
+        InventoryUtil.closeInventory(this.inventory);
+        var inv = newInv();
+        inv.setContents(this.inventory.getContents());
+        this.inventory.clear();
+        this.inventory = inv;
     }
 
 }

@@ -38,6 +38,11 @@ public class RecordSet {
     }
 
     @ParametersAreNonnullByDefault
+    public String getOrDef(FieldKey key, String def) {
+        return data.getOrDefault(key, def);
+    }
+
+    @ParametersAreNonnullByDefault
     public int getInt(FieldKey key) {
         return Integer.parseInt(data.get(key));
     }
