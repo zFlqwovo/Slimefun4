@@ -368,11 +368,12 @@ public class PlayerProfileDataController {
                     lock.lock(scopeKey);
                     var last = scheduledWriteTasks.remove(scopeToUse);
                     if (this == last) {
+                        lock.unlock(scopeKey);
                         lock.destroyLock(scopeKey);
                     } else {
                         scheduledWriteTasks.put(scopeToUse, last);
+                        lock.unlock(scopeKey);
                     }
-                    lock.unlock(scopeKey);
                 }
 
                 @Override
