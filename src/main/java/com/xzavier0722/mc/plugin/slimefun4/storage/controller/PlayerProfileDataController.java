@@ -271,7 +271,7 @@ public class PlayerProfileDataController {
         var re = new PlayerBackpack(p, UUID.randomUUID(), num, size, null);
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);
         key.addCondition(FieldKey.BACKPACK_ID, re.getUniqueId().toString());
-        scheduleWriteTask(new UUIDKey(DataScope.NONE, re.getUniqueId()), key, getRecordSet(re), true);
+        scheduleWriteTask(new UUIDKey(DataScope.NONE, p.getUniqueId()), key, getRecordSet(re), true);
         return re;
     }
 
@@ -280,7 +280,7 @@ public class PlayerProfileDataController {
         key.addCondition(FieldKey.BACKPACK_ID, bp.getUniqueId().toString());
         key.addField(FieldKey.BACKPACK_SIZE);
         key.addField(FieldKey.BACKPACK_NAME);
-        scheduleWriteTask(new UUIDKey(DataScope.NONE, bp.getUniqueId()), key, getRecordSet(bp), false);
+        scheduleWriteTask(new UUIDKey(DataScope.NONE, bp.getOwner().getUniqueId()), key, getRecordSet(bp), false);
     }
 
     public void saveProfileBackpackCount(PlayerProfile profile) {
@@ -307,7 +307,7 @@ public class PlayerProfileDataController {
                 data.put(FieldKey.BACKPACK_ID, id);
                 data.put(FieldKey.INVENTORY_SLOT, slot + "");
                 data.put(FieldKey.INVENTORY_ITEM, is);
-                scheduleWriteTask(new UUIDKey(DataScope.NONE, bp.getUniqueId()), key, data, false);
+                scheduleWriteTask(new UUIDKey(DataScope.NONE, bp.getOwner().getUniqueId()), key, data, false);
             }
         });
     }
