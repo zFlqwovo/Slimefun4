@@ -62,14 +62,8 @@ public class BackpackListener implements Listener {
         Player p = (Player) e.getPlayer();
 
         if (e.getInventory().getHolder() instanceof SlimefunBackpackHolder holder) {
-            var item = backpacks.get(p.getUniqueId());
-
-            PlayerBackpack.getAsync(item, (bp -> {
-                if (bp == holder.getBackpack()) {
-                    saveBackpackInv(bp);
-                    p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
-                }
-            }), true);
+            saveBackpackInv(holder.getBackpack());
+            p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
         }
     }
 
@@ -201,7 +195,8 @@ public class BackpackListener implements Listener {
             PlayerBackpack.getAsync(
                     item,
                     backpack -> backpack.open(p, () -> backpacks.put(p.getUniqueId(), item)),
-                    false);
+                    false
+            );
         } else {
             Slimefun.getLocalization().sendMessage(p, "backpack.already-open", true);
         }
