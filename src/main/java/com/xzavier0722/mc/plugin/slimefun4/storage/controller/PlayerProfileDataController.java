@@ -28,9 +28,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class PlayerProfileDataController {
-    private static volatile PlayerProfileDataController instance;
-
-    private final PlayerBackpackCache backpackCache;
+    private final BackpackCache backpackCache;
     private final Map<String, PlayerProfile> profileCache;
     private final Map<RecordKey, AsyncWriteTask> scheduledWriteTasks;
     private volatile IDataSourceAdapter<?> dataAdapter;
@@ -39,26 +37,13 @@ public class PlayerProfileDataController {
     private ExecutorService callbackExecutor;
     private volatile boolean destroyed = false;
 
-    public static PlayerProfileDataController getInstance() {
-        if (instance == null) {
-            synchronized (PlayerProfileDataController.class) {
-                if (instance == null) {
-                    instance = new PlayerProfileDataController();
-                }
-            }
-        }
-
-        return instance;
-    }
-
-    private PlayerProfileDataController() {
-        backpackCache = new PlayerBackpackCache();
+    PlayerProfileDataController() {
+        backpackCache = new BackpackCache();
         profileCache = new ConcurrentHashMap<>();
         scheduledWriteTasks = new ConcurrentHashMap<>();
     }
 
     public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
-        checkDestroy();
         this.dataAdapter = dataAdapter;
         readExecutor = Executors.newFixedThreadPool(maxReadThread);
         writeExecutor = Executors.newFixedThreadPool(maxWriteThread);
@@ -85,9 +70,7 @@ public class PlayerProfileDataController {
         var bNum = result.get(0).getInt(FieldKey.BACKPACK_NUMBER);
 
         var researches = new HashSet<Research>();
-        getUnlockedResearchKeys(uuid).forEach(rKey -> {
-            Research.getResearch(rKey).ifPresent(researches::add);
-        });
+        getUnlockedResearchKeys(uuid).forEach(rKey -> Research.getResearch(rKey).ifPresent(researches::add));
 
         re = new PlayerProfile(p, bNum, researches);
         profileCache.put(uuid, re);
@@ -308,10 +291,11 @@ public class PlayerProfileDataController {
         return re;
     }
 
-    public void saveBackpackSize(PlayerBackpack bp) {
+    public void saveBackpackInfo(PlayerBackpack bp) {
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);
         key.addCondition(FieldKey.BACKPACK_ID, bp.getUniqueId().toString());
         key.addField(FieldKey.BACKPACK_SIZE);
+        key.addField(FieldKey.BACKPACK_NAME);
         scheduleWriteTask(key, getRecordSet(bp));
     }
 
@@ -359,6 +343,7 @@ public class PlayerProfileDataController {
         re.put(FieldKey.BACKPACK_ID, bp.getUniqueId().toString());
         re.put(FieldKey.BACKPACK_NUMBER, bp.getId() + "");
         re.put(FieldKey.BACKPACK_SIZE, bp.getSize() + "");
+        re.put(FieldKey.BACKPACK_NAME, bp.getName());
         return re;
     }
 

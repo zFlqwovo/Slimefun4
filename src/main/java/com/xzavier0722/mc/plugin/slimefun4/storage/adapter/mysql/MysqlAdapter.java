@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_BACKPACK_ID;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_BACKPACK_NAME;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_BACKPACK_NUM;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_BACKPACK_SIZE;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.SqlConstants.FIELD_INVENTORY_ITEM;
@@ -55,6 +56,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
         fieldMap.put(FieldKey.RESEARCH_ID, FIELD_RESEARCH_KEY);
         fieldMap.put(FieldKey.BACKPACK_ID, FIELD_BACKPACK_ID);
         fieldMap.put(FieldKey.BACKPACK_NUMBER, FIELD_BACKPACK_NUM);
+        fieldMap.put(FieldKey.BACKPACK_NAME, FIELD_BACKPACK_NAME);
         fieldMap.put(FieldKey.BACKPACK_SIZE, FIELD_BACKPACK_SIZE);
         fieldMap.put(FieldKey.INVENTORY_SLOT, FIELD_INVENTORY_SLOT);
         fieldMap.put(FieldKey.INVENTORY_ITEM, FIELD_INVENTORY_ITEM);
@@ -157,6 +159,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + FIELD_BACKPACK_ID + " CHAR(64) PRIMARY KEY NOT NULL, "
                 + FIELD_PLAYER_UUID + " CHAR(64) NOT NULL, "
                 + FIELD_BACKPACK_NUM + " INT UNSIGNED NOT NULL, "
+                + FIELD_BACKPACK_NAME + " CHAR(64) NULL, "
                 + FIELD_BACKPACK_SIZE + " TINYINT UNSIGNED NOT NULL, "
                 + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
                 + "REFERENCES " + profileTable + "(" + FIELD_PLAYER_UUID + ") "

@@ -1,6 +1,5 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
@@ -81,7 +80,7 @@ public class BackpackListener implements Listener {
             return;
         }
 
-        PlayerProfileDataController.getInstance().saveBackpackInventory(bp, slots);
+        Slimefun.getRegistry().getProfileDataController().saveBackpackInventory(bp, slots);
     }
 
     @EventHandler
@@ -183,7 +182,7 @@ public class BackpackListener implements Listener {
                         p,
                         item,
                         line,
-                        PlayerProfileDataController.getInstance().createBackpack(p, profile.nextBackpackNum(), size).getId()
+                        Slimefun.getRegistry().getProfileDataController().createBackpack(p, profile.nextBackpackNum(), size).getId()
                 );
                 break;
             }

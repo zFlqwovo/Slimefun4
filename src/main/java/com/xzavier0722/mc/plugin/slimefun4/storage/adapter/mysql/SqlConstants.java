@@ -13,6 +13,7 @@ public interface SqlConstants {
 
     String FIELD_BACKPACK_ID = "b_id";
     String FIELD_BACKPACK_SIZE = "b_size";
+    String FIELD_BACKPACK_NAME = "b_name";
     String FIELD_BACKPACK_NUM = "b_num";
 
     String FIELD_INVENTORY_SLOT = "i_slot";

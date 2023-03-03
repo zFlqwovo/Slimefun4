@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-class PlayerBackpackCache {
+class BackpackCache {
     private final Map<String, Map<Integer, PlayerBackpack>> numCache;
     private final Map<String, PlayerBackpack> uuidCache;
 
-    PlayerBackpackCache() {
+    BackpackCache() {
         numCache = new ConcurrentHashMap<>();
         uuidCache = new ConcurrentHashMap<>();
     }

@@ -14,6 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ControllerHolder;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.StorageType;
 import org.apache.commons.lang.Validate;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Server;
@@ -392,6 +395,15 @@ public final class SlimefunRegistry {
     @Nonnull
     public NamespacedKey getGuideDataKey() {
         return guideKey;
+    }
+
+    public StorageType getStorageType() {
+        // TODO: impl config
+        return StorageType.MYSQL;
+    }
+
+    public PlayerProfileDataController getProfileDataController() {
+        return ControllerHolder.getController(PlayerProfileDataController.class, getStorageType());
     }
 
 }

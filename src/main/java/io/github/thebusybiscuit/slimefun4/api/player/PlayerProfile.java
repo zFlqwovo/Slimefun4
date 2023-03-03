@@ -3,7 +3,6 @@ package io.github.thebusybiscuit.slimefun4.api.player;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
 import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.events.AsyncProfileLoadEvent;
@@ -156,7 +155,7 @@ public class PlayerProfile {
         } else {
             researches.remove(research);
         }
-        PlayerProfileDataController.getInstance().setResearch(owner.getUniqueId().toString(), research.getKey(), unlock);
+        Slimefun.getRegistry().getProfileDataController().setResearch(owner.getUniqueId().toString(), research.getKey(), unlock);
     }
 
     /**
@@ -270,7 +269,7 @@ public class PlayerProfile {
 
     public int nextBackpackNum() {
         backpackNum++;
-        PlayerProfileDataController.getInstance().saveProfileBackpackCount(this);
+        Slimefun.getRegistry().getProfileDataController().saveProfileBackpackCount(this);
         return backpackNum;
     }
 
@@ -347,7 +346,7 @@ public class PlayerProfile {
             return true;
         }
 
-        PlayerProfileDataController.getInstance().getProfileAsync(p, new IAsyncReadCallback<>() {
+        Slimefun.getRegistry().getProfileDataController().getProfileAsync(p, new IAsyncReadCallback<>() {
             @Override
             public void onResult(PlayerProfile result) {
                 AsyncProfileLoadEvent event = new AsyncProfileLoadEvent(result);
@@ -375,7 +374,7 @@ public class PlayerProfile {
 
         if (!Slimefun.getRegistry().getPlayerProfiles().containsKey(p.getUniqueId())) {
             // Should probably prevent multiple requests for the same profile in the future
-            PlayerProfileDataController.getInstance().getProfileAsync(
+            Slimefun.getRegistry().getProfileDataController().getProfileAsync(
                     p,
                     new IAsyncReadCallback<>() {
                         @Override

@@ -1,7 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.api.player;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
 import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.common.CommonPatterns;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -18,7 +17,6 @@ import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.io.File;
 import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -39,6 +37,7 @@ public class PlayerBackpack {
     private final OfflinePlayer owner;
     private final UUID uuid;
     private final int id;
+    private String name;
     private Inventory inventory;
     private int size;
 
@@ -63,7 +62,7 @@ public class PlayerBackpack {
 
         if (id.isPresent()) {
             int number = id.getAsInt();
-            PlayerProfileDataController.getInstance().getBackpackAsync(
+            Slimefun.getRegistry().getProfileDataController().getBackpackAsync(
                     Bukkit.getOfflinePlayer(UUID.fromString(uuid)),
                     number,
                     new IAsyncReadCallback<>() {
@@ -83,12 +82,18 @@ public class PlayerBackpack {
 
     @ParametersAreNonnullByDefault
     public PlayerBackpack(OfflinePlayer owner, UUID uuid, int id, int size, @Nullable ItemStack[] contents) {
+        this(owner, uuid, "", id, size, contents);
+    }
+
+    @ParametersAreNonnullByDefault
+    public PlayerBackpack(OfflinePlayer owner, UUID uuid, String name, int id, int size, @Nullable ItemStack[] contents) {
         if (size < 9 || size > 54 || size % 9 != 0) {
             throw new IllegalArgumentException("Invalid size! Size must be one of: [9, 18, 27, 36, 45, 54]");
         }
 
         this.owner = owner;
         this.uuid = uuid;
+        this.name = name;
         this.id = id;
         this.size = size;
 
@@ -200,26 +205,21 @@ public class PlayerBackpack {
         for (int slot = 0; slot < this.inventory.getSize(); slot++) {
             inv.setItem(slot, this.inventory.getItem(slot));
         }
-        PlayerProfileDataController.getInstance().saveBackpackSize(this);
-    }
-
-    /**
-     * This method will save the contents of this backpack to a {@link File}.
-     */
-    public void save() {
-        // TODO: save inv to storage
-    }
-
-    /**
-     * This method marks the backpack dirty, it will then be queued for an autosave
-     * using {@link PlayerBackpack#save()}
-     */
-    public void markDirty() {
-        // TODO: remove this method
+        this.inventory = inv;
+        Slimefun.getRegistry().getProfileDataController().saveBackpackInfo(this);
     }
 
     public UUID getUniqueId() {
         return uuid;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+        Slimefun.getRegistry().getProfileDataController().saveBackpackInfo(this);
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

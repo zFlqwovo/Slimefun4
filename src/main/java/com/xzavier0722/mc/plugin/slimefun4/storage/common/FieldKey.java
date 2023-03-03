@@ -9,6 +9,7 @@ public enum FieldKey {
 
     BACKPACK_ID,
     BACKPACK_NUMBER(true),
+    BACKPACK_NAME,
     BACKPACK_SIZE(true),
 
     INVENTORY_SLOT(true),

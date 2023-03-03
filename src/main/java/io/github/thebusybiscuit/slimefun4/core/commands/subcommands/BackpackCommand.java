@@ -1,22 +1,20 @@
 package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
+import io.github.bakedlibs.dough.common.CommonPatterns;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
+import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
+import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.RestoredBackpack;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.bakedlibs.dough.common.CommonPatterns;
-import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
-import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
-import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.RestoredBackpack;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * This command that allows for backpack retrieval in the event they are lost.
@@ -64,7 +62,7 @@ class BackpackCommand extends SubCommand {
 
                 int id = Integer.parseInt(args[2]);
 
-                PlayerProfileDataController.getInstance().getBackpackAsync(player, id, new IAsyncReadCallback<PlayerBackpack>() {
+                Slimefun.getRegistry().getProfileDataController().getBackpackAsync(player, id, new IAsyncReadCallback<PlayerBackpack>() {
                     @Override
                     public boolean runOnMainThread() {
                         return true;
