@@ -271,7 +271,7 @@ public class PlayerProfileDataController {
         var re = new PlayerBackpack(p, UUID.randomUUID(), num, size, null);
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);
         key.addCondition(FieldKey.BACKPACK_ID, re.getUniqueId().toString());
-        scheduleWriteTask(new UUIDKey(DataScope.NONE, p.getUniqueId()), key, getRecordSet(re), true);
+        scheduleWriteTask(new UUIDKey(DataScope.NONE, re.getUniqueId()), key, getRecordSet(re), true);
         return re;
     }
 
@@ -379,7 +379,7 @@ public class PlayerProfileDataController {
                 }
             };
             queuedTask.queue(key, task);
-            scheduledWriteTasks.put(scopeKey, queuedTask);
+            scheduledWriteTasks.put(scopeToUse, queuedTask);
             writeExecutor.submit(queuedTask);
         } finally {
             lock.unlock(scopeKey);
