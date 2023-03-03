@@ -240,6 +240,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
             case PLAYER_RESEARCH -> researchTable;
             case BACKPACK_PROFILE -> backpackTable;
             case BACKPACK_INVENTORY -> inventoryTable;
+            case NONE -> throw new IllegalArgumentException("NONE cannot be a storage data scope!");
         };
     }
 

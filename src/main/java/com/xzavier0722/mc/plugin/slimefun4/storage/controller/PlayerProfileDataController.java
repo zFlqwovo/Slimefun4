@@ -6,7 +6,8 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-import com.xzavier0722.mc.plugin.slimefun4.storage.task.AsyncWriteTask;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
+import com.xzavier0722.mc.plugin.slimefun4.storage.task.QeuedAsyncWriteTask;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
@@ -30,7 +31,8 @@ import java.util.stream.Collectors;
 public class PlayerProfileDataController {
     private final BackpackCache backpackCache;
     private final Map<String, PlayerProfile> profileCache;
-    private final Map<RecordKey, AsyncWriteTask> scheduledWriteTasks;
+    private final Map<ScopeKey, QeuedAsyncWriteTask> scheduledWriteTasks;
+    private final ScopedLock lock;
     private volatile IDataSourceAdapter<?> dataAdapter;
     private ExecutorService readExecutor;
     private ExecutorService writeExecutor;
@@ -41,6 +43,7 @@ public class PlayerProfileDataController {
         backpackCache = new BackpackCache();
         profileCache = new ConcurrentHashMap<>();
         scheduledWriteTasks = new ConcurrentHashMap<>();
+        lock = new ScopedLock();
     }
 
     public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
@@ -223,7 +226,7 @@ public class PlayerProfileDataController {
 
         var key = new RecordKey(DataScope.PLAYER_PROFILE);
         key.addCondition(FieldKey.PLAYER_UUID, uuid);
-        scheduleWriteTask(key, getRecordSet(re));
+        scheduleWriteTask(new UUIDKey(DataScope.NONE, p.getUniqueId()), key, getRecordSet(re), true);
         return re;
     }
 
@@ -238,7 +241,7 @@ public class PlayerProfileDataController {
             var pendingTask = scheduledWriteTasks.size();
             while (pendingTask > 0) {
                 Slimefun.logger().log(Level.SEVERE, "数据保存中，请稍候... 剩余 " + pendingTask + " 个任务");
-                Thread.sleep(3000);
+                Thread.sleep(500);
                 pendingTask = scheduledWriteTasks.size();
             }
         } catch (InterruptedException e) {
@@ -260,7 +263,7 @@ public class PlayerProfileDataController {
             data.put(FieldKey.RESEARCH_ID, researchKey.toString());
             dataAdapter.setData(key, data);
         } else {
-            scheduleWriteTask(key);
+            scheduleWriteTask(new UUIDKey(DataScope.NONE, uuid), key, false);
         }
     }
 
@@ -268,7 +271,7 @@ public class PlayerProfileDataController {
         var re = new PlayerBackpack(p, UUID.randomUUID(), num, size, null);
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);
         key.addCondition(FieldKey.BACKPACK_ID, re.getUniqueId().toString());
-        scheduleWriteTask(key, getRecordSet(re));
+        scheduleWriteTask(new UUIDKey(DataScope.NONE, p.getUniqueId()), key, getRecordSet(re), true);
         return re;
     }
 
@@ -277,14 +280,15 @@ public class PlayerProfileDataController {
         key.addCondition(FieldKey.BACKPACK_ID, bp.getUniqueId().toString());
         key.addField(FieldKey.BACKPACK_SIZE);
         key.addField(FieldKey.BACKPACK_NAME);
-        scheduleWriteTask(key, getRecordSet(bp));
+        scheduleWriteTask(new UUIDKey(DataScope.NONE, bp.getUniqueId()), key, getRecordSet(bp), false);
     }
 
     public void saveProfileBackpackCount(PlayerProfile profile) {
         var key = new RecordKey(DataScope.PLAYER_PROFILE);
         key.addField(FieldKey.PLAYER_BACKPACK_NUM);
-        key.addCondition(FieldKey.PLAYER_UUID, profile.getUUID().toString());
-        scheduleWriteTask(key, getRecordSet(profile));
+        var uuid = profile.getUUID();
+        key.addCondition(FieldKey.PLAYER_UUID, uuid.toString());
+        scheduleWriteTask(new UUIDKey(DataScope.NONE, uuid), key, getRecordSet(profile), false);
     }
 
     public void saveBackpackInventory(PlayerBackpack bp, Set<Integer> slots) {
@@ -303,7 +307,7 @@ public class PlayerProfileDataController {
                 data.put(FieldKey.BACKPACK_ID, id);
                 data.put(FieldKey.INVENTORY_SLOT, slot + "");
                 data.put(FieldKey.INVENTORY_ITEM, is);
-                scheduleWriteTask(key, data);
+                scheduleWriteTask(new UUIDKey(DataScope.NONE, bp.getUniqueId()), key, data, false);
             }
         });
     }
@@ -337,38 +341,49 @@ public class PlayerProfileDataController {
     }
 
     public void scheduleWriteTask(RecordKey key) {
-        scheduleWriteTask(key, () -> dataAdapter.deleteData(key));
+        scheduleWriteTask(key, key, false);
     }
 
-    private void scheduleWriteTask(RecordKey key, RecordSet data) {
-        scheduleWriteTask(key, () -> dataAdapter.setData(key, data));
+    public void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, boolean forceScopeKey) {
+        scheduleWriteTask(scopeKey, key, () -> dataAdapter.deleteData(key), forceScopeKey);
     }
 
-    private void scheduleWriteTask(RecordKey key, Runnable task) {
-        var writeTask = new AsyncWriteTask() {
-            @Override
-            protected boolean execute() {
-                var lastScheduledTask = scheduledWriteTasks.get(key);
-                if (lastScheduledTask != null && lastScheduledTask != this) {
-                    return false;
+    private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, RecordSet data, boolean forceScopeKey) {
+        scheduleWriteTask(scopeKey, key, () -> dataAdapter.setData(key, data), forceScopeKey);
+    }
+
+    private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, Runnable task, boolean forceScopeKey) {
+        lock.lock(scopeKey);
+        try {
+            var queuedTask = scheduledWriteTasks.get(scopeKey);
+            if (queuedTask != null && queuedTask.queue(key, task)) {
+                return;
+            }
+
+            var scopeToUse = forceScopeKey ? scopeKey : key;
+            queuedTask = new QeuedAsyncWriteTask() {
+                @Override
+                protected void onSuccess() {
+                    lock.lock(scopeToUse);
+                    var last = scheduledWriteTasks.remove(scopeToUse);
+                    if (this != last) {
+                        scheduledWriteTasks.put(scopeToUse, last);
+                    }
+                    lock.unlock(scopeToUse);
                 }
-                task.run();
-                return true;
-            }
 
-            @Override
-            protected void onSuccess() {
-                scheduledWriteTasks.remove(key);
-            }
-
-            @Override
-            protected void onError(Throwable e) {
-                Slimefun.logger().log(Level.SEVERE, "Exception thrown while executing write task: ");
-                e.printStackTrace();
-            }
-        };
-        scheduledWriteTasks.put(key, writeTask);
-        writeExecutor.submit(writeTask);
+                @Override
+                protected void onError(Throwable e) {
+                    Slimefun.logger().log(Level.SEVERE, "Exception thrown while executing write task: ");
+                    e.printStackTrace();
+                }
+            };
+            queuedTask.queue(key, task);
+            scheduledWriteTasks.put(scopeKey, queuedTask);
+            writeExecutor.submit(queuedTask);
+        } finally {
+            lock.unlock(scopeKey);
+        }
     }
 
     private <T> void invokeCallback(IAsyncReadCallback<T> callback, T result) {

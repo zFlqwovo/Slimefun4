@@ -10,8 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class RecordKey {
-    private final DataScope scope;
+public class RecordKey extends ScopeKey {
     private final Set<FieldKey> fields;
     private final List<Pair<FieldKey, String>> conditions;
 
@@ -27,14 +26,9 @@ public class RecordKey {
 
     @ParametersAreNonnullByDefault
     public RecordKey(DataScope scope, Set<FieldKey> fields, List<Pair<FieldKey, String>> conditions) {
-        this.scope = scope;
+        super(scope);
         this.fields = fields.isEmpty() ? fields : new HashSet<>(fields);
         this.conditions = conditions.isEmpty() ? conditions : new LinkedList<>(conditions);
-    }
-
-    @Nonnull
-    public DataScope getScope() {
-        return scope;
     }
 
     @ParametersAreNonnullByDefault
@@ -57,17 +51,13 @@ public class RecordKey {
         return Collections.unmodifiableList(conditions);
     }
 
-    public String getKeyStr() {
+    @Override
+    protected String getKeyStr() {
         var re = new StringBuilder();
         re.append(scope).append("/");
         conditions.forEach(c -> re.append(c.getFirstValue()).append("=").append(c.getSecondValue()).append("/"));
         fields.forEach(f -> re.append(f).append("/"));
         return re.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        return getKeyStr().hashCode();
     }
 
     @Override
