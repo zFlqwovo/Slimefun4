@@ -79,21 +79,7 @@ public class PlayerProfileDataController {
 
     public void getProfileAsync(OfflinePlayer p, IAsyncReadCallback<PlayerProfile> callback) {
         checkDestroy();
-        readExecutor.submit(() -> {
-            var re = getProfile(p);
-            Runnable cb;
-            if (re == null) {
-                cb = callback::onResultNotFound;
-            } else {
-                cb = () -> callback.onResult(re);
-            }
-
-            if (callback.runOnMainThread()) {
-                Slimefun.runSync(cb);
-            } else {
-                callbackExecutor.submit(cb);
-            }
-        });
+        readExecutor.submit(() -> invokeCallback(callback, getProfile(p)));
     }
 
     public PlayerBackpack getBackpack(OfflinePlayer owner, int num) {
@@ -193,40 +179,33 @@ public class PlayerProfileDataController {
 
     public void getBackpackAsync(OfflinePlayer owner, int num, IAsyncReadCallback<PlayerBackpack> callback) {
         checkDestroy();
-        readExecutor.submit(() -> {
-            var re = getBackpack(owner, num);
-            Runnable cb;
-            if (re == null) {
-                cb = callback::onResultNotFound;
-            } else {
-                cb = () -> callback.onResult(re);
-            }
-
-            if (callback.runOnMainThread()) {
-                Slimefun.runSync(cb);
-            } else {
-                callbackExecutor.submit(cb);
-            }
-        });
+        readExecutor.submit(() -> invokeCallback(callback, getBackpack(owner, num)));
     }
 
     public void getBackpackAsync(String uuid, IAsyncReadCallback<PlayerBackpack> callback) {
         checkDestroy();
-        readExecutor.submit(() -> {
-            var re = getBackpack(uuid);
-            Runnable cb;
-            if (re == null) {
-                cb = callback::onResultNotFound;
-            } else {
-                cb = () -> callback.onResult(re);
-            }
+        readExecutor.submit(() -> invokeCallback(callback, getBackpack(uuid)));
+    }
 
-            if (callback.runOnMainThread()) {
-                Slimefun.runSync(cb);
-            } else {
-                callbackExecutor.submit(cb);
-            }
-        });
+    public Set<PlayerBackpack> getBackpacks(String pUuid) {
+        checkDestroy();
+        var key = new RecordKey(DataScope.BACKPACK_PROFILE);
+        key.addField(FieldKey.BACKPACK_ID);
+        key.addCondition(FieldKey.PLAYER_UUID, pUuid);
+
+        var result = dataAdapter.getData(key);
+        if (result.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        var re = new HashSet<PlayerBackpack>();
+        result.forEach(bUuid -> re.add(getBackpack(bUuid.get(FieldKey.BACKPACK_ID))));
+        return re;
+    }
+
+    public void getBackpacksAsync(String pUuid, IAsyncReadCallback<Set<PlayerBackpack>> callback) {
+        checkDestroy();
+        readExecutor.submit(() -> invokeCallback(callback, getBackpacks(pUuid)));
     }
 
     private PlayerProfile createProfile(OfflinePlayer p) {
@@ -388,5 +367,20 @@ public class PlayerProfileDataController {
         };
         scheduledWriteTasks.put(key, writeTask);
         writeExecutor.submit(writeTask);
+    }
+
+    private <T> void invokeCallback(IAsyncReadCallback<T> callback, T result) {
+        Runnable cb;
+        if (result == null) {
+            cb = callback::onResultNotFound;
+        } else {
+            cb = () -> callback.onResult(result);
+        }
+
+        if (callback.runOnMainThread()) {
+            Slimefun.runSync(cb);
+        } else {
+            callbackExecutor.submit(cb);
+        }
     }
 }
