@@ -1,33 +1,9 @@
 package io.github.thebusybiscuit.slimefun4.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
-
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ControllerHolder;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.StorageType;
-import org.apache.commons.lang.Validate;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Server;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Piglin;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import io.github.bakedlibs.dough.collections.KeyMap;
-import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.geo.GEOResource;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemHandler;
@@ -41,11 +17,29 @@ import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlock;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.guide.CheatSheetSlimefunGuide;
 import io.github.thebusybiscuit.slimefun4.implementation.guide.SurvivalSlimefunGuide;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
 import me.mrCookieSlime.Slimefun.api.BlockInfoConfig;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
+import org.apache.commons.lang.Validate;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Piglin;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * This class houses a lot of instances of {@link Map} and {@link List} that hold
@@ -67,17 +61,6 @@ public final class SlimefunRegistry {
     private final List<String> researchRanks = new ArrayList<>();
     private final Set<UUID> researchingPlayers = Collections.synchronizedSet(new HashSet<>());
 
-    // TODO: Move this all into a proper "config cache" class
-    private boolean backwardsCompatibility;
-    private boolean automaticallyLoadItems;
-    private boolean enableResearches;
-    private boolean freeCreativeResearches;
-    private boolean researchFireworks;
-    private boolean disableLearningAnimation;
-    private boolean logDuplicateBlockEntries;
-    private boolean talismanActionBarMessages;
-    private boolean useMoneyUnlock;
-
     private final Set<String> tickers = new HashSet<>();
     private final Set<SlimefunItem> radioactive = new HashSet<>();
     private final Set<ItemStack> barterDrops = new HashSet<>();
@@ -98,76 +81,18 @@ public final class SlimefunRegistry {
     private final Map<String, UniversalBlockMenu> universalInventories = new HashMap<>();
     private final Map<Class<? extends ItemHandler>, Set<ItemHandler>> globalItemHandlers = new HashMap<>();
 
-    public void load(@Nonnull Slimefun plugin, @Nonnull Config cfg) {
+    public void load(@Nonnull Slimefun plugin) {
         Validate.notNull(plugin, "The Plugin cannot be null!");
-        Validate.notNull(cfg, "The Config cannot be null!");
 
         soulboundKey = new NamespacedKey(plugin, "soulbound");
         itemChargeKey = new NamespacedKey(plugin, "item_charge");
         guideKey = new NamespacedKey(plugin, "slimefun_guide_mode");
 
-        boolean showVanillaRecipes = cfg.getBoolean("guide.show-vanilla-recipes");
-        boolean showHiddenItemGroupsInSearch = cfg.getBoolean("guide.show-hidden-item-groups-in-search");
-        guides.put(SlimefunGuideMode.SURVIVAL_MODE, new SurvivalSlimefunGuide(showVanillaRecipes, showHiddenItemGroupsInSearch));
+        guides.put(SlimefunGuideMode.SURVIVAL_MODE, new SurvivalSlimefunGuide());
         guides.put(SlimefunGuideMode.CHEAT_MODE, new CheatSheetSlimefunGuide());
 
+        var cfg = Slimefun.getConfigManager().getPluginConfig();
         researchRanks.addAll(cfg.getStringList("research-ranks"));
-
-        backwardsCompatibility = cfg.getBoolean("options.backwards-compatibility");
-        freeCreativeResearches = cfg.getBoolean("researches.free-in-creative-mode");
-        researchFireworks = cfg.getBoolean("researches.enable-fireworks");
-        disableLearningAnimation = cfg.getBoolean("researches.disable-learning-animation");
-        logDuplicateBlockEntries = cfg.getBoolean("options.log-duplicate-block-entries");
-        talismanActionBarMessages = cfg.getBoolean("talismans.use-actionbar");
-        useMoneyUnlock = cfg.getBoolean("researches.use-money-unlock");
-    }
-
-    /**
-     * This returns whether auto-loading is enabled.
-     * Auto-Loading will automatically call {@link SlimefunItem#load()} when the item is registered.
-     * Normally that method is called after the {@link Server} finished starting up.
-     * But in the unusual scenario if a {@link SlimefunItem} is registered after that, this is gonna cover that.
-     * 
-     * @return Whether auto-loading is enabled
-     */
-    public boolean isAutoLoadingEnabled() {
-        return automaticallyLoadItems;
-    }
-
-    /**
-     * This method returns whether backwards-compatibility is enabled.
-     * Backwards compatibility allows Slimefun to recognize items from older versions but comes
-     * at a huge performance cost.
-     * 
-     * @return Whether backwards compatibility is enabled
-     */
-    public boolean isBackwardsCompatible() {
-        return backwardsCompatibility;
-    }
-
-    /**
-     * This method sets the status of backwards compatibility.
-     * Backwards compatibility allows Slimefun to recognize items from older versions but comes
-     * at a huge performance cost.
-     * 
-     * @param compatible
-     *            Whether backwards compatibility should be enabled
-     */
-    public void setBackwardsCompatible(boolean compatible) {
-        backwardsCompatibility = compatible;
-    }
-
-    /**
-     * This method will make any {@link SlimefunItem} which is registered automatically
-     * call {@link SlimefunItem#load()}.
-     * Normally this method call is delayed but when the {@link Server} is already running,
-     * the method can be called instantaneously.
-     * 
-     * @param mode
-     *            Whether auto-loading should be enabled
-     */
-    public void setAutoLoadingMode(boolean mode) {
-        automaticallyLoadItems = mode;
     }
 
     /**
@@ -224,35 +149,6 @@ public final class SlimefunRegistry {
     @Nonnull
     public List<String> getResearchRanks() {
         return researchRanks;
-    }
-
-    public void setResearchingEnabled(boolean enabled) {
-        enableResearches = enabled;
-    }
-
-    public boolean isResearchingEnabled() {
-        return enableResearches;
-    }
-
-    public void setFreeCreativeResearchingEnabled(boolean enabled) {
-        freeCreativeResearches = enabled;
-    }
-
-    public boolean isFreeCreativeResearchingEnabled() {
-        return freeCreativeResearches;
-    }
-
-    public boolean isResearchFireworkEnabled() {
-        return researchFireworks;
-    }
-
-    /**
-     * Returns whether the research learning animations is disabled
-     *
-     * @return Whether the research learning animations is disabled
-     */
-    public boolean isLearningAnimationDisabled() {
-        return disableLearningAnimation;
     }
 
     /**
@@ -368,18 +264,6 @@ public final class SlimefunRegistry {
     @Nonnull
     public KeyMap<GEOResource> getGEOResources() {
         return geoResources;
-    }
-
-    public boolean logDuplicateBlockEntries() {
-        return logDuplicateBlockEntries;
-    }
-
-    public boolean useActionbarForTalismans() {
-        return talismanActionBarMessages;
-    }
-
-    public boolean isUseMoneyUnlock() {
-        return useMoneyUnlock;
     }
 
     @Nonnull

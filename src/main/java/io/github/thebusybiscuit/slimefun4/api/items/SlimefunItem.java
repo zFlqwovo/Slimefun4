@@ -1,28 +1,5 @@
 package io.github.thebusybiscuit.slimefun4.api.items;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import org.apache.commons.lang.Validate;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.permissions.Permission;
-
 import io.github.bakedlibs.dough.collections.OptionalMap;
 import io.github.bakedlibs.dough.items.ItemUtils;
 import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
@@ -50,8 +27,27 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines.enchanting.AutoEnchanter;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
-
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
+import org.apache.commons.lang.Validate;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.Permission;
 
 /**
  * A {@link SlimefunItem} is a custom item registered by a {@link SlimefunAddon}.
@@ -490,7 +486,7 @@ public class SlimefunItem implements Placeable {
             postRegister();
 
             // handle runtime-registrations / auto-loading
-            if (Slimefun.getRegistry().isAutoLoadingEnabled() && state == ItemState.ENABLED) {
+            if (Slimefun.getConfigManager().isAutoLoadingEnabled() && state == ItemState.ENABLED) {
                 info("Item was registered during runtime.");
                 load();
             }
@@ -500,9 +496,19 @@ public class SlimefunItem implements Placeable {
     }
 
     /**
+     * This method registers this {@link SlimefunItem}.
+     * Always call this method after your {@link SlimefunItem} has been initialized.
+     *
+     * @param addon The {@link SlimefunAddon} that this {@link SlimefunItem} belongs to.
+     */
+    public void unregister(@Nonnull SlimefunAddon addon) {
+
+    }
+
+    /**
      * This method is called when this {@link SlimefunItem} is currently being registered
      * and we are certain that it will be enabled.
-     * 
+     *
      * <strong>This method is for internal purposes, like {@link ItemGroup} registration only</strong>
      */
     private final void onEnable() {
@@ -518,9 +524,9 @@ public class SlimefunItem implements Placeable {
         if (itemStackTemplate.getAmount() != 1) {
             // @formatter:off
             warn("This item has an illegal stack size: " + itemStackTemplate.getAmount()
-                + ". An Item size of 1 is recommended. Please inform the author(s) of " + addon.getName()
-                + " to fix this. Crafting Results with amounts of higher should be handled"
-                + " via the recipeOutput parameter!");
+                    + ". An Item size of 1 is recommended. Please inform the author(s) of " + addon.getName()
+                    + " to fix this. Crafting Results with amounts of higher should be handled"
+                    + " via the recipeOutput parameter!");
             // @formatter:on
         }
 
@@ -565,11 +571,11 @@ public class SlimefunItem implements Placeable {
     /**
      * This method returns whether the original {@link SlimefunItemStack} of this
      * {@link SlimefunItem} is immutable.
-     * 
+     *
      * If <code>true</code> is returned, then any changes to the original {@link SlimefunItemStack}
      * will be rejected with a {@link WrongItemStackException}.
      * This ensures integrity so developers don't accidentally damage the wrong {@link ItemStack}.
-     * 
+     *
      * @return Whether the original {@link SlimefunItemStack} is immutable.
      */
     protected boolean isItemStackImmutable() {
@@ -578,7 +584,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This method checks if the dependencies have been set up correctly.
-     * 
+     *
      * @param addon
      *            The {@link SlimefunAddon} trying to register this {@link SlimefunItem}
      */
@@ -602,9 +608,9 @@ public class SlimefunItem implements Placeable {
     /**
      * This method checks recursively for all {@link Class} parents to look for any {@link Deprecated}
      * elements.
-     * 
+     *
      * If a {@link Deprecated} element was found, a warning message will be printed.
-     * 
+     *
      * @param c
      *            The {@link Class} from which to start this operation.
      */
@@ -645,7 +651,7 @@ public class SlimefunItem implements Placeable {
      * This method will set the {@link Research} of this {@link SlimefunItem}.
      * You don't have to call this method if your {@link SlimefunItem} was linked to your {@link Research}
      * using {@link Research#addItems(SlimefunItem...)}
-     * 
+     *
      * @param research
      *            The new {@link Research} for this {@link SlimefunItem}, or null
      */
@@ -688,7 +694,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This sets the {@link ItemGroup} in which this {@link SlimefunItem} will be displayed.
-     * 
+     *
      * @param itemGroup
      *            The new {@link ItemGroup}
      */
@@ -704,7 +710,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This method will set the result of crafting this {@link SlimefunItem}.
      * If null is passed, then it will use the default item as the recipe result.
-     * 
+     *
      * @param output
      *            The {@link ItemStack} that will be the result of crafting this {@link SlimefunItem}
      */
@@ -715,11 +721,11 @@ public class SlimefunItem implements Placeable {
     /**
      * This method returns whether or not this {@link SlimefunItem} is allowed to
      * be used in a Crafting Table.
-     * 
+     *
      * Items of type {@link VanillaItem} may be used in workbenches for example.
-     * 
+     *
      * @see #setUseableInWorkbench(boolean)
-     * 
+     *
      * @return Whether this {@link SlimefunItem} may be used in a Workbench.
      */
     public boolean isUseableInWorkbench() {
@@ -729,10 +735,10 @@ public class SlimefunItem implements Placeable {
     /**
      * This sets whether or not this {@link SlimefunItem} is allowed to be
      * used in a normal Crafting Table.
-     * 
+     *
      * @param useable
      *            Whether this {@link SlimefunItem} should be useable in a workbench
-     * 
+     *
      * @return This instance of {@link SlimefunItem}
      */
     public @Nonnull SlimefunItem setUseableInWorkbench(boolean useable) {
@@ -744,10 +750,10 @@ public class SlimefunItem implements Placeable {
     /**
      * This method checks whether the provided {@link ItemStack} represents
      * this {@link SlimefunItem}.
-     * 
+     *
      * @param item
      *            The {@link ItemStack} to compare
-     * 
+     *
      * @return Whether the given {@link ItemStack} represents this {@link SlimefunItem}
      */
     public boolean isItem(@Nullable ItemStack item) {
@@ -769,7 +775,7 @@ public class SlimefunItem implements Placeable {
         }
 
         // Backwards compatibility
-        if (Slimefun.getRegistry().isBackwardsCompatible()) {
+        if (Slimefun.getConfigManager().isBackwardsCompatible()) {
             boolean loreInsensitive = this instanceof Rechargeable || this instanceof SlimefunBackpack || id.equals("BROKEN_SPAWNER") || id.equals("REINFORCED_SPAWNER");
             return SlimefunUtils.isItemSimilar(item, this.itemStackTemplate, !loreInsensitive);
         } else {
@@ -791,7 +797,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This method will add any given {@link ItemHandler} to this {@link SlimefunItem}.
      * Note that this will not work after the {@link SlimefunItem} was registered.
-     * 
+     *
      * @param handlers
      *            Any {@link ItemHandler} that should be added to this {@link SlimefunItem}
      */
@@ -819,7 +825,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This method will add any given {@link ItemSetting} to this {@link SlimefunItem}.
      * Note that this will not work after the {@link SlimefunItem} was registered.
-     * 
+     *
      * @param settings
      *            Any {@link ItemSetting} that should be added to this {@link SlimefunItem}
      */
@@ -875,7 +881,7 @@ public class SlimefunItem implements Placeable {
      *
      * 返回非官方中文Wiki地址
      * 下游应使用 {@link SlimefunItem#addWikiPage(String)} 来添加Wiki页面
-     * 
+     *
      * @param page
      *            The associated wiki page
      */
@@ -907,9 +913,9 @@ public class SlimefunItem implements Placeable {
     /**
      * This method returns the wiki page that has been assigned to this item.
      * It will return null, if no wiki page was found.
-     * 
+     *
      * @see SlimefunItem#addWikiPage(String)
-     * 
+     *
      * @return This item's wiki page
      */
     public @Nonnull Optional<String> getWikipage() {
@@ -919,7 +925,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This method will return this Item's Name (The name that is displayed when
      * hovering over this {@link ItemStack} in an {@link Inventory}).
-     * 
+     *
      * @return This item's name in {@link ItemStack} form
      */
     public final @Nonnull String getItemName() {
@@ -936,7 +942,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This method returns a Set of item handlers associated with this Item.
-     * 
+     *
      * @return The Set of item handlers
      */
     public @Nonnull Collection<ItemHandler> getHandlers() {
@@ -946,14 +952,14 @@ public class SlimefunItem implements Placeable {
     /**
      * This method calls every {@link ItemHandler} of the given {@link Class}
      * and performs the action as specified via the {@link Consumer}.
-     * 
+     *
      * @param c
      *            The {@link Class} of the {@link ItemHandler} to call.
      * @param callable
      *            A {@link Consumer} that is called for any found {@link ItemHandler}.
      * @param <T>
      *            The type of {@link ItemHandler} to call.
-     * 
+     *
      * @return Whether or not an {@link ItemHandler} was found.
      */
     @ParametersAreNonnullByDefault
@@ -975,7 +981,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This returns whether or not we are scheduling a ticking task for this block.
-     * 
+     *
      * @return Whether this {@link SlimefunItem} is a ticking block
      */
     public boolean isTicking() {
@@ -1005,7 +1011,7 @@ public class SlimefunItem implements Placeable {
      * This will send an info message to the console and signal that this message came
      * from this {@link SlimefunItem}, the message will be sent using the {@link Logger}
      * of the {@link SlimefunAddon} which registered this {@link SlimefunItem}.
-     * 
+     *
      * @param message
      *            The message to send
      */
@@ -1021,7 +1027,7 @@ public class SlimefunItem implements Placeable {
      * This will send a warning to the console and signal that this warning came from
      * this {@link SlimefunItem}, the warning will be sent using the {@link Logger}
      * of the {@link SlimefunAddon} which registered this {@link SlimefunItem}.
-     * 
+     *
      * @param message
      *            The message to send
      */
@@ -1041,7 +1047,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This will throw a {@link Throwable} to the console and signal that
      * this was caused by this {@link SlimefunItem}.
-     * 
+     *
      * @param message
      *            The message to display alongside this Stacktrace
      * @param throwable
@@ -1068,7 +1074,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This method informs the given {@link Player} that this {@link SlimefunItem}
      * will be removed soon.
-     * 
+     *
      * @param player
      *            The {@link Player} to inform.
      */
@@ -1081,22 +1087,22 @@ public class SlimefunItem implements Placeable {
     /**
      * This method checks if the given {@link Player} is able to use this {@link SlimefunItem}.
      * A {@link Player} can use it if the following conditions apply:
-     * 
+     *
      * <ul>
      * <li>The {@link SlimefunItem} is not disabled
      * <li>The {@link SlimefunItem} was not disabled for that {@link Player}'s {@link World}.
      * <li>The {@link Player} has the required {@link Permission} (if present)
      * <li>The {@link Player} has unlocked the required {@link Research} (if present)
      * </ul>
-     * 
+     *
      * If any of these conditions evaluate to <code>false</code>, then an optional message will be
      * sent to the {@link Player}.
-     * 
+     *
      * @param p
      *            The {@link Player} to check
      * @param sendMessage
      *            Whether to send that {@link Player} a message response.
-     * 
+     *
      * @return Whether this {@link Player} is able to use this {@link SlimefunItem}.
      */
     public boolean canUse(@Nonnull Player p, boolean sendMessage) {
@@ -1208,7 +1214,7 @@ public class SlimefunItem implements Placeable {
         }
 
         // Backwards compatibility
-        if (Slimefun.getRegistry().isBackwardsCompatible()) {
+        if (Slimefun.getConfigManager().isBackwardsCompatible()) {
             // This wrapper improves the heavy ItemStack#getItemMeta() call by caching it.
             ItemStackWrapper wrapper = ItemStackWrapper.wrap(item);
 

@@ -1,10 +1,9 @@
 package ren.natsuyuk1.slimefun4;
 
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import net.milkbowl.vault.economy.Economy;
-
-import javax.annotation.Nonnull;
 import java.util.logging.Level;
+import javax.annotation.Nonnull;
+import net.milkbowl.vault.economy.Economy;
 
 /**
  * @author StarWishsama
@@ -35,6 +34,6 @@ public class VaultHelper {
     }
 
     public static boolean isUsable() {
-        return econ != null && Slimefun.getRegistry().isUseMoneyUnlock();
+        return econ != null && Slimefun.getConfigManager().isUseMoneyUnlock();
     }
 }

@@ -25,6 +25,15 @@ import io.github.thebusybiscuit.slimefun4.implementation.tasks.AsyncRecipeChoice
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.SlimefunGuideItem;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.logging.Level;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
 import org.apache.commons.lang.Validate;
@@ -40,16 +49,6 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.RecipeChoice.MaterialChoice;
 import ren.natsuyuk1.slimefun4.VaultHelper;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.logging.Level;
 
 /**
  * The {@link SurvivalSlimefunGuide} is the standard version of our {@link SlimefunGuide}.
@@ -69,12 +68,8 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
 
     private final int[] recipeSlots = { 3, 4, 5, 12, 13, 14, 21, 22, 23 };
     private final ItemStack item;
-    private final boolean showVanillaRecipes;
-    private final boolean showHiddenItemGroupsInSearch;
 
-    public SurvivalSlimefunGuide(boolean showVanillaRecipes, boolean showHiddenItemGroupsInSearch) {
-        this.showVanillaRecipes = showVanillaRecipes;
-        this.showHiddenItemGroupsInSearch = showHiddenItemGroupsInSearch;
+    public SurvivalSlimefunGuide() {
         item = new SlimefunGuideItem(this, "&aSlimefun 指南 &7(箱子界面)");
     }
 
@@ -401,7 +396,7 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
 
     @ParametersAreNonnullByDefault
     private boolean isItemGroupAccessible(Player p, SlimefunItem slimefunItem) {
-        return showHiddenItemGroupsInSearch || slimefunItem.getItemGroup().isAccessible(p);
+        return Slimefun.getConfigManager().isShowHiddenItemGroupsInSearch() || slimefunItem.getItemGroup().isAccessible(p);
     }
 
     @ParametersAreNonnullByDefault
@@ -426,7 +421,7 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
             return;
         }
 
-        if (!showVanillaRecipes) {
+        if (!Slimefun.getConfigManager().isShowVanillaRecipes()) {
             return;
         }
 

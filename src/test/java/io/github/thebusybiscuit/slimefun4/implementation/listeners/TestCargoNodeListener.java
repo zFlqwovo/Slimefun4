@@ -1,5 +1,15 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
+import be.seeseemelk.mockbukkit.MockBukkit;
+import be.seeseemelk.mockbukkit.ServerMock;
+import io.github.bakedlibs.dough.items.CustomItemStack;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.items.cargo.CargoInputNode;
+import io.github.thebusybiscuit.slimefun4.test.TestUtilities;
+import io.github.thebusybiscuit.slimefun4.test.providers.SlimefunItemsSource;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -14,18 +24,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-
-import io.github.bakedlibs.dough.items.CustomItemStack;
-import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
-import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.items.cargo.CargoInputNode;
-import io.github.thebusybiscuit.slimefun4.test.TestUtilities;
-import io.github.thebusybiscuit.slimefun4.test.providers.SlimefunItemsSource;
-
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
 
 class TestCargoNodeListener {
 
@@ -100,7 +98,7 @@ class TestCargoNodeListener {
     @Test
     @DisplayName("Test non-Cargo node not being affected")
     void testNonCargoNode() {
-        Slimefun.getRegistry().setBackwardsCompatible(true);
+        Slimefun.getConfigManager().setBackwardsCompatible(true);
         Player player = server.addPlayer();
         Location l = new Location(player.getWorld(), 190, 50, 400);
         Block b = l.getBlock();
@@ -111,7 +109,7 @@ class TestCargoNodeListener {
         BlockPlaceEvent event = new BlockPlaceEvent(b, b.getState(), against, item, player, true, EquipmentSlot.HAND);
         listener.onCargoNodePlace(event);
         Assertions.assertFalse(event.isCancelled());
-        Slimefun.getRegistry().setBackwardsCompatible(false);
+        Slimefun.getConfigManager().setBackwardsCompatible(false);
     }
 
 }

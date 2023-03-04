@@ -1,5 +1,11 @@
 package io.github.thebusybiscuit.slimefun4.core.commands;
 
+import be.seeseemelk.mockbukkit.MockBukkit;
+import be.seeseemelk.mockbukkit.ServerMock;
+import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
+import io.github.thebusybiscuit.slimefun4.api.researches.Research;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.test.TestUtilities;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.AfterAll;
@@ -7,14 +13,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
-import io.github.thebusybiscuit.slimefun4.api.researches.Research;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.test.TestUtilities;
-
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
 
 class TestResearchCommand {
 
@@ -43,7 +41,7 @@ class TestResearchCommand {
     @Test
     @DisplayName("Test /sf research all")
     void testResearchAll() throws InterruptedException {
-        Slimefun.getRegistry().setResearchingEnabled(true);
+        Slimefun.getConfigManager().setResearchingEnabled(true);
         Player player = server.addPlayer();
         PlayerProfile profile = TestUtilities.awaitProfile(player);
 
@@ -56,7 +54,7 @@ class TestResearchCommand {
     @Test
     @DisplayName("Test /sf research <research id>")
     void testResearchSpecific() throws InterruptedException {
-        Slimefun.getRegistry().setResearchingEnabled(true);
+        Slimefun.getConfigManager().setResearchingEnabled(true);
         Player player = server.addPlayer();
         PlayerProfile profile = TestUtilities.awaitProfile(player);
 
@@ -69,7 +67,7 @@ class TestResearchCommand {
     @Test
     @DisplayName("Test /sf research reset")
     void testResearchReset() throws InterruptedException {
-        Slimefun.getRegistry().setResearchingEnabled(true);
+        Slimefun.getConfigManager().setResearchingEnabled(true);
         Player player = server.addPlayer();
         PlayerProfile profile = TestUtilities.awaitProfile(player);
 

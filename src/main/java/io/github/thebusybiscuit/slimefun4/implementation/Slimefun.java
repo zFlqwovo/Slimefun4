@@ -12,6 +12,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.core.SlimefunRegistry;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
+import io.github.thebusybiscuit.slimefun4.core.config.SlimefunConfigManager;
 import io.github.thebusybiscuit.slimefun4.core.networks.NetworkManager;
 import io.github.thebusybiscuit.slimefun4.core.services.AutoSavingService;
 import io.github.thebusybiscuit.slimefun4.core.services.BackupService;
@@ -94,6 +95,19 @@ import io.github.thebusybiscuit.slimefun4.integrations.IntegrationsManager;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
 import io.papermc.lib.PaperLib;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuListener;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
@@ -112,20 +126,6 @@ import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.scheduler.BukkitTask;
 import ren.natsuyuk1.slimefun4.SlimefunExtended;
 import ren.natsuyuk1.slimefun4.utils.LangUtil;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * This is the main class of Slimefun.
@@ -159,6 +159,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     private boolean isNewlyInstalled = false;
 
     // Various things we need
+    private final SlimefunConfigManager cfgManager = new SlimefunConfigManager(this);
     private final SlimefunRegistry registry = new SlimefunRegistry();
     private final SlimefunCommand command = new SlimefunCommand(this);
     private final TickerTask ticker = new TickerTask();
@@ -249,7 +250,8 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         local = new LocalizationService(this, "", null);
         networkManager = new NetworkManager(200);
         command.register();
-        registry.load(this, config);
+        cfgManager.reload();
+        registry.load(this);
         loadTags();
     }
 
@@ -287,7 +289,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         createDirectories();
 
         // Load various config settings into our cache
-        registry.load(this, config);
+        registry.load(this);
 
         // Set up localization
         logger.log(Level.INFO, "正在加载语言文件...");
@@ -322,7 +324,6 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         logger.log(Level.INFO, "加载研究项目...");
         loadResearches();
 
-        registry.setResearchingEnabled(getResearchCfg().getBoolean("enable-researching"));
         PostSetup.setupWiki();
 
         // All Slimefun Listeners
@@ -332,7 +333,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         // Initiating various Stuff and all items with a slight delay (0ms after the Server finished loading)
         runSync(new SlimefunStartupTask(this, () -> {
             textureService.register(registry.getAllSlimefunItems(), true);
-            permissionsService.register(registry.getAllSlimefunItems(), true);
+            permissionsService.update(registry.getAllSlimefunItems(), true);
 
             // This try/catch should prevent buggy Spigot builds from blocking item loading
             try {
@@ -899,13 +900,18 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     /**
      * This returns our {@link NetworkManager} which is responsible
      * for handling the Cargo and Energy networks.
-     * 
+     *
      * @return Our {@link NetworkManager} instance
      */
 
     public static @Nonnull NetworkManager getNetworkManager() {
         validateInstance();
         return instance.networkManager;
+    }
+
+    public static @Nonnull SlimefunConfigManager getConfigManager() {
+        validateInstance();
+        return instance.cfgManager;
     }
 
     public static @Nonnull SlimefunRegistry getRegistry() {

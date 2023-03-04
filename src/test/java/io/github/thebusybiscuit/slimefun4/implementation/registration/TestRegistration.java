@@ -1,13 +1,21 @@
 package io.github.thebusybiscuit.slimefun4.implementation.registration;
 
+import be.seeseemelk.mockbukkit.MockBukkit;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemState;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.api.items.groups.FlexItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.researches.Research;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.setup.PostSetup;
+import io.github.thebusybiscuit.slimefun4.implementation.setup.ResearchSetup;
+import io.github.thebusybiscuit.slimefun4.implementation.setup.SlimefunItemSetup;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
-
 import javax.annotation.Nonnull;
-
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.AfterAll;
@@ -21,18 +29,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
-import io.github.thebusybiscuit.slimefun4.api.items.ItemState;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.api.items.groups.FlexItemGroup;
-import io.github.thebusybiscuit.slimefun4.api.researches.Research;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.setup.PostSetup;
-import io.github.thebusybiscuit.slimefun4.implementation.setup.ResearchSetup;
-import io.github.thebusybiscuit.slimefun4.implementation.setup.SlimefunItemSetup;
-
-import be.seeseemelk.mockbukkit.MockBukkit;
 
 @TestMethodOrder(value = OrderAnnotation.class)
 class TestRegistration {
@@ -103,7 +99,7 @@ class TestRegistration {
         // Not really ideal but still important to test.
         // Research amount is variable, so we can't test for that.
         // We are really only concerned about any runtime exceptions here.
-        Slimefun.getRegistry().setResearchingEnabled(true);
+        Slimefun.getConfigManager().setResearchingEnabled(true);
 
         // It is important that this is run after item registration
         Assertions.assertDoesNotThrow(() -> ResearchSetup.setupResearches());

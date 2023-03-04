@@ -1,18 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.registration;
 
-import java.time.LocalDate;
-import java.time.Month;
-
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
+import be.seeseemelk.mockbukkit.MockBukkit;
+import be.seeseemelk.mockbukkit.ServerMock;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -26,9 +15,17 @@ import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideMode;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.test.TestUtilities;
-
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.ServerMock;
+import java.time.LocalDate;
+import java.time.Month;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class TestItemGroups {
 
@@ -174,7 +171,7 @@ class TestItemGroups {
         item.register(plugin);
         item.load();
 
-        Slimefun.getRegistry().setResearchingEnabled(true);
+        Slimefun.getConfigManager().setResearchingEnabled(true);
         Research research = new Research(new NamespacedKey(plugin, "cant_touch_this"), 432432, "MC Hammer", 90);
         research.addItems(item);
         research.register();

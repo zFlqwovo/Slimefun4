@@ -87,7 +87,7 @@ public class Research implements Keyed {
      * @return Whether this {@link Research} is enabled or not
      */
     public boolean isEnabled() {
-        return Slimefun.getRegistry().isResearchingEnabled() && enabled;
+        return Slimefun.getConfigManager().isResearchingEnabled() && enabled;
     }
 
     /**
@@ -253,7 +253,7 @@ public class Research implements Keyed {
             canUnlock = p.getLevel() >= cost;
         }
 
-        boolean creativeResearch = p.getGameMode() == GameMode.CREATIVE && Slimefun.getRegistry().isFreeCreativeResearchingEnabled();
+        boolean creativeResearch = p.getGameMode() == GameMode.CREATIVE && Slimefun.getConfigManager().isFreeCreativeResearchingEnabled();
 
         return creativeResearch || canUnlock;
     }
@@ -312,11 +312,17 @@ public class Research implements Keyed {
     }
 
     /**
+     * Unregisters this {@link Research}.
+     */
+    public void unregister() {
+        enabled = false;
+        Slimefun.getRegistry().getResearches().remove(this);
+    }
+
+    /**
      * Attempts to get a {@link Research} with the given {@link NamespacedKey}.
-     * 
-     * @param key
-     *            the {@link NamespacedKey} of the {@link Research} you are looking for
-     * 
+     *
+     * @param key the {@link NamespacedKey} of the {@link Research} you are looking for
      * @return An {@link Optional} with or without the found {@link Research}
      */
     @Nonnull
