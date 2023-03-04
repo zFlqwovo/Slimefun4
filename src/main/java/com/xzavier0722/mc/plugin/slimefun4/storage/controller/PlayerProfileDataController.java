@@ -7,7 +7,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
-import com.xzavier0722.mc.plugin.slimefun4.storage.task.QeuedAsyncWriteTask;
+import com.xzavier0722.mc.plugin.slimefun4.storage.task.QueuedAsyncWriteTask;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
@@ -30,7 +30,7 @@ import org.bukkit.inventory.ItemStack;
 public class PlayerProfileDataController {
     private final BackpackCache backpackCache;
     private final Map<String, PlayerProfile> profileCache;
-    private final Map<ScopeKey, QeuedAsyncWriteTask> scheduledWriteTasks;
+    private final Map<ScopeKey, QueuedAsyncWriteTask> scheduledWriteTasks;
     private final ScopedLock lock;
     private volatile IDataSourceAdapter<?> dataAdapter;
     private ExecutorService readExecutor;
@@ -361,7 +361,7 @@ public class PlayerProfileDataController {
             }
 
             var scopeToUse = forceScopeKey ? scopeKey : key;
-            queuedTask = new QeuedAsyncWriteTask() {
+            queuedTask = new QueuedAsyncWriteTask() {
                 @Override
                 protected void onSuccess() {
                     lock.lock(scopeKey);
