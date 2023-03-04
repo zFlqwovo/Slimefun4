@@ -347,6 +347,11 @@ public class PlayerProfileDataController {
         scheduleWriteTask(scopeKey, key, () -> dataAdapter.deleteData(key), forceScopeKey);
     }
 
+    public void invalidCache(String pUuid) {
+        profileCache.remove(pUuid);
+        backpackCache.invalid(pUuid);
+    }
+
     private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, RecordSet data, boolean forceScopeKey) {
         scheduleWriteTask(scopeKey, key, () -> dataAdapter.setData(key, data), forceScopeKey);
     }
