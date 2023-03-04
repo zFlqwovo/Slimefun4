@@ -12,11 +12,6 @@ import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.inventory.ItemStack;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,6 +22,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.ItemStack;
 
 public class PlayerProfileDataController {
     private final BackpackCache backpackCache;
@@ -213,7 +212,7 @@ public class PlayerProfileDataController {
         readExecutor.submit(() -> invokeCallback(callback, getBackpacks(pUuid)));
     }
 
-    private PlayerProfile createProfile(OfflinePlayer p) {
+    public PlayerProfile createProfile(OfflinePlayer p) {
         checkDestroy();
         var uuid = p.getUniqueId().toString();
         var cache = profileCache.get(uuid);

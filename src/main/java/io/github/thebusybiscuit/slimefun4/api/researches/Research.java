@@ -9,6 +9,14 @@ import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideImplementation
 import io.github.thebusybiscuit.slimefun4.core.services.localization.Language;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.setup.ResearchSetup;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,15 +26,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import ren.natsuyuk1.slimefun4.VaultHelper;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * Represents a research, which is bound to one
@@ -333,6 +332,15 @@ public class Research implements Keyed {
         }
 
         return Optional.empty();
+    }
+
+    @Deprecated
+    public static Optional<Research> getResearchByID(@Nonnull Integer oldID) {
+        if (oldID == null) {
+            return Optional.empty();
+        }
+
+        return Slimefun.getRegistry().getResearches().parallelStream().filter(r -> r.id == oldID).findFirst();
     }
 
     @Override
