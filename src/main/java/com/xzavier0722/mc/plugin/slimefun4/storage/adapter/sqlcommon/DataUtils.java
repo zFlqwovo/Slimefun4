@@ -1,4 +1,4 @@
-package com.xzavier0722.mc.plugin.slimefun4.util;
+package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;

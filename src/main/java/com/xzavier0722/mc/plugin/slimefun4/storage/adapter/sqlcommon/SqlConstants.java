@@ -1,4 +1,4 @@
-package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql;
+package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon;
 
 public interface SqlConstants {
     String TABLE_NAME_PLAYER_PROFILE = "player_profile";

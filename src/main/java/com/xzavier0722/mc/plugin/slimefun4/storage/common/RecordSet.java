@@ -1,6 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.common;
 
-import com.xzavier0722.mc.plugin.slimefun4.util.DataUtils;
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.DataUtils;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -1,15 +1,15 @@
-package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql;
+package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.function.Supplier;
 
-public class MysqlConnectionPool {
-    private final MysqlConfig config;
+public class ConnectionPool {
+    private final Supplier<Connection> connCreator;
     private final int maxConnCount;
     private final Deque<Connection> freeConn;
     private final Set<Connection> usingConn;
@@ -18,9 +18,9 @@ public class MysqlConnectionPool {
     private int currConnCount = 0;
     private int waitingCount = 0;
 
-    public MysqlConnectionPool(MysqlConfig config) {
-        this.config = config;
-        this.maxConnCount = config.maxConnection();
+    public ConnectionPool(Supplier<Connection> connCreator, int maxConnCount) {
+        this.connCreator = connCreator;
+        this.maxConnCount = maxConnCount;
         this.freeConn = new LinkedList<>();
         this.usingConn = new HashSet<>();
     }
@@ -35,7 +35,7 @@ public class MysqlConnectionPool {
                 return getConn();
             }
 
-            var re = newConn();
+            var re = connCreator.get();
             currConnCount++;
             usingConn.add(re);
             return re;
@@ -80,10 +80,6 @@ public class MysqlConnectionPool {
         } catch (SQLException e) {
             return false;
         }
-    }
-
-    private Connection newConn() throws SQLException {
-        return DriverManager.getConnection(config.jdbcUrl(), config.user(), config.passwd());
     }
 
     private void checkDestroy() {
