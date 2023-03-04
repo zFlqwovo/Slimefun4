@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
@@ -144,6 +145,29 @@ public class BackpackListener implements Listener {
         }
 
         changedSlots.computeIfAbsent(bp.getUniqueId(), k -> new HashSet<>()).add(slot);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemChanged(InventoryDragEvent e) {
+        var p = e.getWhoClicked();
+        if (!backpacks.containsKey(p.getUniqueId())) {
+            return;
+        }
+
+        if (!(e.getInventory().getHolder() instanceof SlimefunBackpackHolder holder)) {
+            return;
+        }
+
+        var bp = holder.getBackpack();
+        Set<Integer> changed = null;
+        for (var slot : e.getRawSlots()) {
+            if (slot < bp.getSize()) {
+                if (changed == null) {
+                    changed = changedSlots.computeIfAbsent(bp.getUniqueId(), k -> new HashSet<>());
+                }
+                changed.add(slot);
+            }
+        }
     }
 
     private boolean isAllowed(@Nonnull SlimefunBackpack backpack, @Nullable ItemStack item) {
