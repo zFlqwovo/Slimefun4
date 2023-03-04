@@ -132,7 +132,7 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         );
 
         executeSql(
-                "CREATE INDEX IF NOT EXISTS player_researches ON " + table + " (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ");"
+                "CREATE INDEX IF NOT EXISTS index_player_researches ON " + table + " (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ");"
         );
     }
 
@@ -152,7 +152,7 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         );
 
         executeSql(
-                "CREATE INDEX IF NOT EXISTS player_backpack ON " + table + " (" + FIELD_PLAYER_UUID + ", " + FIELD_BACKPACK_NUM + ");"
+                "CREATE INDEX IF NOT EXISTS index_player_backpack ON " + table + " (" + FIELD_PLAYER_UUID + ", " + FIELD_BACKPACK_NUM + ");"
         );
     }
 

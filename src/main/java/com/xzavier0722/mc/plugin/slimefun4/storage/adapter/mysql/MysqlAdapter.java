@@ -133,7 +133,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
                 + "REFERENCES " + profileTable + "(" + FIELD_PLAYER_UUID + ") "
                 + "ON UPDATE CASCADE ON DELETE CASCADE, "
-                + "INDEX player_researches (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ")"
+                + "INDEX index_player_research (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ")"
                 + ");"
         );
     }
@@ -150,7 +150,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
                 + "REFERENCES " + profileTable + "(" + FIELD_PLAYER_UUID + ") "
                 + "ON UPDATE CASCADE ON DELETE CASCADE, "
-                + "INDEX player_backpack (" + FIELD_PLAYER_UUID + ", " + FIELD_BACKPACK_NUM + ")"
+                + "INDEX index_player_backpack (" + FIELD_PLAYER_UUID + ", " + FIELD_BACKPACK_NUM + ")"
                 + ");"
         );
     }
