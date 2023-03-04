@@ -6,6 +6,15 @@ import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Cooler;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -23,16 +32,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * This {@link Listener} is responsible for all events centered around a {@link SlimefunBackpack}.
@@ -74,7 +73,7 @@ public class BackpackListener implements Listener {
             return;
         }
 
-        Slimefun.getRegistry().getProfileDataController().saveBackpackInventory(bp, slots);
+        Slimefun.getDatabaseManager().getProfileDataController().saveBackpackInventory(bp, slots);
     }
 
     @EventHandler
@@ -196,7 +195,7 @@ public class BackpackListener implements Listener {
             // Create backpack
             PlayerBackpack.setUuid(
                     item,
-                    Slimefun.getRegistry().getProfileDataController().createBackpack(
+                    Slimefun.getDatabaseManager().getProfileDataController().createBackpack(
                             p,
                             profile.nextBackpackNum(),
                             size

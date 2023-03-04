@@ -13,6 +13,7 @@ import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.core.SlimefunRegistry;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.config.SlimefunConfigManager;
+import io.github.thebusybiscuit.slimefun4.core.config.SlimefunDatabaseManager;
 import io.github.thebusybiscuit.slimefun4.core.networks.NetworkManager;
 import io.github.thebusybiscuit.slimefun4.core.services.AutoSavingService;
 import io.github.thebusybiscuit.slimefun4.core.services.BackupService;
@@ -160,6 +161,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
 
     // Various things we need
     private final SlimefunConfigManager cfgManager = new SlimefunConfigManager(this);
+    private final SlimefunDatabaseManager databaseManager = new SlimefunDatabaseManager(this);
     private final SlimefunRegistry registry = new SlimefunRegistry();
     private final SlimefunCommand command = new SlimefunCommand(this);
     private final TickerTask ticker = new TickerTask();
@@ -289,7 +291,11 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         createDirectories();
 
         // Load various config settings into our cache
+        cfgManager.reload();
         registry.load(this);
+
+        logger.log(Level.INFO, "正在加载数据库...");
+        databaseManager.init();
 
         // Set up localization
         logger.log(Level.INFO, "正在加载语言文件...");
@@ -912,6 +918,11 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     public static @Nonnull SlimefunConfigManager getConfigManager() {
         validateInstance();
         return instance.cfgManager;
+    }
+
+    public static @Nonnull SlimefunDatabaseManager getDatabaseManager() {
+        validateInstance();
+        return instance.databaseManager;
     }
 
     public static @Nonnull SlimefunRegistry getRegistry() {

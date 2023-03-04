@@ -1,0 +1,30 @@
+# 数据库类型, 可选的有 SQLITE, MYSQL
+# 注意: 在切换数据库类型时, 我们并不会自动帮你迁移数据 :)
+storageType: SQLITE
+
+# 数据库读取线程数
+# 读取 + 写入线程数不可超过最大连接数
+readExecutorThread: 5
+# 数据库写入线程数, 在使用 SQLite 模式时强制为 1
+writeExecutorThread: 5
+
+mysql:
+  # 数据库连接地址
+  host: "127.0.0.1"
+  # 数据库连接端口
+  port: 3306
+  # 数据库名
+  database: ""
+  # 表前缀
+  tablePrefix: ""
+  # 连接用户名
+  user: ""
+  # 连接用户密码
+  password: ""
+  # 是否使用加密连接
+  useSSL: false
+  # 最大连接数
+  maxConnection: 10
+sqlite:
+  # SQLite 最大读区线程
+  maxReadConnection: 1024

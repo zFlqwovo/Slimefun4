@@ -6,6 +6,13 @@ import io.github.bakedlibs.dough.common.CommonPatterns;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.BackpackListener;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.UUID;
+import java.util.function.Consumer;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -16,14 +23,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
 import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
  * This class represents the instance of a {@link SlimefunBackpack} that is ready to
@@ -54,7 +53,7 @@ public class PlayerBackpack {
 
         var bUuid = getUuid(item.getItemMeta());
         if (bUuid.isPresent()) {
-            Slimefun.getRegistry().getProfileDataController().getBackpackAsync(
+            Slimefun.getDatabaseManager().getProfileDataController().getBackpackAsync(
                     bUuid.get(),
                     new IAsyncReadCallback<>() {
                         @Override
@@ -88,7 +87,7 @@ public class PlayerBackpack {
 
         if (id.isPresent()) {
             int number = id.getAsInt();
-            Slimefun.getRegistry().getProfileDataController().getBackpackAsync(
+            Slimefun.getDatabaseManager().getProfileDataController().getBackpackAsync(
                     Bukkit.getOfflinePlayer(UUID.fromString(uuid)),
                     number,
                     new IAsyncReadCallback<>() {
@@ -264,7 +263,7 @@ public class PlayerBackpack {
         }
 
         updateInv();
-        Slimefun.getRegistry().getProfileDataController().saveBackpackInfo(this);
+        Slimefun.getDatabaseManager().getProfileDataController().saveBackpackInfo(this);
     }
 
     public UUID getUniqueId() {
@@ -274,7 +273,7 @@ public class PlayerBackpack {
     public void setName(String name) {
         this.name = name;
         updateInv();
-        Slimefun.getRegistry().getProfileDataController().saveBackpackInfo(this);
+        Slimefun.getDatabaseManager().getProfileDataController().saveBackpackInfo(this);
     }
 
     public String getName() {

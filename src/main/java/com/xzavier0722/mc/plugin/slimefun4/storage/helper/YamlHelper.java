@@ -22,7 +22,7 @@ public class YamlHelper {
                 try {
                     var uuid = UUID.fromString(file.getName().replace(".yml", ""));
                     var p = Bukkit.getOfflinePlayer(uuid);
-                    if (p != null && Slimefun.getRegistry().getProfileDataController().getProfile(p) == null) {
+                    if (p != null && Slimefun.getDatabaseManager().getProfileDataController().getProfile(p) == null) {
                         migratePlayerProfile(uuid);
                     }
 
@@ -49,7 +49,7 @@ public class YamlHelper {
             return;
         }
 
-        var controller = Slimefun.getRegistry().getProfileDataController();
+        var controller = Slimefun.getDatabaseManager().getProfileDataController();
         var profile = controller.createProfile(p);
 
         // Research migrate
@@ -67,7 +67,7 @@ public class YamlHelper {
         for (String backpackID : configFile.getKeys("backpacks")) {
             var size = configFile.getInt("backpacks." + backpackID + ".size");
 
-            var bp = controller.createBackpack(p, profile.nextBackpackNum(), size);
+            var bp = controller.createBackpack(p, Integer.parseInt(backpackID), size);
 
             var changedSlot = new HashSet<Integer>();
 

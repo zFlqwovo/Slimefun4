@@ -8,13 +8,12 @@ import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.RestoredBackpack;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * This command that allows for backpack retrieval in the event they are lost.
@@ -62,7 +61,7 @@ class BackpackCommand extends SubCommand {
 
                 int id = Integer.parseInt(args[2]);
 
-                Slimefun.getRegistry().getProfileDataController().getBackpackAsync(player, id, new IAsyncReadCallback<PlayerBackpack>() {
+                Slimefun.getDatabaseManager().getProfileDataController().getBackpackAsync(player, id, new IAsyncReadCallback<PlayerBackpack>() {
                     @Override
                     public boolean runOnMainThread() {
                         return true;

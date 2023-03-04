@@ -1,8 +1,5 @@
 package io.github.thebusybiscuit.slimefun4.core;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ControllerHolder;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.StorageType;
 import io.github.bakedlibs.dough.collections.KeyMap;
 import io.github.thebusybiscuit.slimefun4.api.geo.GEOResource;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -280,14 +277,4 @@ public final class SlimefunRegistry {
     public NamespacedKey getGuideDataKey() {
         return guideKey;
     }
-
-    public StorageType getStorageType() {
-        // TODO: impl config
-        return StorageType.MYSQL;
-    }
-
-    public PlayerProfileDataController getProfileDataController() {
-        return ControllerHolder.getController(PlayerProfileDataController.class, getStorageType());
-    }
-
 }
