@@ -67,11 +67,7 @@ public class YamlHelper {
         for (String backpackID : configFile.getKeys("backpacks")) {
             var size = configFile.getInt("backpacks." + backpackID + ".size");
 
-            var bp = controller.createBackpack(
-                    p,
-                    profile.nextBackpackNum(),
-                    size
-            );
+            var bp = controller.createBackpack(p, profile.nextBackpackNum(), size);
 
             var changedSlot = new HashSet<Integer>();
 
