@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashSet;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
@@ -72,10 +73,16 @@ public class YamlHelper {
                     size
             );
 
+            var changedSlot = new HashSet<Integer>();
+
             for (String key : configFile.getKeys("backpacks." + backpackID + ".contents")) {
                 var item = configFile.getItem("backpacks." + backpackID + ".contents." + key);
-                bp.getInventory().setItem(Integer.parseInt(key), item);
+                var bpKey = Integer.parseInt(key);
+                bp.getInventory().setItem(bpKey, item);
+                changedSlot.add(bpKey);
             }
+
+            controller.saveBackpackInventory(bp, changedSlot);
         }
     }
 }
