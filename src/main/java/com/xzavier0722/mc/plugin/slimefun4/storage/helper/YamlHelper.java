@@ -15,8 +15,9 @@ public class YamlHelper {
     public static void migratePlayerData() {
         var playerFolder = new File("data-storage/Slimefun/Players/");
 
-        if (!playerFolder.isDirectory()) return;
+        if (!playerFolder.exists() || !playerFolder.isDirectory()) return;
 
+        // FIXME: 使用其他方法识别已迁移后的数据
         for (File file : playerFolder.listFiles()) {
             if (file.getName().endsWith(".yml")) {
                 try {
