@@ -69,15 +69,21 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         var table = SqlUtils.mapTable(key.getScope());
         executeSql(
                 "INSERT OR IGNORE INTO " + table + " (" + fieldStr.get() + ") VALUES (" + valStr + ");"
-                + (updateFields.isEmpty() ? "" : "UPDATE " + table + " SET "
+        );
+
+        if (updateFields.isEmpty()) {
+            return;
+        }
+
+        executeSql(
+                "UPDATE " + table + " SET "
                 + String.join(", ", updateFields.stream().map(field -> {
                     var val = item.get(field);
                     if (val == null) {
                         throw new IllegalArgumentException("Cannot find value in RecordSet for the specific key: " + field);
                     }
                     return SqlUtils.buildKvStr(field, val);
-                }).toList())
-                + " WHERE " + SqlUtils.buildConditionStr(key.getConditions()) + ";")
+                }).toList()) + SqlUtils.buildConditionStr(key.getConditions()) + ";"
         );
     }
 
@@ -108,7 +114,7 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
                 + SqlUtils.mapTable(DataScope.PLAYER_PROFILE) + "("
                 + FIELD_PLAYER_UUID + " TEXT PRIMARY KEY NOT NULL, "
                 + FIELD_PLAYER_NAME + " TEXT NOT NULL, "
-                + FIELD_BACKPACK_NUM + " INT UNSIGNED DEFAULT 0"
+                + FIELD_BACKPACK_NUM + " INTEGER DEFAULT 0"
                 + ");"
         );
     }
@@ -117,14 +123,16 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         var table = SqlUtils.mapTable(DataScope.PLAYER_RESEARCH);
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
-                        + table + "("
-                        + FIELD_PLAYER_UUID + " CHAR(64) NOT NULL, "
-                        + FIELD_RESEARCH_KEY + " CHAR(64) NOT NULL, "
-                        + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
-                        + "REFERENCES " + SqlUtils.mapTable(DataScope.PLAYER_PROFILE) + "(" + FIELD_PLAYER_UUID + ") "
-                        + "ON UPDATE CASCADE ON DELETE CASCADE);"
-                        + "CREATE INDEX player_researches ON " + table + " (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ");"
-                        + ""
+                + table + "("
+                + FIELD_PLAYER_UUID + " TEXT NOT NULL, "
+                + FIELD_RESEARCH_KEY + " TEXT NOT NULL, "
+                + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
+                + "REFERENCES " + SqlUtils.mapTable(DataScope.PLAYER_PROFILE) + "(" + FIELD_PLAYER_UUID + ") "
+                + "ON UPDATE CASCADE ON DELETE CASCADE);"
+        );
+
+        executeSql(
+                "CREATE INDEX IF NOT EXISTS player_researches ON " + table + " (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ");"
         );
     }
 
@@ -133,16 +141,18 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + table + "("
-                        + FIELD_BACKPACK_ID + " CHAR(64) PRIMARY KEY NOT NULL, "
-                        + FIELD_PLAYER_UUID + " CHAR(64) NOT NULL, "
-                        + FIELD_BACKPACK_NUM + " INT UNSIGNED NOT NULL, "
-                        + FIELD_BACKPACK_NAME + " CHAR(64) NULL, "
-                        + FIELD_BACKPACK_SIZE + " TINYINT UNSIGNED NOT NULL, "
+                        + FIELD_BACKPACK_ID + " TEXT PRIMARY KEY NOT NULL, "
+                        + FIELD_PLAYER_UUID + " TEXT NOT NULL, "
+                        + FIELD_BACKPACK_NUM + " INTEGER NOT NULL, "
+                        + FIELD_BACKPACK_NAME + " TEXT NULL, "
+                        + FIELD_BACKPACK_SIZE + " INTEGER NOT NULL, "
                         + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
                         + "REFERENCES " + SqlUtils.mapTable(DataScope.PLAYER_PROFILE) + "(" + FIELD_PLAYER_UUID + ") "
                         + "ON UPDATE CASCADE ON DELETE CASCADE);"
-                        + "CREATE INDEX player_backpack ON " + table + " (" + FIELD_PLAYER_UUID + ", " + FIELD_BACKPACK_NUM + ");"
-                        + ""
+        );
+
+        executeSql(
+                "CREATE INDEX IF NOT EXISTS player_backpack ON " + table + " (" + FIELD_PLAYER_UUID + ", " + FIELD_BACKPACK_NUM + ");"
         );
     }
 
@@ -150,8 +160,8 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + SqlUtils.mapTable(DataScope.BACKPACK_INVENTORY) + "("
-                        + FIELD_BACKPACK_ID + " CHAR(64) NOT NULL, "
-                        + FIELD_INVENTORY_SLOT + " TINYINT UNSIGNED NOT NULL, "
+                        + FIELD_BACKPACK_ID + " TEXT NOT NULL, "
+                        + FIELD_INVENTORY_SLOT + " INTEGER NOT NULL, "
                         + FIELD_INVENTORY_ITEM + " TEXT NOT NULL, "
                         + "FOREIGN KEY (" + FIELD_BACKPACK_ID + ") "
                         + "REFERENCES " + SqlUtils.mapTable(DataScope.BACKPACK_PROFILE) + "(" + FIELD_BACKPACK_ID + ") "
