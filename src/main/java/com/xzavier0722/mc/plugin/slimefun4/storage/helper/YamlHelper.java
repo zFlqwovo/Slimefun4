@@ -26,7 +26,9 @@ public class YamlHelper {
                 try {
                     var uuid = UUID.fromString(file.getName().replace(".yml", ""));
                     var p = Bukkit.getOfflinePlayer(uuid);
-                    if (p != null && Slimefun.getDatabaseManager().getProfileDataController().getProfile(p) == null) {
+
+                    // FIXME: 等待 ProfileDataController#hasProfile 方法
+                    if (p != null) {
                         migratePlayerProfile(uuid);
                     }
 
