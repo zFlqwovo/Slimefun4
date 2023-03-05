@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 
@@ -17,7 +18,9 @@ public class YamlHelper {
 
         if (!playerFolder.exists() || !playerFolder.isDirectory()) return;
 
-        // FIXME: 使用其他方法识别已迁移后的数据
+        var backupFolder = new File("data-storage/Slimefun/Players_Backup");
+        backupFolder.mkdirs();
+
         for (File file : playerFolder.listFiles()) {
             if (file.getName().endsWith(".yml")) {
                 try {
@@ -27,19 +30,18 @@ public class YamlHelper {
                         migratePlayerProfile(uuid);
                     }
 
-                    var backupFile = new File(file.getAbsolutePath() + ".bak");
+                    var backupFile = new File(backupFolder, file.getName());
                     backupFile.createNewFile();
                     Files.copy(file.toPath(), backupFile.toPath());
 
                     file.delete();
-                } catch (IllegalArgumentException ignored) {
-                    // Illegal file name
-                    return;
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException | IllegalArgumentException e) {
+                    Slimefun.logger().log(Level.WARNING, "迁移玩家数据时出现问题", e);
                 }
             }
         }
+
+        Slimefun.logger().log(Level.INFO, "迁移玩家数据完成! 迁移前的数据已储存在 " + backupFolder.getAbsolutePath());
     }
 
     private static void migratePlayerProfile(@Nonnull UUID uuid) {
