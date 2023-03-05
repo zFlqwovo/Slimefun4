@@ -27,6 +27,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public class PlayerProfileDataController {
     private final BackpackCache backpackCache;
     private final Map<String, PlayerProfile> profileCache;
@@ -52,6 +55,7 @@ public class PlayerProfileDataController {
         callbackExecutor = Executors.newCachedThreadPool();
     }
 
+    @Nullable
     public PlayerProfile getProfile(OfflinePlayer p) {
         checkDestroy();
         var uuid = p.getUniqueId().toString();
@@ -66,7 +70,7 @@ public class PlayerProfileDataController {
 
         var result = dataAdapter.getData(key);
         if (result.isEmpty()) {
-            return createProfile(p);
+            return null;
         }
 
         var bNum = result.get(0).getInt(FieldKey.BACKPACK_NUMBER);
@@ -84,6 +88,7 @@ public class PlayerProfileDataController {
         readExecutor.submit(() -> invokeCallback(callback, getProfile(p)));
     }
 
+    @Nullable
     public PlayerBackpack getBackpack(OfflinePlayer owner, int num) {
         checkDestroy();
         var uuid = owner.getUniqueId().toString();
@@ -117,6 +122,7 @@ public class PlayerProfileDataController {
         return re;
     }
 
+    @Nullable
     public PlayerBackpack getBackpack(String uuid) {
         var re = backpackCache.get(uuid);
         if (re != null) {
@@ -153,6 +159,7 @@ public class PlayerProfileDataController {
 
     }
 
+    @Nonnull
     private ItemStack[] getBackpackInv(String uuid, int size) {
         var key = new RecordKey(DataScope.BACKPACK_INVENTORY);
         key.addField(FieldKey.INVENTORY_SLOT);
@@ -166,6 +173,7 @@ public class PlayerProfileDataController {
         return re;
     }
 
+    @Nonnull
     private Set<NamespacedKey> getUnlockedResearchKeys(String uuid) {
         var key = new RecordKey(DataScope.PLAYER_RESEARCH);
         key.addField(FieldKey.RESEARCH_ID);
@@ -191,6 +199,7 @@ public class PlayerProfileDataController {
         readExecutor.submit(() -> invokeCallback(callback, getBackpack(uuid)));
     }
 
+    @Nonnull
     public Set<PlayerBackpack> getBackpacks(String pUuid) {
         checkDestroy();
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);
@@ -212,6 +221,7 @@ public class PlayerProfileDataController {
         readExecutor.submit(() -> invokeCallback(callback, getBackpacks(pUuid)));
     }
 
+    @Nonnull
     public PlayerProfile createProfile(OfflinePlayer p) {
         checkDestroy();
         var uuid = p.getUniqueId().toString();
@@ -266,6 +276,7 @@ public class PlayerProfileDataController {
         }
     }
 
+    @Nonnull
     public PlayerBackpack createBackpack(OfflinePlayer p, int num, int size) {
         var re = new PlayerBackpack(p, UUID.randomUUID(), num, size, null);
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);

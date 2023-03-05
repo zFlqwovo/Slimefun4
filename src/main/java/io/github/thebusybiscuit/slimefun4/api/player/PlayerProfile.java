@@ -344,17 +344,7 @@ public class PlayerProfile {
             return true;
         }
 
-        Slimefun.getDatabaseManager().getProfileDataController().getProfileAsync(p, new IAsyncReadCallback<>() {
-            @Override
-            public void onResult(PlayerProfile result) {
-                AsyncProfileLoadEvent event = new AsyncProfileLoadEvent(result);
-                Bukkit.getPluginManager().callEvent(event);
-
-                Slimefun.getRegistry().getPlayerProfiles().put(uuid, event.getProfile());
-                callback.accept(event.getProfile());
-            }
-        });
-
+        getOrCreate(p, callback);
         return false;
     }
 
@@ -372,15 +362,7 @@ public class PlayerProfile {
 
         if (!Slimefun.getRegistry().getPlayerProfiles().containsKey(p.getUniqueId())) {
             // Should probably prevent multiple requests for the same profile in the future
-            Slimefun.getDatabaseManager().getProfileDataController().getProfileAsync(
-                    p,
-                    new IAsyncReadCallback<>() {
-                        @Override
-                        public void onResult(PlayerProfile result) {
-                            Slimefun.getRegistry().getPlayerProfiles().put(p.getUniqueId(), result);
-                        }
-                    }
-            );
+            getOrCreate(p, null);
             return false;
         }
 
@@ -454,6 +436,32 @@ public class PlayerProfile {
 
     public OfflinePlayer getOwner() {
         return owner;
+    }
+
+    private static void getOrCreate(OfflinePlayer p, Consumer<PlayerProfile> cb) {
+        var controller = Slimefun.getDatabaseManager().getProfileDataController();
+        controller.getProfileAsync(p, new IAsyncReadCallback<>() {
+            @Override
+            public void onResult(PlayerProfile result) {
+                invokeCb(result);
+            }
+
+            @Override
+            public void onResultNotFound() {
+                invokeCb(controller.createProfile(p));
+            }
+
+            private void invokeCb(PlayerProfile pf) {
+                if (cb == null) {
+                    return;
+                }
+                AsyncProfileLoadEvent event = new AsyncProfileLoadEvent(pf);
+                Bukkit.getPluginManager().callEvent(event);
+
+                Slimefun.getRegistry().getPlayerProfiles().put(p.getUniqueId(), event.getProfile());
+                cb.accept(event.getProfile());
+            }
+        });
     }
 
 }
