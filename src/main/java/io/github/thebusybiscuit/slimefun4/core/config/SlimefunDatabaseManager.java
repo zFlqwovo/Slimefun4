@@ -28,6 +28,12 @@ public class SlimefunDatabaseManager {
     public SlimefunDatabaseManager(Slimefun plugin) {
         this.plugin = plugin;
         databaseConfig = new Config(plugin, "database.yml");
+
+        if (!databaseConfig.getFile().exists()) {
+            plugin.saveResource("database.yml", true);
+            // FIXME: 第一次打开仍然无法正常读取
+            databaseConfig.reload();
+        }
     }
 
     public void init() {
