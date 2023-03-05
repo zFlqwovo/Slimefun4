@@ -27,26 +27,18 @@ public class SlimefunDatabaseManager {
 
     public SlimefunDatabaseManager(Slimefun plugin) {
         this.plugin = plugin;
-        databaseConfig = new Config(plugin, "database");
-
-        readExecutorThread = databaseConfig.getInt("readExecutorThread");
-        writeExecutorThread = databaseConfig.getInt("writeExecutorThread");
-
-        var type = databaseConfig.getValueAs(StorageType.class, "storageType");
-
-        if (type.isEmpty()) {
-            Slimefun.logger().log(Level.SEVERE, "加载数据库配置失败: 数据库类型填写错误");
-            return;
-        }
-
-        storageType = type.get();
+        databaseConfig = new Config(plugin, "database.yml");
     }
 
     public void init() {
+        readExecutorThread = databaseConfig.getInt("readExecutorThread");
+        writeExecutorThread = databaseConfig.getInt("writeExecutorThread");
+        storageType = StorageType.valueOf(databaseConfig.getOrSetDefault("storageType", "SQLITE"));
+
         try {
             initAdapter();
         } catch (IOException e) {
-            Slimefun.logger().log(Level.SEVERE, "加载数据库适配器失败", e);
+            plugin.getLogger().log(Level.SEVERE, "加载数据库适配器失败", e);
             return;
         }
 
@@ -73,7 +65,7 @@ public class SlimefunDatabaseManager {
             }
             case SQLITE -> {
                 adapter = new SqliteAdapter();
-                var dbPath = new File("plugins/" + plugin.getName().replace(" ", "_"), "database.db");
+                var dbPath = new File("data-storage/Slimefun", "database.db");
                 dbPath.createNewFile();
 
                 ((IDataSourceAdapter<SqliteConfig>) adapter).prepare(
