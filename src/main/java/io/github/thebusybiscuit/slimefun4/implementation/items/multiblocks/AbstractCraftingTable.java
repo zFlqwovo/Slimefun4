@@ -83,7 +83,7 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
 
         if (id.isPresent()) {
             var bUuid = id.get();
-            PlayerBackpack.setUuid(output, bUuid);
+            PlayerBackpack.setItemPdc(output, bUuid, p.getUniqueId().toString());
             // TODO: set owner name and backpack name
 
             Slimefun.getDatabaseManager().getProfileDataController().getBackpackAsync(

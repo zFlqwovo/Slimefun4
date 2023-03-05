@@ -53,6 +53,7 @@ public class PlayerProfile {
     private final Config waypointsFile;
 
     private boolean dirty = false;
+    private boolean isInvalid = false;
     private boolean markedForDeletion = false;
 
     private final Set<Research> researches;
@@ -436,6 +437,14 @@ public class PlayerProfile {
 
     public OfflinePlayer getOwner() {
         return owner;
+    }
+
+    public void markInvalid() {
+        isInvalid = true;
+    }
+
+    public boolean isInvalid() {
+        return isInvalid;
     }
 
     private static void getOrCreate(OfflinePlayer p, Consumer<PlayerProfile> cb) {

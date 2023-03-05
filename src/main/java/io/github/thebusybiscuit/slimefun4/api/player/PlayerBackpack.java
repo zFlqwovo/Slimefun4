@@ -38,6 +38,7 @@ import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
  */
 public class PlayerBackpack {
     private static final NamespacedKey KEY_BACKPACK_UUID = new NamespacedKey(Slimefun.instance(), "B_UUID");
+    private static final NamespacedKey KEY_OWNER_UUID = new NamespacedKey(Slimefun.instance(), "OWNER_UUID");
     private final OfflinePlayer owner;
     private final UUID uuid;
     private final int id;
@@ -45,6 +46,7 @@ public class PlayerBackpack {
     private String name;
     private Inventory inventory;
     private int size;
+    private boolean isInvalid = false;
 
     public static void getAsync(ItemStack item, Consumer<PlayerBackpack> callback, boolean runCbOnMainThread) {
         if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasLore()) {
@@ -116,6 +118,13 @@ public class PlayerBackpack {
         return Optional.ofNullable(meta.getPersistentDataContainer().get(KEY_BACKPACK_UUID, PersistentDataType.STRING));
     }
 
+    public static Optional<String> getOwnerUuid(ItemMeta meta) {
+        if (meta == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(meta.getPersistentDataContainer().get(KEY_OWNER_UUID, PersistentDataType.STRING));
+    }
+
     public static OptionalInt getNum(ItemMeta meta) {
         if (meta == null) {
             return OptionalInt.empty();
@@ -134,9 +143,11 @@ public class PlayerBackpack {
         return OptionalInt.empty();
     }
 
-    public static void setUuid(ItemStack item, String uuid) {
+    public static void setItemPdc(ItemStack item, String bpUuid, String ownerUuid) {
         ItemMeta im = item.getItemMeta();
-        im.getPersistentDataContainer().set(PlayerBackpack.KEY_BACKPACK_UUID, PersistentDataType.STRING, uuid);
+        var pdc = im.getPersistentDataContainer();
+        pdc.set(PlayerBackpack.KEY_BACKPACK_UUID, PersistentDataType.STRING, bpUuid);
+        pdc.set(PlayerBackpack.KEY_OWNER_UUID, PersistentDataType.STRING, ownerUuid);
         item.setItemMeta(im);
     }
 
@@ -229,26 +240,11 @@ public class PlayerBackpack {
      *
      * @param players The player who this Backpack will be shown to
      */
-    public void open(Player... players) {
-        Slimefun.runSync(() -> {
-            for (Player p : players) {
-                p.openInventory(inventory);
-            }
-        });
-    }
-
-    /**
-     * This will open the {@link Inventory} of this backpack to every {@link Player}
-     * that was passed onto this method.
-     *
-     * @param player   The player who this Backpack will be shown to
-     * @param callback The operation after backpack was open
-     */
-    public void open(Player player, Runnable callback) {
-        Slimefun.runSync(() -> {
-            player.openInventory(inventory);
-            callback.run();
-        });
+    public void open(Player p) {
+        if (isInvalid) {
+            return;
+        }
+        p.openInventory(inventory);
     }
 
     /**
@@ -278,6 +274,15 @@ public class PlayerBackpack {
 
     public String getName() {
         return name;
+    }
+
+    public void markInvalid() {
+        isInvalid = true;
+        InventoryUtil.closeInventory(this.inventory);
+    }
+
+    public boolean isInvalid() {
+        return isInvalid;
     }
 
     private Inventory newInv() {

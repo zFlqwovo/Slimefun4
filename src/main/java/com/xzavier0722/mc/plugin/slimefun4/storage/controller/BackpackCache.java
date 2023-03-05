@@ -29,13 +29,16 @@ class BackpackCache {
         return uuidCache.get(uuid);
     }
 
-    void invalid(String pUuid) {
+    void invalidate(String pUuid) {
         var cache = numCache.remove(pUuid);
         if (cache == null) {
             return;
         }
 
-        cache.values().forEach(bp -> uuidCache.remove(bp.getUniqueId().toString()));
+        cache.values().forEach(bp -> {
+            uuidCache.remove(bp.getUniqueId().toString());
+            bp.markInvalid();
+        });
     }
 
     void clean() {

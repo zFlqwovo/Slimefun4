@@ -224,6 +224,7 @@ messages:
   radiation: '&4你已经暴露在致命的辐射之下! &c快把辐射物品丢掉或者穿上防化服!'
   opening-guide: '&b正在打开指南书, 请稍等...'
   opening-backpack: '&b正在打开背包, 请稍等....'
+  not-backpack-owner: '&c该背包的所有者不在线，你无权使用!'
   no-iron-golem-heal: '&c这不是铁锭. 不能用来治疗铁傀儡!'
   link-prompt: '&e单击此处:'
   diet-cookie: '&e你感觉变轻了...'

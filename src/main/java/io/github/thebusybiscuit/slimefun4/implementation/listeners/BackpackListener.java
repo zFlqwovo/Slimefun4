@@ -193,13 +193,14 @@ public class BackpackListener implements Listener {
         var meta = item.getItemMeta();
         if (PlayerBackpack.getUuid(meta).isEmpty() && PlayerBackpack.getNum(meta).isEmpty()) {
             // Create backpack
-            PlayerBackpack.setUuid(
+            PlayerBackpack.setItemPdc(
                     item,
                     Slimefun.getDatabaseManager().getProfileDataController().createBackpack(
                             p,
                             profile.nextBackpackNum(),
                             size
-                    ).getUniqueId().toString()
+                    ).getUniqueId().toString(),
+                    p.getUniqueId().toString()
             );
         }
 
@@ -217,8 +218,11 @@ public class BackpackListener implements Listener {
 
             PlayerBackpack.getAsync(
                     item,
-                    backpack -> backpack.open(p, () -> backpacks.put(p.getUniqueId(), item)),
-                    false
+                    backpack -> {
+                        backpacks.put(p.getUniqueId(), item);
+                        backpack.open(p);
+                    },
+                    true
             );
         } else {
             Slimefun.getLocalization().sendMessage(p, "backpack.already-open", true);

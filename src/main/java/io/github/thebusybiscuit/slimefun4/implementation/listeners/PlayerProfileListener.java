@@ -7,7 +7,9 @@ import javax.annotation.Nonnull;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -31,7 +33,7 @@ public class PlayerProfileListener implements Listener {
 
         // if we still have a profile of this Player in memory, delete it
         profile.ifPresent(PlayerProfile::markForDeletion);
-        Slimefun.getDatabaseManager().getProfileDataController().invalidCache(e.getPlayer().getUniqueId().toString());
+        Slimefun.getDatabaseManager().getProfileDataController().invalidateCache(e.getPlayer().getUniqueId().toString());
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -40,7 +42,12 @@ public class PlayerProfileListener implements Listener {
 
         // if we still have a profile of this Player in memory, delete it
         profile.ifPresent(PlayerProfile::markForDeletion);
-        Slimefun.getDatabaseManager().getProfileDataController().invalidCache(e.getPlayer().getUniqueId().toString());
+        Slimefun.getDatabaseManager().getProfileDataController().invalidateCache(e.getPlayer().getUniqueId().toString());
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onJoin(PlayerJoinEvent e) {
+        Slimefun.getDatabaseManager().getProfileDataController().invalidateCache(e.getPlayer().getUniqueId().toString());
     }
 
 }
