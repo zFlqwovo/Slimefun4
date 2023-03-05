@@ -39,7 +39,7 @@ public class SlimefunDatabaseManager {
     public void init() {
         readExecutorThread = databaseConfig.getInt("readExecutorThread");
         writeExecutorThread = databaseConfig.getInt("writeExecutorThread");
-        storageType = StorageType.valueOf(databaseConfig.getOrSetDefault("storageType", "SQLITE"));
+        storageType = StorageType.valueOf(databaseConfig.getString("storageType"));
 
         try {
             initAdapter();
