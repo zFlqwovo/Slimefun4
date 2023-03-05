@@ -496,16 +496,6 @@ public class SlimefunItem implements Placeable {
     }
 
     /**
-     * This method registers this {@link SlimefunItem}.
-     * Always call this method after your {@link SlimefunItem} has been initialized.
-     *
-     * @param addon The {@link SlimefunAddon} that this {@link SlimefunItem} belongs to.
-     */
-    public void unregister(@Nonnull SlimefunAddon addon) {
-
-    }
-
-    /**
      * This method is called when this {@link SlimefunItem} is currently being registered
      * and we are certain that it will be enabled.
      *

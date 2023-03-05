@@ -15,12 +15,24 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Server;
 
 public class SlimefunConfigManager {
+    /**
+     * Slimefun plugin instance
+     */
     private final Slimefun plugin;
 
+    /**
+     * Hold plugin config named "config.yml"
+     */
     private final Config pluginConfig;
 
+    /**
+     * Hold item config named "Items.yml"
+     */
     private final Config itemsConfig;
 
+    /**
+     * Hold research config named "Researches.yml"
+     */
     private final Config researchesConfig;
 
     private boolean backwardsCompatibility;
@@ -85,9 +97,14 @@ public class SlimefunConfigManager {
                 NamespacedKey key = research.getKey();
                 int cost = researchesConfig.getInt(key.getNamespace() + '.' + key.getKey() + ".cost");
                 research.setCost(cost);
+                var status = researchesConfig.getBoolean(key.getNamespace() + '.' + key.getKey() + ".enabled");
 
-                if (!researchesConfig.getBoolean(key.getNamespace() + '.' + key.getKey() + ".enabled")) {
-                    research.unregister();
+                if (research.isEnabled() != status) {
+                    if (status) {
+                        research.register();
+                    } else {
+                        research.disable();
+                    }
                 }
             } catch (Exception x) {
                 plugin.getLogger().log(Level.SEVERE, x, () -> "Something went wrong while trying to update the cost of a research: " + research);
@@ -101,7 +118,7 @@ public class SlimefunConfigManager {
                 if (itemStatus && SlimefunItem.getById(item.getId()) == null) {
                     item.register(item.getAddon());
                 } else {
-                    item.unregister(item.getAddon());
+                    Slimefun.logger().log(Level.WARNING, "物品禁用暂时不支持热重载, 请手动重启服务器.");
                 }
             }
 

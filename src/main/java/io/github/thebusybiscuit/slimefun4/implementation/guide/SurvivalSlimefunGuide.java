@@ -293,12 +293,15 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
             menu.addItem(index, new CustomItemStack(ChestMenuUtils.getNoPermissionItem(), sfitem.getItemName(), message.toArray(new String[0])));
             menu.addMenuClickHandler(index, ChestMenuUtils.getEmptyClickHandler());
         } else if (isSurvivalMode() && research != null && !profile.hasUnlocked(research)) {
-            // TODO: 添加一个开关
+            String lore;
+
             if (VaultHelper.isUsable()) {
-                menu.addItem(index, new CustomItemStack(ChestMenuUtils.getNoPermissionItem(), "&f" + ItemUtils.getItemName(sfitem.getItem()), "&7" + sfitem.getId(), "&4&l" + Slimefun.getLocalization().getMessage(p, "guide.locked"), "", "&a> 单击解锁", "", "&7需要 &b" + (research.getCost() * Slimefun.getCfg().getDouble("researches.money-multiply")) + " 游戏币"));
+                lore = (research.getCost() * Slimefun.getCfg().getDouble("researches.money-multiply")) + " 游戏币";
             } else {
-                menu.addItem(index, new CustomItemStack(ChestMenuUtils.getNoPermissionItem(), "&f" + ItemUtils.getItemName(sfitem.getItem()), "&7" + sfitem.getId(), "&4&l" + Slimefun.getLocalization().getMessage(p, "guide.locked"), "", "&a> 单击解锁", "", "&7需要 &b" + research.getCost() + " 级经验"));
+                lore = research.getCost() + " 级经验";
             }
+
+            menu.addItem(index, new CustomItemStack(new CustomItemStack(ChestMenuUtils.getNoPermissionItem(), "&f" + ItemUtils.getItemName(sfitem.getItem()), "&7" + sfitem.getId(), "&4&l" + Slimefun.getLocalization().getMessage(p, "guide.locked"), "", "&a> 单击解锁", "", "&7需要 &b", lore)));
             menu.addMenuClickHandler(index, (pl, slot, item, action) -> {
                 research.unlockFromGuide(this, p, profile, sfitem, itemGroup, page);
                 return false;

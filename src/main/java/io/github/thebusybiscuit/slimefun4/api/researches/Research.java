@@ -314,8 +314,13 @@ public class Research implements Keyed {
     /**
      * Unregisters this {@link Research}.
      */
-    public void unregister() {
+    public void disable() {
         enabled = false;
+        for (SlimefunItem item : new ArrayList<>(items)) {
+            if (item != null) {
+                item.setResearch(null);
+            }
+        }
         Slimefun.getRegistry().getResearches().remove(this);
     }
 
