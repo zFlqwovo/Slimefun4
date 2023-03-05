@@ -70,15 +70,16 @@ public class YamlHelper {
 
         // Backpack migrate
         for (String backpackID : configFile.getKeys("backpacks")) {
-            var size = configFile.getInt("backpacks." + backpackID + ".size");
+            var bpID = Integer.parseInt(backpackID);
+            var size = configFile.getInt("backpacks." + bpID + ".size");
 
-            var bp = controller.createBackpack(p, Integer.parseInt(backpackID), size);
+            var bp = controller.createBackpack(p, bpID, size);
 
             var changedSlot = new HashSet<Integer>();
 
-            for (String key : configFile.getKeys("backpacks." + backpackID + ".contents")) {
-                var item = configFile.getItem("backpacks." + backpackID + ".contents." + key);
+            for (String key : configFile.getKeys("backpacks." + bpID + ".contents")) {
                 var bpKey = Integer.parseInt(key);
+                var item = configFile.getItem("backpacks." + bpID + ".contents." + bpKey);
                 bp.getInventory().setItem(bpKey, item);
                 changedSlot.add(bpKey);
             }
