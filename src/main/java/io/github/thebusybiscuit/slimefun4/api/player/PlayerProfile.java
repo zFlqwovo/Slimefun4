@@ -452,14 +452,13 @@ public class PlayerProfile {
             }
 
             private void invokeCb(PlayerProfile pf) {
-                if (cb == null) {
-                    return;
-                }
                 AsyncProfileLoadEvent event = new AsyncProfileLoadEvent(pf);
                 Bukkit.getPluginManager().callEvent(event);
 
                 Slimefun.getRegistry().getPlayerProfiles().put(p.getUniqueId(), event.getProfile());
-                cb.accept(event.getProfile());
+                if (cb != null) {
+                    cb.accept(event.getProfile());
+                }
             }
         });
     }
