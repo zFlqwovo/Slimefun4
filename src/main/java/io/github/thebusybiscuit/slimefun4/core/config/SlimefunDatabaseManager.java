@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import javax.annotation.Nullable;
 
 public class SlimefunDatabaseManager {
+    private static final String CONFIG_FILE_NAME = "database.yml";
     private final Slimefun plugin;
     private final Config databaseConfig;
 
@@ -27,13 +28,11 @@ public class SlimefunDatabaseManager {
 
     public SlimefunDatabaseManager(Slimefun plugin) {
         this.plugin = plugin;
-        databaseConfig = new Config(plugin, "database.yml");
-
-        if (!databaseConfig.getFile().exists()) {
-            plugin.saveResource("database.yml", true);
-            // FIXME: 第一次打开仍然无法正常读取
-            databaseConfig.reload();
+        if (!new File(plugin.getDataFolder(), CONFIG_FILE_NAME).exists()) {
+            plugin.saveResource(CONFIG_FILE_NAME, false);
         }
+
+        databaseConfig = new Config(plugin, "database.yml");
     }
 
     public void init() {
