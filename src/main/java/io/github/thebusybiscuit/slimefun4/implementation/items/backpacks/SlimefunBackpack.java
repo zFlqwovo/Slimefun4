@@ -36,6 +36,7 @@ import java.util.UUID;
  */
 public class SlimefunBackpack extends SimpleSlimefunItem<ItemUseHandler> implements DistinctiveItem {
 
+    private static final boolean IGNORE_OWNER_OFFLINE_CHECK = Slimefun.getCfg().getBoolean("backpack.allow-open-when-owner-offline");
     private final int size;
 
     @ParametersAreNonnullByDefault
@@ -79,13 +80,15 @@ public class SlimefunBackpack extends SimpleSlimefunItem<ItemUseHandler> impleme
     public ItemUseHandler getItemHandler() {
         return e -> {
             e.cancel();
-            var item = e.getItem();
-            var p = e.getPlayer();
-            var ownerUuid = PlayerBackpack.getOwnerUuid(item.getItemMeta());
-            // TODO: add config
-            if (ownerUuid.isPresent() && Bukkit.getPlayer(UUID.fromString(ownerUuid.get())) == null) {
-                Slimefun.getLocalization().sendMessage(p, "messages.not-backpack-owner");
-                return;
+
+            if (!IGNORE_OWNER_OFFLINE_CHECK) {
+                var item = e.getItem();
+                var p = e.getPlayer();
+                var ownerUuid = PlayerBackpack.getOwnerUuid(item.getItemMeta());
+                if (ownerUuid.isPresent() && Bukkit.getPlayer(UUID.fromString(ownerUuid.get())) == null) {
+                    Slimefun.getLocalization().sendMessage(p, "messages.not-backpack-owner");
+                    return;
+                }
             }
 
             BackpackListener listener = Slimefun.getBackpackListener();
