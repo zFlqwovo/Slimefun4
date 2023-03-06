@@ -35,8 +35,6 @@ import java.util.UUID;
  *
  */
 public class SlimefunBackpack extends SimpleSlimefunItem<ItemUseHandler> implements DistinctiveItem {
-
-    private static final boolean IGNORE_OWNER_OFFLINE_CHECK = Slimefun.getCfg().getBoolean("backpack.allow-open-when-owner-offline");
     private final int size;
 
     @ParametersAreNonnullByDefault
@@ -81,7 +79,7 @@ public class SlimefunBackpack extends SimpleSlimefunItem<ItemUseHandler> impleme
         return e -> {
             e.cancel();
 
-            if (!IGNORE_OWNER_OFFLINE_CHECK) {
+            if (!Slimefun.getCfg().getBoolean("backpack.allow-open-when-owner-offline")) {
                 var item = e.getItem();
                 var p = e.getPlayer();
                 var ownerUuid = PlayerBackpack.getOwnerUuid(item.getItemMeta());

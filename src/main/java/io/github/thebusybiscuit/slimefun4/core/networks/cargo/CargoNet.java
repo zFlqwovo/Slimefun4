@@ -44,7 +44,6 @@ import me.mrCookieSlime.Slimefun.api.BlockStorage;
 public class CargoNet extends AbstractItemNetwork implements HologramOwner {
 
     private static final int RANGE = 5;
-    private static final int TICK_DELAY = Slimefun.getCfg().getInt("networks.cargo-ticker-delay");
 
     private final Set<Location> inputNodes = new HashSet<>();
     private final Set<Location> outputNodes = new HashSet<>();
@@ -141,7 +140,7 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
 
             // Skip ticking if the threshold is not reached. The delay is not same as minecraft tick,
             // but it's based on 'custom-ticker-delay' config.
-            if (tickDelayThreshold < TICK_DELAY) {
+            if (tickDelayThreshold < Slimefun.getCfg().getInt("networks.cargo-ticker-delay")) {
                 tickDelayThreshold++;
                 return;
             }

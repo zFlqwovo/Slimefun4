@@ -190,7 +190,6 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     private LocalizationService local;
 
     // Important config files for Slimefun
-    private final Config config = new Config(this);
     private final Config items = new Config(this, "Items.yml");
     private final Config researches = new Config(this, "Researches.yml");
 
@@ -300,6 +299,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         // Set up localization
         logger.log(Level.INFO, "正在加载语言文件...");
 
+        var config = cfgManager.getPluginConfig();
         String chatPrefix = config.getString("options.chat-prefix");
         String serverDefaultLanguage = config.getString("options.language");
         local = new LocalizationService(this, chatPrefix, serverDefaultLanguage);
@@ -445,7 +445,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         }
 
         // Create a new backup zip
-        if (config.getBoolean("options.backup-data")) {
+        if (cfgManager.getPluginConfig().getBoolean("options.backup-data")) {
             backupService.run();
         }
 
@@ -662,7 +662,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         backpackListener.register(this);
 
         // Handle Slimefun Guide being given on Join
-        new SlimefunGuideListener(this, config.getBoolean("guide.receive-on-first-join"));
+        new SlimefunGuideListener(this, cfgManager.getPluginConfig().getBoolean("guide.receive-on-first-join"));
 
         // Clear the Slimefun Guide History upon Player Leaving
         new PlayerProfileListener(this);
@@ -753,7 +753,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
 
     public static @Nonnull Config getCfg() {
         validateInstance();
-        return instance.config;
+        return instance.cfgManager.getPluginConfig();
     }
 
     public static @Nonnull Config getResearchCfg() {
