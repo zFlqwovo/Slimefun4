@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -21,8 +20,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunIte
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.BackpackListener;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
-
-import java.util.UUID;
 
 /**
  * This class represents a {@link SlimefunItem} that is considered a Backpack.
@@ -79,14 +76,9 @@ public class SlimefunBackpack extends SimpleSlimefunItem<ItemUseHandler> impleme
         return e -> {
             e.cancel();
 
-            if (!Slimefun.getCfg().getBoolean("backpack.allow-open-when-owner-offline")) {
-                var item = e.getItem();
-                var p = e.getPlayer();
-                var ownerUuid = PlayerBackpack.getOwnerUuid(item.getItemMeta());
-                if (ownerUuid.isPresent() && Bukkit.getPlayer(UUID.fromString(ownerUuid.get())) == null) {
-                    Slimefun.getLocalization().sendMessage(p, "messages.not-backpack-owner");
-                    return;
-                }
+            if (!PlayerBackpack.isOwnerOnline(e.getItem().getItemMeta())) {
+                Slimefun.getLocalization().sendMessage(e.getPlayer(), "messages.not-backpack-owner");
+                return;
             }
 
             BackpackListener listener = Slimefun.getBackpackListener();

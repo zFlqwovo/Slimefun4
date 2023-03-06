@@ -193,14 +193,13 @@ public class BackpackListener implements Listener {
         var meta = item.getItemMeta();
         if (PlayerBackpack.getUuid(meta).isEmpty() && PlayerBackpack.getNum(meta).isEmpty()) {
             // Create backpack
-            PlayerBackpack.setItemPdc(
+            PlayerBackpack.bindItem(
                     item,
                     Slimefun.getDatabaseManager().getProfileDataController().createBackpack(
                             p,
                             profile.nextBackpackNum(),
                             size
-                    ).getUniqueId().toString(),
-                    p.getUniqueId().toString()
+                    )
             );
         }
 

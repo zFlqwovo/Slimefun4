@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Cooler;
 import io.github.thebusybiscuit.slimefun4.implementation.items.food.Juice;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -87,7 +88,9 @@ public class CoolerListener implements Listener {
      *            The {@link Cooler} {@link ItemStack} to take the {@link Juice} from
      */
     private void takeJuiceFromCooler(@Nonnull Player p, @Nonnull ItemStack cooler) {
-        PlayerBackpack.getAsync(cooler, backpack -> consumeJuice(p, cooler, backpack), true);
+        if (PlayerBackpack.isOwnerOnline(cooler.getItemMeta())) {
+            PlayerBackpack.getAsync(cooler, backpack -> consumeJuice(p, cooler, backpack), true);
+        }
     }
 
     private boolean consumeJuice(@Nonnull Player p, @Nonnull ItemStack coolerItem, @Nonnull PlayerBackpack backpack) {

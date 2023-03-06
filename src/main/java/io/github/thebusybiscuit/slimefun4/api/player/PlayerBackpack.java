@@ -37,6 +37,7 @@ import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
  * @see BackpackListener
  */
 public class PlayerBackpack {
+    public static final String LORE_OWNER = "&7所有者: ";
     private static final NamespacedKey KEY_BACKPACK_UUID = new NamespacedKey(Slimefun.instance(), "B_UUID");
     private static final NamespacedKey KEY_OWNER_UUID = new NamespacedKey(Slimefun.instance(), "OWNER_UUID");
     private final OfflinePlayer owner;
@@ -144,25 +145,52 @@ public class PlayerBackpack {
     }
 
     public static void setItemPdc(ItemStack item, String bpUuid, String ownerUuid) {
-        ItemMeta im = item.getItemMeta();
-        var pdc = im.getPersistentDataContainer();
-        pdc.set(PlayerBackpack.KEY_BACKPACK_UUID, PersistentDataType.STRING, bpUuid);
-        pdc.set(PlayerBackpack.KEY_OWNER_UUID, PersistentDataType.STRING, ownerUuid);
-        item.setItemMeta(im);
+        ItemMeta meta = item.getItemMeta();
+        setPdc(meta, bpUuid, ownerUuid);
+        item.setItemMeta(meta);
     }
 
-    private static IAsyncReadCallback<PlayerBackpack> asReadCallback(Consumer<PlayerBackpack> callback, boolean runOnMain) {
-        return new IAsyncReadCallback<>() {
-            @Override
-            public boolean runOnMainThread() {
-                return runOnMain;
-            }
+    public static void bindItem(ItemStack item, PlayerBackpack bp) {
+        var meta = item.getItemMeta();
+        setPdc(meta, bp.uuid.toString(), bp.owner.getUniqueId().toString());
+        setItem(meta, bp);
+        item.setItemMeta(meta);
+    }
 
-            @Override
-            public void onResult(PlayerBackpack result) {
-                callback.accept(result);
+    public static void setItemDisplayInfo(ItemStack item, PlayerBackpack bp) {
+        var meta = item.getItemMeta();
+        setItem(meta, bp);
+        item.setItemMeta(meta);
+    }
+
+    public static boolean isOwnerOnline(ItemMeta meta) {
+        if (Slimefun.getCfg().getBoolean("backpack.allow-open-when-owner-offline")) {
+            return true;
+        }
+        var ownerUuid = PlayerBackpack.getOwnerUuid(meta);
+        return ownerUuid.isEmpty() || Bukkit.getPlayer(UUID.fromString(ownerUuid.get())) != null;
+    }
+
+    private static void setPdc(ItemMeta meta, String bpUuid, String ownerUuid) {
+        var pdc = meta.getPersistentDataContainer();
+        pdc.set(PlayerBackpack.KEY_BACKPACK_UUID, PersistentDataType.STRING, bpUuid);
+        pdc.set(PlayerBackpack.KEY_OWNER_UUID, PersistentDataType.STRING, ownerUuid);
+    }
+
+    private static void setItem(ItemMeta meta, PlayerBackpack bp) {
+        var lore = meta.getLore();
+        for (var i = 0; i < lore.size(); i++) {
+            var line = lore.get(i);
+            if (LORE_OWNER.equals(line)) {
+                lore.set(i, LORE_OWNER + bp.getOwner().getName());
+                break;
             }
-        };
+        }
+
+        if (bp.name.isEmpty() || bp.name.isBlank()) {
+            return;
+        }
+        meta.setDisplayName(bp.name);
     }
 
     @ParametersAreNonnullByDefault
