@@ -32,7 +32,7 @@ public class SlimefunDatabaseManager {
             plugin.saveResource(CONFIG_FILE_NAME, false);
         }
 
-        databaseConfig = new Config(plugin, "database.yml");
+        databaseConfig = new Config(plugin, CONFIG_FILE_NAME);
     }
 
     public void init() {
