@@ -209,7 +209,8 @@ public class PlayerBackpack {
         this.name = name;
         this.id = id;
         this.size = size;
-        this. holder = new SlimefunBackpackHolder();
+        this.holder = new SlimefunBackpackHolder();
+        this.holder.setBackpack(this);
         inventory = newInv();
 
         if (contents == null) {
