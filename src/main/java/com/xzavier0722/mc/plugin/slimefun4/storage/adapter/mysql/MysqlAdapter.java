@@ -125,7 +125,8 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + profileTable + "("
                 + FIELD_PLAYER_UUID + " CHAR(64) PRIMARY KEY NOT NULL, "
                 + FIELD_PLAYER_NAME + " CHAR(64) NOT NULL, "
-                + FIELD_BACKPACK_NUM + " INT UNSIGNED DEFAULT 0"
+                + FIELD_BACKPACK_NUM + " INT UNSIGNED DEFAULT 0, "
+                + "INDEX index_player_name (" + FIELD_PLAYER_NAME + ")"
                 + ");"
         );
     }

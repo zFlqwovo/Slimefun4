@@ -12,6 +12,13 @@ import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,13 +29,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class PlayerProfileDataController {
     private final BackpackCache backpackCache;
@@ -326,6 +326,25 @@ public class PlayerProfileDataController {
         saveBackpackInventory(bp, Set.of(slots));
     }
 
+    public UUID getPlayerUuid(String pName) {
+        checkDestroy();
+        var key = new RecordKey(DataScope.PLAYER_PROFILE);
+        key.addField(FieldKey.PLAYER_UUID);
+        key.addCondition(FieldKey.PLAYER_NAME, pName);
+
+        var result = dataAdapter.getData(key);
+        if (result.isEmpty()) {
+            return null;
+        }
+
+        return UUID.fromString(result.get(0).get(FieldKey.PLAYER_UUID));
+    }
+
+    public void getPlayerUuidAsync(String pName, IAsyncReadCallback<UUID> callback) {
+        checkDestroy();
+        readExecutor.submit(() -> invokeCallback(callback, getPlayerUuid(pName)));
+    }
+
     private void checkDestroy() {
         if (destroyed) {
             throw new IllegalStateException("Controller cannot be accessed after destroyed.");
@@ -350,11 +369,11 @@ public class PlayerProfileDataController {
         return re;
     }
 
-    public void scheduleWriteTask(RecordKey key) {
+    private void scheduleWriteTask(RecordKey key) {
         scheduleWriteTask(key, key, false);
     }
 
-    public void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, boolean forceScopeKey) {
+    private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, boolean forceScopeKey) {
         scheduleWriteTask(scopeKey, key, () -> dataAdapter.deleteData(key), forceScopeKey);
     }
 

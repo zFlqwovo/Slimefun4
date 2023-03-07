@@ -112,13 +112,18 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
     }
 
     private void createProfileTable() {
+        var table = SqlUtils.mapTable(DataScope.PLAYER_PROFILE);
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
-                + SqlUtils.mapTable(DataScope.PLAYER_PROFILE) + "("
+                + table + "("
                 + FIELD_PLAYER_UUID + " TEXT PRIMARY KEY NOT NULL, "
                 + FIELD_PLAYER_NAME + " TEXT NOT NULL, "
                 + FIELD_BACKPACK_NUM + " INTEGER DEFAULT 0"
                 + ");"
+        );
+
+        executeQuery(
+                "CREATE INDEX IF NOT EXISTS index_player_name ON " + table + " (" + FIELD_PLAYER_NAME + ");"
         );
     }
 
