@@ -7,7 +7,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.BackpackListener;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -40,7 +39,7 @@ import java.util.function.Consumer;
  */
 public class PlayerBackpack {
     public static final String LORE_OWNER = "&7所有者: ";
-    private static final String COLORED_LORE_OWNER = ChatColor.translateAlternateColorCodes('&', LORE_OWNER);
+    private static final String COLORED_LORE_OWNER = ChatColors.color(LORE_OWNER);
     private static final NamespacedKey KEY_BACKPACK_UUID = new NamespacedKey(Slimefun.instance(), "B_UUID");
     private static final NamespacedKey KEY_OWNER_UUID = new NamespacedKey(Slimefun.instance(), "OWNER_UUID");
     private final OfflinePlayer owner;
@@ -194,12 +193,7 @@ public class PlayerBackpack {
         if (bp.name.isEmpty() || bp.name.isBlank()) {
             return;
         }
-        meta.setDisplayName(bp.name);
-    }
-
-    @ParametersAreNonnullByDefault
-    public PlayerBackpack(OfflinePlayer owner, UUID uuid, int id, int size, @Nullable ItemStack[] contents) {
-        this(owner, uuid, "", id, size, contents);
+        meta.setDisplayName(ChatColors.color(bp.name));
     }
 
     @ParametersAreNonnullByDefault
@@ -319,7 +313,7 @@ public class PlayerBackpack {
     }
 
     private Inventory newInv() {
-        var re = Bukkit.createInventory(holder, size, (name.isEmpty() ? "背包" : name) + " [大小 " + size + "]");
+        var re = Bukkit.createInventory(holder, size, (name.isEmpty() ? "背包" : ChatColors.color(name + "&r")) + " [大小 " + size + "]");
         holder.setInventory(re);
         return re;
     }

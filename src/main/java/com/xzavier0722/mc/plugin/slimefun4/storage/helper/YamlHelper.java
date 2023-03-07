@@ -80,7 +80,7 @@ public class YamlHelper {
             }
             var size = configFile.getInt("backpacks." + bpID + ".size");
 
-            var bp = controller.createBackpack(p, bpID, size);
+            var bp = controller.createBackpack(p, "",bpID, size);
 
             var changedSlot = new HashSet<Integer>();
 

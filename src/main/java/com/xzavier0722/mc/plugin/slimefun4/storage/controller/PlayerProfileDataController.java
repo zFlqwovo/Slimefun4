@@ -100,6 +100,7 @@ public class PlayerProfileDataController {
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);
         key.addField(FieldKey.BACKPACK_ID);
         key.addField(FieldKey.BACKPACK_SIZE);
+        key.addField(FieldKey.BACKPACK_NAME);
         key.addCondition(FieldKey.PLAYER_UUID, uuid);
         key.addCondition(FieldKey.BACKPACK_NUMBER, num + "");
 
@@ -108,12 +109,14 @@ public class PlayerProfileDataController {
             return null;
         }
 
-        var idStr= bResult.get(0).get(FieldKey.BACKPACK_ID);
+        var result = bResult.get(0);
         var size = Integer.parseInt(bResult.get(0).get(FieldKey.BACKPACK_SIZE));
+        var idStr = result.get(FieldKey.BACKPACK_ID);
 
         re = new PlayerBackpack(
                 owner,
                 UUID.fromString(idStr),
+                result.getOrDef(FieldKey.BACKPACK_NAME, ""),
                 num,
                 size,
                 getBackpackInv(idStr, size)
@@ -277,8 +280,8 @@ public class PlayerProfileDataController {
     }
 
     @Nonnull
-    public PlayerBackpack createBackpack(OfflinePlayer p, int num, int size) {
-        var re = new PlayerBackpack(p, UUID.randomUUID(), num, size, null);
+    public PlayerBackpack createBackpack(OfflinePlayer p, String name, int num, int size) {
+        var re = new PlayerBackpack(p, UUID.randomUUID(), name, num, size, null);
         var key = new RecordKey(DataScope.BACKPACK_PROFILE);
         key.addCondition(FieldKey.BACKPACK_ID, re.getUniqueId().toString());
         scheduleWriteTask(new UUIDKey(DataScope.NONE, p.getUniqueId()), key, getRecordSet(re), true);
