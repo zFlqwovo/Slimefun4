@@ -140,10 +140,11 @@ public class BackpackListener implements Listener {
 
         var bp = holder.getBackpack();
         var slot = e.getRawSlot();
-        if (slot >= bp.getSize()) {
+        if (slot < 0 || slot >= bp.getSize()) {
             return;
         }
 
+        // FIXME: some action (like shift-click)
         changedSlots.computeIfAbsent(bp.getUniqueId(), k -> new HashSet<>()).add(slot);
     }
 
@@ -161,12 +162,13 @@ public class BackpackListener implements Listener {
         var bp = holder.getBackpack();
         Set<Integer> changed = null;
         for (var slot : e.getRawSlots()) {
-            if (slot < bp.getSize()) {
-                if (changed == null) {
-                    changed = changedSlots.computeIfAbsent(bp.getUniqueId(), k -> new HashSet<>());
-                }
-                changed.add(slot);
+            if (slot < 0 || slot >= bp.getSize()) {
+                continue;
             }
+            if (changed == null) {
+                changed = changedSlots.computeIfAbsent(bp.getUniqueId(), k -> new HashSet<>());
+            }
+            changed.add(slot);
         }
     }
 
