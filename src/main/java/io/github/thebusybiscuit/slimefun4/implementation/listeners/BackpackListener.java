@@ -62,6 +62,7 @@ public class BackpackListener implements Listener {
         Player p = (Player) e.getPlayer();
 
         if (e.getInventory().getHolder() instanceof SlimefunBackpackHolder holder) {
+            backpacks.remove(p.getUniqueId());
             saveBackpackInv(holder.getBackpack());
             p.playSound(p.getLocation(), Sound.ENTITY_HORSE_ARMOR, 1F, 1F);
         }
