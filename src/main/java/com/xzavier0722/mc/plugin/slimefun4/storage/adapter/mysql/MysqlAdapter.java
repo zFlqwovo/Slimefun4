@@ -51,6 +51,12 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
     @Override
     public void shutdown() {
         pool.destroy();
+        pool = null;
+        config = null;
+        profileTable = null;
+        researchTable = null;
+        backpackTable = null;
+        inventoryTable = null;
     }
 
     @Override

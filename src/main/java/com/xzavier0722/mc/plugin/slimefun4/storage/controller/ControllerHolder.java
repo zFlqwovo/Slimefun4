@@ -12,6 +12,10 @@ public class ControllerHolder<T> {
         return ((ControllerHolder<CT>) holders.get(clazz)).get(type);
     }
 
+    public static void clearControllers() {
+        holders.clear();
+    }
+
     public static <CT> CT createController(Class<CT> clazz, StorageType type) {
         try {
             var re = clazz.getDeclaredConstructor().newInstance();

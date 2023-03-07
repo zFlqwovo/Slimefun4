@@ -51,7 +51,7 @@ public class SlimefunDatabaseManager {
         profileController.init(adapter, readExecutorThread, writeExecutorThread);
     }
 
-    public void initAdapter() throws IOException {
+    private void initAdapter() throws IOException {
         switch (storageType) {
             case MYSQL -> {
                 adapter = new MysqlAdapter();
@@ -85,5 +85,11 @@ public class SlimefunDatabaseManager {
     @Nullable
     public PlayerProfileDataController getProfileDataController() {
         return ControllerHolder.getController(PlayerProfileDataController.class, storageType);
+    }
+
+    public void shutdown() {
+        getProfileDataController().shutdown();
+        adapter.shutdown();
+        ControllerHolder.clearControllers();
     }
 }

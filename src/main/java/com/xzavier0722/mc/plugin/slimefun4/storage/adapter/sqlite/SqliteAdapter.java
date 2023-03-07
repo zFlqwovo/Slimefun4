@@ -38,11 +38,14 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
     @Override
     public void shutdown() {
         readPool.destroy();
+        readPool = null;
         try {
             writeConn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        writeConn = null;
+        config = null;
     }
 
     @Override

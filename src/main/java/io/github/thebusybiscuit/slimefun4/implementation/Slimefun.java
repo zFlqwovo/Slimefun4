@@ -462,6 +462,8 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.closeInventory();
         }
+
+        databaseManager.shutdown();
     }
 
     /**
