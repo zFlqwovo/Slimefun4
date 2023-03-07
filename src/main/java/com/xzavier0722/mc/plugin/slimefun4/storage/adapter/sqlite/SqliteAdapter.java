@@ -122,7 +122,7 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
                 + ");"
         );
 
-        executeQuery(
+        executeSql(
                 "CREATE INDEX IF NOT EXISTS index_player_name ON " + table + " (" + FIELD_PLAYER_NAME + ");"
         );
     }
