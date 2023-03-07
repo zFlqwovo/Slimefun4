@@ -68,8 +68,12 @@ public class YamlHelper {
         }
 
         // Backpack migrate
+        var max = 0;
         for (String backpackID : configFile.getKeys("backpacks")) {
             var bpID = Integer.parseInt(backpackID);
+            if (max < bpID) {
+                max = bpID;
+            }
             var size = configFile.getInt("backpacks." + bpID + ".size");
 
             var bp = controller.createBackpack(p, bpID, size);
@@ -85,5 +89,6 @@ public class YamlHelper {
 
             controller.saveBackpackInventory(bp, changedSlot);
         }
+        profile.setBackpackCount(max);
     }
 }

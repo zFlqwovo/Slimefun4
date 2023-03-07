@@ -276,6 +276,11 @@ public class PlayerProfile {
         return backpackNum;
     }
 
+    public void setBackpackCount(int count) {
+        backpackNum = Math.max(backpackNum, count);
+        Slimefun.getDatabaseManager().getProfileDataController().saveProfileBackpackCount(this);
+    }
+
     public @Nonnull String getTitle() {
         List<String> titles = Slimefun.getRegistry().getResearchRanks();
 
