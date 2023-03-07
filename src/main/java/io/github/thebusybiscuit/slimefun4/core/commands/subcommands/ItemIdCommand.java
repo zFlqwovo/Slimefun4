@@ -5,6 +5,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import javax.annotation.Nonnull;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -13,9 +14,6 @@ import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
 
 class ItemIdCommand extends SubCommand {
     protected ItemIdCommand(Slimefun plugin, SlimefunCommand cmd) {
@@ -24,16 +22,15 @@ class ItemIdCommand extends SubCommand {
 
     @Override
     public void onExecute(@Nonnull CommandSender sender, @Nonnull String[] args) {
-        if (sender instanceof Player) {
+        if (sender instanceof Player p) {
             if (sender.hasPermission("slimefun.command.id")) {
-                Player p = (Player) sender;
-                ItemStack item = p.getInventory().getItemInMainHand();
+                var item = p.getInventory().getItemInMainHand();
                 if (item.getType() != Material.AIR) {
-                    SlimefunItem sfItem = SlimefunItem.getByItem(item);
+                    var sfItem = SlimefunItem.getByItem(item);
                     if (sfItem != null) {
-                        String sfId = sfItem.getId();
-                        TextComponent msg = new TextComponent("该物品的ID为: ");
-                        TextComponent idMsg = new TextComponent(sfId);
+                        var sfId = sfItem.getId();
+                        var msg = new TextComponent("该物品的ID为: ");
+                        var idMsg = new TextComponent(sfId);
                         idMsg.setUnderlined(true);
                         idMsg.setItalic(true);
                         idMsg.setColor(ChatColor.GRAY);

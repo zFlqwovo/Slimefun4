@@ -13,7 +13,11 @@ import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 
 public class YamlHelper {
-    public static void migratePlayerData() {
+    /**
+     * To check the existence of old player data stored as yml
+     * and try to migrate them to database
+     */
+    public static void checkYamlPlayerData() {
         var playerFolder = new File("data-storage/Slimefun/Players/");
 
         if (!playerFolder.exists() || !playerFolder.isDirectory()) return;

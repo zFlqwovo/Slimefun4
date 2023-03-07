@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.helper.YamlHelper;
 import com.xzavier0722.mc.plugin.slimefuncomplib.ICompatibleSlimefun;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.bakedlibs.dough.protection.ProtectionManager;
@@ -265,7 +266,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
 
         // Check if Paper (<3) is installed
         if (PaperLib.isPaper()) {
-            logger.log(Level.INFO, "检测到 Paper 服务端! 性能优化已应用.");
+            logger.log(Level.INFO, "检测到你正在使用 Paper 服务端! 性能优化已应用.");
         } else {
             LangUtil.suggestPaper(this);
         }
@@ -295,6 +296,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
 
         logger.log(Level.INFO, "正在加载数据库...");
         databaseManager.init();
+        YamlHelper.checkYamlPlayerData();
 
         // Set up localization
         logger.log(Level.INFO, "正在加载语言文件...");
