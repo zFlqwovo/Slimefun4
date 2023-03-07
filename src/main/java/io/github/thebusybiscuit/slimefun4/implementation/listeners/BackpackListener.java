@@ -1,37 +1,38 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
+import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Cooler;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * This {@link Listener} is responsible for all events centered around a {@link SlimefunBackpack}.
@@ -51,7 +52,7 @@ import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
 public class BackpackListener implements Listener {
 
     private final Map<UUID, ItemStack> backpacks = new HashMap<>();
-    private final Map<UUID, Set<Integer>> changedSlots = new HashMap<>();
+    private final Map<UUID, List<Pair<ItemStack, Integer>>> invSnapshot = new HashMap<>();
 
     public void register(@Nonnull Slimefun plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -69,12 +70,16 @@ public class BackpackListener implements Listener {
     }
 
     private void saveBackpackInv(PlayerBackpack bp) {
-        var slots = changedSlots.remove(bp.getUniqueId());
-        if (slots == null) {
+        var snapshot = invSnapshot.remove(bp.getUniqueId());
+        if (snapshot == null) {
             return;
         }
 
-        Slimefun.getDatabaseManager().getProfileDataController().saveBackpackInventory(bp, slots);
+        var changed = getChangedSlots(snapshot, bp.getInventory().getContents());
+        if (changed.isEmpty()) {
+            return;
+        }
+        Slimefun.getDatabaseManager().getProfileDataController().saveBackpackInventory(bp, changed);
     }
 
     @EventHandler
@@ -124,51 +129,6 @@ public class BackpackListener implements Listener {
                     e.setCancelled(true);
                 }
             }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onItemChanged(InventoryClickEvent e) {
-        var p = e.getWhoClicked();
-        if (!backpacks.containsKey(p.getUniqueId())) {
-            return;
-        }
-
-        if (!(e.getInventory().getHolder() instanceof SlimefunBackpackHolder holder)) {
-            return;
-        }
-
-        var bp = holder.getBackpack();
-        var slot = e.getRawSlot();
-        if (slot < 0 || slot >= bp.getSize()) {
-            return;
-        }
-
-        // FIXME: some action (like shift-click)
-        changedSlots.computeIfAbsent(bp.getUniqueId(), k -> new HashSet<>()).add(slot);
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onItemChanged(InventoryDragEvent e) {
-        var p = e.getWhoClicked();
-        if (!backpacks.containsKey(p.getUniqueId())) {
-            return;
-        }
-
-        if (!(e.getInventory().getHolder() instanceof SlimefunBackpackHolder holder)) {
-            return;
-        }
-
-        var bp = holder.getBackpack();
-        Set<Integer> changed = null;
-        for (var slot : e.getRawSlots()) {
-            if (slot < 0 || slot >= bp.getSize()) {
-                continue;
-            }
-            if (changed == null) {
-                changed = changedSlots.computeIfAbsent(bp.getUniqueId(), k -> new HashSet<>());
-            }
-            changed.add(slot);
         }
     }
 
@@ -222,6 +182,7 @@ public class BackpackListener implements Listener {
                     item,
                     backpack -> {
                         backpacks.put(p.getUniqueId(), item);
+                        invSnapshot.put(backpack.getUniqueId(), getInvSnapshot(backpack.getInventory().getContents()));
                         backpack.open(p);
                     },
                     true
@@ -229,6 +190,35 @@ public class BackpackListener implements Listener {
         } else {
             Slimefun.getLocalization().sendMessage(p, "backpack.already-open", true);
         }
+    }
+
+    private List<Pair<ItemStack, Integer>> getInvSnapshot(ItemStack[] invContents) {
+        var re = new ArrayList<Pair<ItemStack, Integer>>();
+        for (var each : invContents) {
+            re.add(new Pair<>(each, each == null ? 0 : each.getAmount()));
+        }
+
+        return re;
+    }
+
+    private Set<Integer> getChangedSlots(List<Pair<ItemStack, Integer>> snapshot, ItemStack[] currContent) {
+        var re = new HashSet<Integer>();
+        for (var i = 0; i < currContent.length; i++) {
+            var each = snapshot.get(i);
+            var curr = currContent[i];
+            if (curr == null) {
+                if (each.getFirstValue() != null) {
+                    re.add(i);
+                }
+                continue;
+            }
+
+            if (!curr.equals(each.getFirstValue()) || curr.getAmount() != each.getSecondValue()) {
+                re.add(i);
+            }
+        }
+
+        return re;
     }
 
     /**

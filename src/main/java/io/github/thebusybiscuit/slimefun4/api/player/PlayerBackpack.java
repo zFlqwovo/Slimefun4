@@ -6,14 +6,8 @@ import io.github.bakedlibs.dough.common.CommonPatterns;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.BackpackListener;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.UUID;
-import java.util.function.Consumer;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -23,6 +17,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
 import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * This class represents the instance of a {@link SlimefunBackpack} that is ready to
@@ -38,6 +40,7 @@ import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
  */
 public class PlayerBackpack {
     public static final String LORE_OWNER = "&7所有者: ";
+    private static final String COLORED_LORE_OWNER = ChatColor.translateAlternateColorCodes('&', LORE_OWNER);
     private static final NamespacedKey KEY_BACKPACK_UUID = new NamespacedKey(Slimefun.instance(), "B_UUID");
     private static final NamespacedKey KEY_OWNER_UUID = new NamespacedKey(Slimefun.instance(), "OWNER_UUID");
     private final OfflinePlayer owner;
@@ -181,11 +184,12 @@ public class PlayerBackpack {
         var lore = meta.getLore();
         for (var i = 0; i < lore.size(); i++) {
             var line = lore.get(i);
-            if (LORE_OWNER.equals(line)) {
-                lore.set(i, LORE_OWNER + bp.getOwner().getName());
+            if (COLORED_LORE_OWNER.equals(line)) {
+                lore.set(i, COLORED_LORE_OWNER + bp.getOwner().getName());
                 break;
             }
         }
+        meta.setLore(lore);
 
         if (bp.name.isEmpty() || bp.name.isBlank()) {
             return;
