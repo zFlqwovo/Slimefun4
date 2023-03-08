@@ -313,6 +313,7 @@ backpack:
   no-stack: '&c你不能同时手持两个背包'
   set-name: '&e请输入背包名称'
   not-backpack-owner: '&c该背包的所有者不在线，你无权使用!'
+  not-original-item: '&c输入名字时请不要切换手上的物品!'
 workbench:
   not-enhanced: '&4你不能在普通的工作台上使用 Slimefun 物品'
 cauldron:
