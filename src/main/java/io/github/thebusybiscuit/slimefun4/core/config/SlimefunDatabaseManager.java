@@ -70,12 +70,12 @@ public class SlimefunDatabaseManager {
             }
             case SQLITE -> {
                 adapter = new SqliteAdapter();
-                var dbPath = new File("data-storage/Slimefun", "database.db");
-                dbPath.createNewFile();
+                var profilePath = new File("data-storage/Slimefun", "profile.db");
+                profilePath.createNewFile();
 
                 ((IDataSourceAdapter<SqliteConfig>) adapter).prepare(
                         new SqliteConfig(
-                                dbPath.getAbsolutePath(),
+                                profilePath.getAbsolutePath(),
                                 databaseConfig.getInt("sqlite.maxReadConnection")
                         ));
             }
