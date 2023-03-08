@@ -6,13 +6,14 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 
-public class YamlHelper {
+public class PlayerProfileMigrator {
     /**
      * To check the existence of old player data stored as yml
      * and try to migrate them to database
@@ -31,14 +32,17 @@ public class YamlHelper {
                     var uuid = UUID.fromString(file.getName().replace(".yml", ""));
                     var p = Bukkit.getOfflinePlayer(uuid);
 
+                    if (!p.hasPlayedBefore() || p == null) {
+                        return;
+                    }
+
                     if (Slimefun.getDatabaseManager().getProfileDataController().getProfile(p) == null) {
                         migratePlayerProfile(uuid);
                     }
 
                     var backupFile = new File(backupFolder, file.getName());
                     backupFile.createNewFile();
-                    Files.copy(file.toPath(), backupFile.toPath());
-
+                    Files.copy(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     file.delete();
                 } catch (IOException | IllegalArgumentException e) {
                     Slimefun.logger().log(Level.WARNING, "迁移玩家数据时出现问题", e);
