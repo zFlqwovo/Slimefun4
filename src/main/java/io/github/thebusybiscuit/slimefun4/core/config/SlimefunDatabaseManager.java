@@ -16,7 +16,7 @@ import java.util.logging.Level;
 import javax.annotation.Nullable;
 
 public class SlimefunDatabaseManager {
-    private static final String CONFIG_FILE_NAME = "database.yml";
+    private static final String PROFILE_CONFIG_FILE_NAME = "profile-storage.yml";
     private final Slimefun plugin;
     private final Config databaseConfig;
 
@@ -28,11 +28,11 @@ public class SlimefunDatabaseManager {
 
     public SlimefunDatabaseManager(Slimefun plugin) {
         this.plugin = plugin;
-        if (!new File(plugin.getDataFolder(), CONFIG_FILE_NAME).exists()) {
-            plugin.saveResource(CONFIG_FILE_NAME, false);
+        if (!new File(plugin.getDataFolder(), PROFILE_CONFIG_FILE_NAME).exists()) {
+            plugin.saveResource(PROFILE_CONFIG_FILE_NAME, false);
         }
 
-        databaseConfig = new Config(plugin, CONFIG_FILE_NAME);
+        databaseConfig = new Config(plugin, PROFILE_CONFIG_FILE_NAME);
     }
 
     public void init() {
