@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.items.multiblocks;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import io.github.bakedlibs.dough.common.ChatColors;
+import io.github.bakedlibs.dough.common.CommonPatterns;
 import io.github.bakedlibs.dough.items.ItemUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -63,11 +64,13 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
     }
 
     @ParametersAreNonnullByDefault
-    protected void upgradeBackpack(Player p, Inventory inv, SlimefunBackpack backpack, ItemStack output) {
+    protected void upgradeBackpack(Player p, Inventory inv, SlimefunBackpack backpack, ItemStack output, Runnable onReadyCb) {
         ItemStack input = null;
 
+        var contents = inv.getContents();
         for (int j = 0; j < 9; j++) {
-            if (inv.getContents()[j] != null && inv.getContents()[j].getType() != Material.AIR && SlimefunItem.getByItem(inv.getContents()[j]) instanceof SlimefunBackpack) {
+            var item = contents[j];
+            if (item != null && item.getType() != Material.AIR && SlimefunItem.getByItem(item) instanceof SlimefunBackpack) {
                 input = inv.getContents()[j];
                 break;
             }
@@ -82,10 +85,8 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
         Optional<String> id = retrieveUuid(input);
 
         if (id.isPresent()) {
-            var bUuid = id.get();
-            PlayerBackpack.setItemPdc(output, bUuid, p.getUniqueId().toString());
             Slimefun.getDatabaseManager().getProfileDataController().getBackpackAsync(
-                    bUuid,
+                    id.get(),
                     new IAsyncReadCallback<>() {
                         @Override
                         public boolean runOnMainThread() {
@@ -95,18 +96,36 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
                         @Override
                         public void onResult(PlayerBackpack result) {
                             result.setSize(size);
-                            PlayerBackpack.setItemDisplayInfo(output, result);
+                            PlayerBackpack.bindItem(output, result);
+                            onReadyCb.run();
                         }
                     }
             );
+            return;
         } else {
-            retrieveID(input).ifPresent(lore -> {
-                var meta = output.getItemMeta();
-                meta.getLore().add(lore);
-                output.setItemMeta(meta);
-                PlayerBackpack.getAsync(output, bp -> bp.setSize(size), true);
-            });
+            id = retrieveID(input);
+            if (id.isPresent()) {
+                Slimefun.getDatabaseManager().getProfileDataController().getBackpackAsync(
+                        p,
+                        Integer.parseInt(id.get()),
+                        new IAsyncReadCallback<>() {
+                            @Override
+                            public boolean runOnMainThread() {
+                                return true;
+                            }
+
+                            @Override
+                            public void onResult(PlayerBackpack result) {
+                                result.setSize(size);
+                                PlayerBackpack.bindItem(output, result);
+                                onReadyCb.run();
+                            }
+                        }
+                );
+                return;
+            }
         }
+        onReadyCb.run();
     }
 
 
@@ -114,7 +133,7 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
         if (backpack != null) {
             for (String line : backpack.getItemMeta().getLore()) {
                 if (line.startsWith(ChatColors.color("&7ID: ")) && line.contains("#")) {
-                    return Optional.of(line);
+                    return Optional.of(CommonPatterns.HASH.split(line.replace(ChatColors.color("&7ID: "), ""))[1]);
                 }
             }
         }

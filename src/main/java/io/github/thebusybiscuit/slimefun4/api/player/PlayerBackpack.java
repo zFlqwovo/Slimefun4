@@ -265,7 +265,7 @@ public class PlayerBackpack {
      * <p>
      * 二进制兼容
      *
-     * @param players The player who this Backpack will be shown to
+     * @param p The player who this Backpack will be shown to
      */
     public void open(Player p) {
         if (isInvalid) {
@@ -285,6 +285,7 @@ public class PlayerBackpack {
             throw new IllegalArgumentException("Invalid size! Size must be one of: [9, 18, 27, 36, 45, 54]");
         }
 
+        this.size = size;
         updateInv();
         Slimefun.getDatabaseManager().getProfileDataController().saveBackpackInfo(this);
     }

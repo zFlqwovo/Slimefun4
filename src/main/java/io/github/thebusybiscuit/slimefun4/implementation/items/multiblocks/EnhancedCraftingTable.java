@@ -66,7 +66,13 @@ public class EnhancedCraftingTable extends AbstractCraftingTable {
             SlimefunItem sfItem = SlimefunItem.getByItem(output);
 
             if (sfItem instanceof SlimefunBackpack backpack) {
-                upgradeBackpack(p, inv, backpack, output);
+                upgradeBackpack(p, inv, backpack, output, () -> {
+                    p.getWorld().playSound(b.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1, 1);
+                    outputInv.addItem(output);
+                });
+            } else {
+                p.getWorld().playSound(b.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1, 1);
+                outputInv.addItem(output);
             }
 
             for (int j = 0; j < 9; j++) {
@@ -76,11 +82,6 @@ public class EnhancedCraftingTable extends AbstractCraftingTable {
                     ItemUtils.consumeItem(item, true);
                 }
             }
-
-            p.getWorld().playSound(b.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1, 1);
-
-            outputInv.addItem(output);
-
         } else {
             Slimefun.getLocalization().sendMessage(p, "machines.full-inventory", true);
         }

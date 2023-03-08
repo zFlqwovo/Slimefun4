@@ -76,7 +76,9 @@ public class MagicWorkbench extends AbstractCraftingTable {
             SlimefunItem sfItem = SlimefunItem.getByItem(output);
 
             if (sfItem instanceof SlimefunBackpack backpack) {
-                upgradeBackpack(p, inv, backpack, output);
+                upgradeBackpack(p, inv, backpack, output, () -> startAnimation(p, b, inv, dispenser, output));
+            } else {
+                startAnimation(p, b, inv, dispenser, output);
             }
 
             for (int j = 0; j < 9; j++) {
