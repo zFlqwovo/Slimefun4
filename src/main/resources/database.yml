@@ -26,5 +26,5 @@ mysql:
   # 最大连接数
   maxConnection: 10
 sqlite:
-  # SQLite 最大读区线程
-  maxReadConnection: 1024
+  # SQLite 最大读取链接数
+  maxReadConnection: 5

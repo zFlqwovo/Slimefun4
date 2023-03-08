@@ -36,9 +36,9 @@ public class SlimefunDatabaseManager {
     }
 
     public void init() {
-        readExecutorThread = databaseConfig.getInt("readExecutorThread");
-        writeExecutorThread = databaseConfig.getInt("writeExecutorThread");
         storageType = StorageType.valueOf(databaseConfig.getString("storageType"));
+        readExecutorThread = databaseConfig.getInt("readExecutorThread");
+        writeExecutorThread = storageType == StorageType.SQLITE ? 1 : databaseConfig.getInt("writeExecutorThread");
 
         try {
             initAdapter();
