@@ -345,7 +345,7 @@ public class PlayerProfile {
         UUID uuid = p.getUniqueId();
         PlayerProfile profile = Slimefun.getRegistry().getPlayerProfiles().get(uuid);
 
-        if (profile != null) {
+        if (profile != null && !profile.isInvalid) {
             callback.accept(profile);
             return true;
         }
@@ -366,7 +366,8 @@ public class PlayerProfile {
     public static boolean request(@Nonnull OfflinePlayer p) {
         Validate.notNull(p, "Cannot request a Profile for null");
 
-        if (!Slimefun.getRegistry().getPlayerProfiles().containsKey(p.getUniqueId())) {
+        var profile = Slimefun.getRegistry().getPlayerProfiles().get(p.getUniqueId());
+        if (profile == null || profile.isInvalid) {
             // Should probably prevent multiple requests for the same profile in the future
             getOrCreate(p, null);
             return false;
