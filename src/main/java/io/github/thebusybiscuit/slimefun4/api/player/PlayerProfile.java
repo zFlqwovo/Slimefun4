@@ -387,7 +387,11 @@ public class PlayerProfile {
      * @return An {@link Optional} describing the result
      */
     public static @Nonnull Optional<PlayerProfile> find(@Nonnull OfflinePlayer p) {
-        return Optional.ofNullable(Slimefun.getRegistry().getPlayerProfiles().get(p.getUniqueId()));
+        var re = Slimefun.getRegistry().getPlayerProfiles().get(p.getUniqueId());
+        if (re == null || re.isInvalid) {
+            return Optional.empty();
+        }
+        return Optional.of(re);
     }
 
     public static @Nonnull Iterator<PlayerProfile> iterator() {
