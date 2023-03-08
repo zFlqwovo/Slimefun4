@@ -1,6 +1,5 @@
 package io.github.thebusybiscuit.slimefun4.implementation;
 
-import com.xzavier0722.mc.plugin.slimefun4.chat.PlayerChatCatcher;
 import com.xzavier0722.mc.plugin.slimefun4.storage.helper.PlayerProfileMigrator;
 import com.xzavier0722.mc.plugin.slimefuncomplib.ICompatibleSlimefun;
 import io.github.bakedlibs.dough.config.Config;
@@ -167,7 +166,6 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     private final SlimefunRegistry registry = new SlimefunRegistry();
     private final SlimefunCommand command = new SlimefunCommand(this);
     private final TickerTask ticker = new TickerTask();
-    private PlayerChatCatcher chatCatcher;
 
     // Services - Systems that fulfill certain tasks, treat them as a black box
     private final CustomItemDataService itemDataService = new CustomItemDataService(this, "slimefun_item");
@@ -611,7 +609,6 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * This method registers all of our {@link Listener Listeners}.
      */
     private void registerListeners() {
-        chatCatcher = new PlayerChatCatcher(this);
         // Old deprecated CS-CoreLib Listener
         new MenuListener(this);
 
@@ -1077,10 +1074,4 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     public File getFile() {
         return super.getFile();
     }
-
-    public static @Nonnull PlayerChatCatcher getChatCatcher() {
-        validateInstance();
-        return instance.chatCatcher;
-    }
-
 }
