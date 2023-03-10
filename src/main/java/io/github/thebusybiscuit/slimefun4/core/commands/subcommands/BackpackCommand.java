@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
@@ -8,6 +9,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.RestoredBackpack;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
@@ -79,18 +81,33 @@ class BackpackCommand extends SubCommand {
         Validate.notNull(p, "The player cannot be null!");
         Validate.isTrue(page > 0, "Backpack page must greater than 0!");
 
-        var bps = Slimefun.getDatabaseManager().getProfileDataController()
-                .getBackpacks(owner.getUniqueId().toString()).stream().toList();
+        Slimefun.getDatabaseManager().getProfileDataController()
+                .getBackpacksAsync(owner.getUniqueId().toString(), new IAsyncReadCallback<>() {
+                    @Override
+                    public boolean runOnMainThread() {
+                        return true;
+                    }
 
-        if (bps.isEmpty()) {
-            Slimefun.getLocalization().sendMessage(p, "commands.backpack.backpack-does-not-exist");
-            return;
-        }
+                    @Override
+                    public void onResult(Set<PlayerBackpack> result) {
+                        if (!p.isOnline()) {
+                            return;
+                        }
+                        showBackpackMenu(owner, p, result, page);
+                    }
 
+                    @Override
+                    public void onResultNotFound() {
+                        Slimefun.getLocalization().sendMessage(p, "commands.backpack.backpack-does-not-exist");
+                    }
+                });
+    }
+
+    private void showBackpackMenu(OfflinePlayer owner, Player p, Set<PlayerBackpack> result, int page) {
         var menu = new ChestMenu(owner.getName() + " 拥有的背包列表");
         menu.setEmptySlotsClickable(false);
 
-        var pages = bps.size() / 36;
+        var pages = result.size() / 36;
 
         // Draw background start
         for (int i = 0; i < 9; i++) {
@@ -98,6 +115,7 @@ class BackpackCommand extends SubCommand {
             menu.addMenuClickHandler(i, (pl, slot, item, action) -> false);
         }
 
+        var bps = new ArrayList<>(result);
         // max display 36 backpacks per page
         for (int i = 0; i <= 36; i++) {
             int slot = DISPLAY_START_SLOT + i;
@@ -116,13 +134,12 @@ class BackpackCommand extends SubCommand {
             im.setLore(lore);
             visualBackpack.setItemMeta(im);
 
-            var restoreBp = SlimefunItems.RESTORED_BACKPACK.clone();
-            PlayerBackpack.bindItem(restoreBp, bp);
             menu.addItem(slot, visualBackpack);
             menu.addMenuClickHandler(slot, (p1, slot1, item, action) -> {
                 if (!action.isRightClicked() && !action.isShiftClicked() && p1.getUniqueId() == p.getUniqueId()) {
+                    var restoreBp = SlimefunItems.RESTORED_BACKPACK.clone();
+                    PlayerBackpack.bindItem(restoreBp, bp);
                     p1.getInventory().addItem(restoreBp);
-                    p1.closeInventory();
                     Slimefun.getLocalization().sendMessage(p1, "commands.backpack.restored-backpack-given");
                 }
 
@@ -142,8 +159,8 @@ class BackpackCommand extends SubCommand {
             menu.addMenuClickHandler(46, (pl, slot, item, action) -> {
                 int next = page - 1;
 
-                if (next != page && next > 0) {
-                    openBackpackMenu(owner, p, next);
+                if (next > 0) {
+                    showBackpackMenu(owner, p, result, next);
                 }
 
                 return false;
@@ -154,8 +171,8 @@ class BackpackCommand extends SubCommand {
                 menu.addMenuClickHandler(52, (pl, slot, item, action) -> {
                     int next = page + 1;
 
-                    if (next != page && next <= pages) {
-                        openBackpackMenu(owner, p, next);
+                    if (next <= pages) {
+                        showBackpackMenu(owner, p, result, next);
                     }
 
                     return false;

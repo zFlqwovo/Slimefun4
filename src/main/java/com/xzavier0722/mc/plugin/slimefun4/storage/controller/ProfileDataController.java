@@ -221,7 +221,10 @@ public class ProfileDataController {
 
     public void getBackpacksAsync(String pUuid, IAsyncReadCallback<Set<PlayerBackpack>> callback) {
         checkDestroy();
-        readExecutor.submit(() -> invokeCallback(callback, getBackpacks(pUuid)));
+        readExecutor.submit(() -> {
+            var re = getBackpacks(pUuid);
+            invokeCallback(callback, re.isEmpty() ? null : re);
+        });
     }
 
     @Nonnull
