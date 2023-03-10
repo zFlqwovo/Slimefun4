@@ -24,7 +24,6 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 
 public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
     private ConnectionPool pool;
-    private MysqlConfig config;
     private String profileTable;
     private String researchTable;
     private String backpackTable;
@@ -39,8 +38,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 throw new IllegalStateException("Failed to create Mysql connection: ", e);
             }
         }, config.maxConnection());
-        this.config = config;
-        profileTable = SqlUtils.mapTable(DataScope.BACKPACK_PROFILE, config.tablePrefix());
+        profileTable = SqlUtils.mapTable(DataScope.PLAYER_PROFILE, config.tablePrefix());
         researchTable = SqlUtils.mapTable(DataScope.PLAYER_RESEARCH, config.tablePrefix());
         backpackTable = SqlUtils.mapTable(DataScope.BACKPACK_PROFILE, config.tablePrefix());
         inventoryTable = SqlUtils.mapTable(DataScope.BACKPACK_INVENTORY, config.tablePrefix());
@@ -52,7 +50,6 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
     public void shutdown() {
         pool.destroy();
         pool = null;
-        config = null;
         profileTable = null;
         researchTable = null;
         backpackTable = null;
@@ -81,7 +78,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
 
         var updateFields = key.getFields();
         executeSql(
-                "INSERT INTO " + SqlUtils.mapTable(key.getScope(), config.tablePrefix()) + " (" + fieldStr.get() + ") "
+                "INSERT INTO " + mapTable(key.getScope()) + " (" + fieldStr.get() + ") "
                 + "VALUES (" + valStr + ")"
                 + (updateFields.isEmpty() ? "" : " ON DUPLICATE KEY UPDATE "
                         + String.join(", ", updateFields.stream().map(field -> {
@@ -99,17 +96,14 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
     public List<RecordSet> getData(RecordKey key) {
         return executeQuery(
                 "SELECT " + SqlUtils.buildFieldStr(key.getFields()).orElse("*")
-                +" FROM " + SqlUtils.mapTable(key.getScope(), config.tablePrefix())
+                +" FROM " + mapTable(key.getScope())
                 + SqlUtils.buildConditionStr(key.getConditions()) + ";"
         );
     }
 
     @Override
     public void deleteData(RecordKey key) {
-        executeSql("DELETE FROM " + SqlUtils.mapTable(
-                key.getScope(),
-                config.tablePrefix()) + SqlUtils.buildConditionStr(key.getConditions()) + ";"
-        );
+        executeSql("DELETE FROM " + mapTable(key.getScope()) + SqlUtils.buildConditionStr(key.getConditions()) + ";");
     }
 
     private void createTables() {
@@ -203,5 +197,15 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 pool.releaseConn(conn);
             }
         }
+    }
+
+    private String mapTable(DataScope scope) {
+        return switch (scope) {
+            case PLAYER_PROFILE -> profileTable;
+            case BACKPACK_INVENTORY -> inventoryTable;
+            case BACKPACK_PROFILE -> backpackTable;
+            case PLAYER_RESEARCH -> researchTable;
+            case NONE -> throw new IllegalArgumentException("NONE cannot be a storage data scope!");
+        };
     }
 }
