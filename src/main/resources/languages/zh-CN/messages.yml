@@ -19,7 +19,8 @@ commands:
     description: 获取你丢失的背包
     invalid-id: '&4背包 ID 必须为非负数!'
     player-never-joined: '&4找不到叫这个名字的玩家!'
-    backpack-does-not-exist: '&4你指定的背包不存在!'
+    backpack-does-not-exist: '&4该玩家没有任何背包!'
+    searching: '&e查询中...'
     restored-backpack-given: '&a你的背包已被恢复并且已经放入了你的物品栏!'
   charge:
     description: 为你手持的物品充电

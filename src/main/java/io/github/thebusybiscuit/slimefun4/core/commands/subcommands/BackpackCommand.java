@@ -10,6 +10,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Restore
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
@@ -50,25 +51,32 @@ class BackpackCommand extends SubCommand {
                     return;
                 }
 
-                OfflinePlayer backpackOwner;
-
                 if (args.length == 2) {
                     if (sender.hasPermission("slimefun.command.backpack.other")) {
-                        backpackOwner = Bukkit.getOfflinePlayer(args[1]);
+                        Slimefun.getDatabaseManager().getProfileDataController()
+                                .getPlayerUuidAsync(args[1], new IAsyncReadCallback<>() {
+                                    @Override
+                                    public void onResult(UUID result) {
+                                        if (!player.isOnline()) {
+                                            return;
+                                        }
+                                        openBackpackMenu(Bukkit.getOfflinePlayer(result), player, 1);
+                                    }
+
+                                    @Override
+                                    public void onResultNotFound() {
+                                        Slimefun.getLocalization().sendMessage(player, "commands.backpack.backpack-does-not-exist");
+                                    }
+                                });
                     } else {
                         Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
                         return;
                     }
                 } else {
-                    backpackOwner = player;
+                    openBackpackMenu(player, player, 1);
                 }
 
-                if (!(backpackOwner instanceof Player) && !backpackOwner.hasPlayedBefore()) {
-                    Slimefun.getLocalization().sendMessage(sender, "commands.backpack.player-never-joined");
-                    return;
-                }
-
-                openBackpackMenu(backpackOwner, player, 1);
+                Slimefun.getLocalization().sendMessage(player, "commands.backpack.searching");
             } else {
                 Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
             }
