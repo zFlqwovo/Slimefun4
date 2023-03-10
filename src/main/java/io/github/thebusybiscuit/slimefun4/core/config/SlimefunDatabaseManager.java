@@ -6,7 +6,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.MysqlConfig;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteConfig;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ControllerHolder;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.PlayerProfileDataController;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ProfileDataController;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.StorageType;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -47,7 +47,7 @@ public class SlimefunDatabaseManager {
             return;
         }
 
-        var profileController = ControllerHolder.createController(PlayerProfileDataController.class, storageType);
+        var profileController = ControllerHolder.createController(ProfileDataController.class, storageType);
         profileController.init(adapter, readExecutorThread, writeExecutorThread);
     }
 
@@ -83,8 +83,8 @@ public class SlimefunDatabaseManager {
     }
 
     @Nullable
-    public PlayerProfileDataController getProfileDataController() {
-        return ControllerHolder.getController(PlayerProfileDataController.class, storageType);
+    public ProfileDataController getProfileDataController() {
+        return ControllerHolder.getController(ProfileDataController.class, storageType);
     }
 
     public void shutdown() {

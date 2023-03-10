@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class PlayerProfileDataController {
+public class ProfileDataController {
     private final BackpackCache backpackCache;
     private final Map<String, PlayerProfile> profileCache;
     private final Map<ScopeKey, QueuedAsyncWriteTask> scheduledWriteTasks;
@@ -41,7 +41,7 @@ public class PlayerProfileDataController {
     private ExecutorService callbackExecutor;
     private volatile boolean destroyed = false;
 
-    PlayerProfileDataController() {
+    ProfileDataController() {
         backpackCache = new BackpackCache();
         profileCache = new ConcurrentHashMap<>();
         scheduledWriteTasks = new ConcurrentHashMap<>();
