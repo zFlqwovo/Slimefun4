@@ -51,13 +51,13 @@ class BackpackCommand extends SubCommand {
 
                 if (args.length == 2) {
                     if (sender.hasPermission("slimefun.command.backpack.other")) {
-                        backpackOwner = player;
+                        backpackOwner = Bukkit.getOfflinePlayer(args[1]);
                     } else {
                         Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
                         return;
                     }
                 } else {
-                    backpackOwner = Bukkit.getOfflinePlayer(args[1]);
+                    backpackOwner = player;
                 }
 
                 if (!(backpackOwner instanceof Player) && !backpackOwner.hasPlayedBefore()) {
