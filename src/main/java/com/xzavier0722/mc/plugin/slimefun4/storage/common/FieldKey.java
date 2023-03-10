@@ -13,7 +13,14 @@ public enum FieldKey {
     BACKPACK_SIZE(true),
 
     INVENTORY_SLOT(true),
-    INVENTORY_ITEM;
+    INVENTORY_ITEM,
+
+    LOCATION,
+    CHUNK,
+    SLIMEFUN_ID,
+
+    DATA_KEY,
+    DATA_VALUE;
 
     private final boolean isNumType;
     FieldKey() {

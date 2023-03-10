@@ -4,6 +4,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.ConnectionPool;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 
@@ -16,11 +17,16 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NAME;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NUM;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_SIZE;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_CHUNK;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_KEY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_VALUE;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_ITEM;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_SLOT;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_LOCATION;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_NAME;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 
 public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
     private SqliteConfig config;
@@ -32,7 +38,14 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         this.config = config;
         writeConn = createConn();
         readPool = new ConnectionPool(this::createConn, config.maxReadConnection());
-        createTables();
+    }
+
+    @Override
+    public void initStorage(DataType type) {
+        switch (type) {
+            case PLAYER_PROFILE -> createProfileTables();
+            case BLOCK_STORAGE -> createBlockStorageTables();
+        }
     }
 
     @Override
@@ -104,11 +117,18 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         executeSql("DELETE FROM " + SqlUtils.mapTable(key.getScope()) + SqlUtils.buildConditionStr(key.getConditions()) + ";");
     }
 
-    private void createTables() {
+    private void createProfileTables() {
         createProfileTable();
         createResearchTable();
         createBackpackTable();
-        createInventoryTable();
+        createBackpackInvTable();
+    }
+
+    private void createBlockStorageTables() {
+        createBlockRecordTable();
+        createBlockDataTable();
+        createBlockInvTable();
+        createChunkDataTable();
     }
 
     private void createProfileTable() {
@@ -148,15 +168,15 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         var table = SqlUtils.mapTable(DataScope.BACKPACK_PROFILE);
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
-                        + table + "("
-                        + FIELD_BACKPACK_ID + " TEXT PRIMARY KEY NOT NULL, "
-                        + FIELD_PLAYER_UUID + " TEXT NOT NULL, "
-                        + FIELD_BACKPACK_NUM + " INTEGER NOT NULL, "
-                        + FIELD_BACKPACK_NAME + " TEXT NULL, "
-                        + FIELD_BACKPACK_SIZE + " INTEGER NOT NULL, "
-                        + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
-                        + "REFERENCES " + SqlUtils.mapTable(DataScope.PLAYER_PROFILE) + "(" + FIELD_PLAYER_UUID + ") "
-                        + "ON UPDATE CASCADE ON DELETE CASCADE);"
+                + table + "("
+                + FIELD_BACKPACK_ID + " TEXT PRIMARY KEY NOT NULL, "
+                + FIELD_PLAYER_UUID + " TEXT NOT NULL, "
+                + FIELD_BACKPACK_NUM + " INTEGER NOT NULL, "
+                + FIELD_BACKPACK_NAME + " TEXT NULL, "
+                + FIELD_BACKPACK_SIZE + " INTEGER NOT NULL, "
+                + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
+                + "REFERENCES " + SqlUtils.mapTable(DataScope.PLAYER_PROFILE) + "(" + FIELD_PLAYER_UUID + ") "
+                + "ON UPDATE CASCADE ON DELETE CASCADE);"
         );
 
         executeSql(
@@ -164,21 +184,81 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         );
     }
 
-    private void createInventoryTable() {
+    private void createBackpackInvTable() {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
-                        + SqlUtils.mapTable(DataScope.BACKPACK_INVENTORY) + "("
-                        + FIELD_BACKPACK_ID + " TEXT NOT NULL, "
-                        + FIELD_INVENTORY_SLOT + " INTEGER NOT NULL, "
-                        + FIELD_INVENTORY_ITEM + " TEXT NOT NULL, "
-                        + "FOREIGN KEY (" + FIELD_BACKPACK_ID + ") "
-                        + "REFERENCES " + SqlUtils.mapTable(DataScope.BACKPACK_PROFILE) + "(" + FIELD_BACKPACK_ID + ") "
-                        + "ON UPDATE CASCADE ON DELETE CASCADE, "
-                        + "PRIMARY KEY (" + FIELD_BACKPACK_ID + ", " + FIELD_INVENTORY_SLOT + ")"
-                        + ");"
+                + SqlUtils.mapTable(DataScope.BACKPACK_INVENTORY) + "("
+                + FIELD_BACKPACK_ID + " TEXT NOT NULL, "
+                + FIELD_INVENTORY_SLOT + " INTEGER NOT NULL, "
+                + FIELD_INVENTORY_ITEM + " TEXT NOT NULL, "
+                + "FOREIGN KEY (" + FIELD_BACKPACK_ID + ") "
+                + "REFERENCES " + SqlUtils.mapTable(DataScope.BACKPACK_PROFILE) + "(" + FIELD_BACKPACK_ID + ") "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "PRIMARY KEY (" + FIELD_BACKPACK_ID + ", " + FIELD_INVENTORY_SLOT + ")"
+                + ");"
         );
     }
 
+
+    private void createBlockRecordTable() {
+        var table = SqlUtils.mapTable(DataScope.BLOCK_RECORD);
+        executeSql(
+                "CREATE TABLE IF NOT EXISTS "
+                + table + "("
+                + FIELD_LOCATION + " TEXT PRIMARY KEY NOT NULL, "
+                + FIELD_CHUNK + " TEXT NOT NULL, "
+                + FIELD_SLIMEFUN_ID + " TEXT NOT NULL, "
+                + "INDEX " + FIELD_CHUNK + " (chunk)"
+                + ");"
+        );
+
+        executeSql(
+                "CREATE INDEX IF NOT EXISTS index_chunk ON " + table + " (" + FIELD_CHUNK + ");"
+        );
+    }
+
+    private void createBlockDataTable() {
+        executeSql(
+                "CREATE TABLE IF NOT EXISTS "
+                + SqlUtils.mapTable(DataScope.BLOCK_DATA) + "("
+                + FIELD_LOCATION + " TEXT NOT NULL, "
+                + FIELD_DATA_KEY + " TEXT NOT NULL, "
+                + FIELD_DATA_VALUE + " TEXT NOT NULL, "
+                + "FOREIGN KEY (" + FIELD_LOCATION + ") "
+                + "REFERENCES " + SqlUtils.mapTable(DataScope.BLOCK_RECORD) + "(" + FIELD_LOCATION + ") "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "PRIMARY KEY (" + FIELD_LOCATION + ", " + FIELD_DATA_KEY + ")"
+                + ");"
+        );
+    }
+
+    private void createChunkDataTable() {
+        executeSql(
+                "CREATE TABLE IF NOT EXISTS "
+                + SqlUtils.mapTable(DataScope.CHUNK_DATA) + "("
+                + FIELD_CHUNK + " TEXT NOT NULL, "
+                + FIELD_DATA_KEY + " TEXT NOT NULL, "
+                + FIELD_DATA_VALUE + " TEXT NOT NULL, "
+                + "PRIMARY KEY (" + FIELD_CHUNK + ", " + FIELD_DATA_KEY + ")"
+                + ");"
+        );
+    }
+
+    private void createBlockInvTable() {
+        executeSql(
+                "CREATE TABLE IF NOT EXISTS "
+                + SqlUtils.mapTable(DataScope.BLOCK_INVENTORY) + "("
+                + FIELD_LOCATION + " TEXT NOT NULL, "
+                + FIELD_INVENTORY_SLOT + " INTEGER NOT NULL, "
+                + FIELD_INVENTORY_ITEM + " TEXT NOT NULL, "
+                + "FOREIGN KEY (" + FIELD_LOCATION + ") "
+                + "REFERENCES " + SqlUtils.mapTable(DataScope.BLOCK_RECORD) + "(" + FIELD_LOCATION + ") "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "PRIMARY KEY (" + FIELD_LOCATION + ", " + FIELD_INVENTORY_SLOT + ")"
+                + ");"
+        );
+    }
+    
     private synchronized void executeSql(String sql) {
         try {
             SqlUtils.execSql(writeConn, sql);

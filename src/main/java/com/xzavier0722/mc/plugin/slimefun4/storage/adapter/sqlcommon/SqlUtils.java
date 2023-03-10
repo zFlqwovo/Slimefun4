@@ -20,13 +20,22 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NAME;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NUM;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_SIZE;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_CHUNK;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_KEY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_VALUE;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_ITEM;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_SLOT;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_LOCATION;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_NAME;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_BACKPACK;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_BACKPACK_INVENTORY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_BLOCK_DATA;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_BLOCK_INVENTORY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_BLOCK_RECORD;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_CHUNK_DATA;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_PLAYER_PROFILE;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_PLAYER_RESEARCH;
 
@@ -44,21 +53,30 @@ public class SqlUtils {
         fieldMap.put(FieldKey.BACKPACK_SIZE, FIELD_BACKPACK_SIZE);
         fieldMap.put(FieldKey.INVENTORY_SLOT, FIELD_INVENTORY_SLOT);
         fieldMap.put(FieldKey.INVENTORY_ITEM, FIELD_INVENTORY_ITEM);
+        fieldMap.put(FieldKey.LOCATION, FIELD_LOCATION);
+        fieldMap.put(FieldKey.CHUNK, FIELD_CHUNK);
+        fieldMap.put(FieldKey.SLIMEFUN_ID, FIELD_SLIMEFUN_ID);
+        fieldMap.put(FieldKey.DATA_KEY, FIELD_DATA_KEY);
+        fieldMap.put(FieldKey.DATA_VALUE, FIELD_DATA_VALUE);
         mapper = new FieldMapper<>(fieldMap);
     }
 
     public static String mapTable(DataScope scope) {
-        return mapTable(scope, "");
-    }
-
-    public static String mapTable(DataScope scope, String prefix) {
-        return prefix + switch (scope) {
+        return switch (scope) {
             case PLAYER_PROFILE -> TABLE_NAME_PLAYER_PROFILE;
             case PLAYER_RESEARCH -> TABLE_NAME_PLAYER_RESEARCH;
             case BACKPACK_PROFILE -> TABLE_NAME_BACKPACK;
             case BACKPACK_INVENTORY -> TABLE_NAME_BACKPACK_INVENTORY;
+            case BLOCK_RECORD -> TABLE_NAME_BLOCK_RECORD;
+            case BLOCK_DATA -> TABLE_NAME_BLOCK_DATA;
+            case CHUNK_DATA -> TABLE_NAME_CHUNK_DATA;
+            case BLOCK_INVENTORY -> TABLE_NAME_BLOCK_INVENTORY;
             case NONE -> throw new IllegalArgumentException("NONE cannot be a storage data scope!");
         };
+    }
+
+    public static String mapTable(DataScope scope, String prefix) {
+        return prefix + mapTable(scope);
     }
 
     public static String mapField(FieldKey key) {
