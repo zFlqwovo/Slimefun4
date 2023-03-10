@@ -6,11 +6,13 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.RestoredBackpack;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import java.util.ArrayList;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -40,20 +42,30 @@ class BackpackCommand extends SubCommand {
     public void onExecute(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (sender.hasPermission("slimefun.command.backpack")) {
-                if (args.length != 2) {
-                    Slimefun.getLocalization().sendMessage(sender, "messages.usage", true, msg -> msg.replace("%usage%", "/sf backpack <Player> <ID>"));
+                if (args.length < 1) {
+                    Slimefun.getLocalization().sendMessage(sender, "messages.usage", true, msg -> msg.replace("%usage%", "/sf backpack (玩家名)"));
                     return;
                 }
 
-                @SuppressWarnings("deprecation")
-                OfflinePlayer backpackOwner = Bukkit.getOfflinePlayer(args[1]);
+                OfflinePlayer backpackOwner;
+
+                if (args.length == 2) {
+                    if (sender.hasPermission("slimefun.command.backpack.other")) {
+                        backpackOwner = player;
+                    } else {
+                        Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
+                        return;
+                    }
+                } else {
+                    backpackOwner = Bukkit.getOfflinePlayer(args[1]);
+                }
 
                 if (!(backpackOwner instanceof Player) && !backpackOwner.hasPlayedBefore()) {
                     Slimefun.getLocalization().sendMessage(sender, "commands.backpack.player-never-joined");
                     return;
                 }
 
-                openBackpackMenu(player, 1);
+                openBackpackMenu(backpackOwner, player, 1);
             } else {
                 Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
             }
@@ -62,19 +74,19 @@ class BackpackCommand extends SubCommand {
         }
     }
 
-    private void openBackpackMenu(@Nonnull Player p, int page) {
+    private void openBackpackMenu(@Nonnull OfflinePlayer owner, @Nonnull Player p, int page) {
         Validate.notNull(p, "The player cannot be null!");
         Validate.isTrue(page > 0, "Backpack page must greater than 0!");
 
         var bps = Slimefun.getDatabaseManager().getProfileDataController()
-                .getBackpacks(p.getUniqueId().toString()).stream().toList();
+                .getBackpacks(owner.getUniqueId().toString()).stream().toList();
 
         if (bps.isEmpty()) {
             Slimefun.getLocalization().sendMessage(p, "commands.backpack.backpack-does-not-exist");
             return;
         }
 
-        var menu = new ChestMenu("拥有的背包列表");
+        var menu = new ChestMenu(owner.getName() + " 拥有的背包列表");
         menu.setEmptySlotsClickable(false);
 
         var pages = bps.size() / 36;
@@ -93,9 +105,19 @@ class BackpackCommand extends SubCommand {
                 break;
             }
             var bp = bps.get(index);
+
+            var visualBackpack = SlimefunItems.RESTORED_BACKPACK.clone();
+            var im = visualBackpack.getItemMeta();
+            im.setDisplayName(bp.getName().isEmpty() ? "背包 #" + bp.getId() : bp.getName());
+            var lore = new ArrayList<String>();
+            lore.add("");
+            lore.add(ChatColor.translateAlternateColorCodes('&', "&a左键 获取此背包"));
+            im.setLore(lore);
+            visualBackpack.setItemMeta(im);
+
             var restoreBp = SlimefunItems.RESTORED_BACKPACK.clone();
-            Slimefun.getBackpackListener().setBackpackId(p, restoreBp, 2, bp.getId());
-            menu.addItem(slot, restoreBp);
+            Slimefun.getBackpackListener().setBackpackId(owner, restoreBp, 2, bp.getId());
+            menu.addItem(slot, visualBackpack);
             menu.addMenuClickHandler(slot, (p1, slot1, item, action) -> {
                 if (!action.isRightClicked() && !action.isShiftClicked() && p1.getUniqueId() == p.getUniqueId()) {
                     p1.getInventory().addItem(restoreBp);
@@ -120,7 +142,7 @@ class BackpackCommand extends SubCommand {
                 int next = page - 1;
 
                 if (next != page && next > 0) {
-                    openBackpackMenu(p, next);
+                    openBackpackMenu(owner, p, next);
                 }
 
                 return false;
@@ -132,7 +154,7 @@ class BackpackCommand extends SubCommand {
                     int next = page + 1;
 
                     if (next != page && next <= pages) {
-                        openBackpackMenu(p, next);
+                        openBackpackMenu(owner, p, next);
                     }
 
                     return false;
