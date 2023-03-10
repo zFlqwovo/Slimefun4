@@ -162,5 +162,7 @@ class BackpackCommand extends SubCommand {
                 });
             }
         }
+
+        menu.open(p);
     }
 }
