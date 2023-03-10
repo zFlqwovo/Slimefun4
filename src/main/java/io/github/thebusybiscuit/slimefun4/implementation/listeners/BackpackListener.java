@@ -7,9 +7,17 @@ import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Cooler;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
-import org.apache.commons.lang.Validate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,19 +28,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * This {@link Listener} is responsible for all events centered around a {@link SlimefunBackpack}.
@@ -228,38 +224,5 @@ public class BackpackListener implements Listener {
         }
 
         return re;
-    }
-
-    /**
-     * This method sets the id for a backpack onto the given {@link ItemStack}.
-     * 
-     * @param backpackOwner
-     *            The owner of this backpack
-     * @param item
-     *            The {@link ItemStack} to modify
-     * @param line
-     *            The line at which the ID should be replaced
-     * @param id
-     *            The id of this backpack
-     */
-    public void setBackpackId(@Nonnull OfflinePlayer backpackOwner, @Nonnull ItemStack item, int line, int id) {
-        Validate.notNull(backpackOwner, "Backpacks must have an owner!");
-        Validate.notNull(item, "Cannot set the id onto null!");
-
-        ItemMeta im = item.getItemMeta();
-
-        if (!im.hasLore()) {
-            throw new IllegalArgumentException("This backpack does not have any lore!");
-        }
-
-        List<String> lore = im.getLore();
-
-        if (line >= lore.size() || !lore.get(line).contains("<ID>")) {
-            throw new IllegalArgumentException("Specified a line that is out of bounds or invalid!");
-        }
-
-        lore.set(line, lore.get(line).replace("<ID>", backpackOwner.getUniqueId() + "#" + id));
-        im.setLore(lore);
-        item.setItemMeta(im);
     }
 }

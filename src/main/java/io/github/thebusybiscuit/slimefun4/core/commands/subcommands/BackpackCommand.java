@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
+import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -116,7 +117,7 @@ class BackpackCommand extends SubCommand {
             visualBackpack.setItemMeta(im);
 
             var restoreBp = SlimefunItems.RESTORED_BACKPACK.clone();
-            Slimefun.getBackpackListener().setBackpackId(owner, restoreBp, 2, bp.getId());
+            PlayerBackpack.bindItem(restoreBp, bp);
             menu.addItem(slot, visualBackpack);
             menu.addMenuClickHandler(slot, (p1, slot1, item, action) -> {
                 if (!action.isRightClicked() && !action.isShiftClicked() && p1.getUniqueId() == p.getUniqueId()) {
