@@ -1,7 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation;
 
 import com.xzavier0722.mc.plugin.slimefun4.chat.PlayerChatCatcher;
-import com.xzavier0722.mc.plugin.slimefun4.storage.helper.PlayerProfileMigrator;
+import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.PlayerProfileMigrator;
 import com.xzavier0722.mc.plugin.slimefuncomplib.ICompatibleSlimefun;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.bakedlibs.dough.protection.ProtectionManager;
@@ -297,8 +297,8 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         registry.load(this);
 
         logger.log(Level.INFO, "正在加载数据库...");
+        PlayerProfileMigrator.checkOldData(logger);
         databaseManager.init();
-        PlayerProfileMigrator.checkYamlPlayerData();
 
         // Set up localization
         logger.log(Level.INFO, "正在加载语言文件...");

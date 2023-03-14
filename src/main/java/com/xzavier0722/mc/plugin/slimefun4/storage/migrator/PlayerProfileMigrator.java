@@ -1,4 +1,4 @@
-package com.xzavier0722.mc.plugin.slimefun4.storage.helper;
+package com.xzavier0722.mc.plugin.slimefun4.storage.migrator;
 
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
@@ -10,18 +10,29 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 
 public class PlayerProfileMigrator {
+    private static final File playerFolder = new File("data-storage/Slimefun/Players/");
+
+    public static void checkOldData(Logger logger) {
+        if (playerFolder.exists() && playerFolder.isDirectory()) {
+            logger.log(Level.WARNING, "检测到使用文件储存的旧玩家数据, 请使用 /sf migrate 迁移旧数据至数据库!");
+        }
+    }
+
     /**
      * To check the existence of old player data stored as yml
      * and try to migrate them to database
      */
-    public static void checkYamlPlayerData() {
-        var playerFolder = new File("data-storage/Slimefun/Players/");
+    public static MigrateStatus migrateOldData() {
+        var result = MigrateStatus.SUCCESS;
 
-        if (!playerFolder.exists() || !playerFolder.isDirectory()) return;
+        if (!playerFolder.exists() || !playerFolder.isDirectory()) {
+            return MigrateStatus.MIGRATED;
+        }
 
         var backupFolder = new File("data-storage/Slimefun/Players_Backup");
         backupFolder.mkdirs();
@@ -33,7 +44,8 @@ public class PlayerProfileMigrator {
                     var p = Bukkit.getOfflinePlayer(uuid);
 
                     if (!p.hasPlayedBefore() || p == null) {
-                        return;
+                        Slimefun.logger().log(Level.FINEST, "检测到从未加入服务器玩家的数据, 已自动跳过");
+                        continue;
                     }
 
                     if (Slimefun.getDatabaseManager().getProfileDataController().getProfile(p) == null) {
@@ -46,11 +58,13 @@ public class PlayerProfileMigrator {
                     file.delete();
                 } catch (IOException | IllegalArgumentException e) {
                     Slimefun.logger().log(Level.WARNING, "迁移玩家数据时出现问题", e);
+                    result = MigrateStatus.FAILED;
                 }
             }
         }
 
         Slimefun.logger().log(Level.INFO, "迁移玩家数据完成! 迁移前的数据已储存在 " + backupFolder.getAbsolutePath());
+        return result;
     }
 
     private static void migratePlayerProfile(@Nonnull UUID uuid) {

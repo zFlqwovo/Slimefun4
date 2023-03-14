@@ -39,8 +39,13 @@ commands:
     disabled: '&7已禁用调试模式'
   reload:
     description: "重载 Slimefun 配置文件"
-    reload-success: "&a成功重载配置文件."
-    reload-failed: "&c重载配置文件失败! 你可能需要重启服务器以应用更改, 查看后台输出信息了解更多."
+    success: "&a成功重载配置文件."
+    failed: "&c重载配置文件失败! 你可能需要重启服务器以应用更改, 查看后台输出信息了解更多."
+  migrate:
+    description: "迁移旧数据"
+    success: "&a迁移旧数据至数据库成功."
+    failed: "&c迁移数据过程中出现了问题, 请查看后台."
+    already-migrated: "&a暂无可迁移数据."
 placeholderapi:
   profile-loading: '加载中...'
 guide:
