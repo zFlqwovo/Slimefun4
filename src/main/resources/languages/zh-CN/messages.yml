@@ -37,6 +37,10 @@ commands:
     none-running: '&7当前没有运行的测试项!'
     running: '&7正在调试模式中运行该测试项: &6%test%'
     disabled: '&7已禁用调试模式'
+  reload:
+    description: "重载 Slimefun 配置文件"
+    reload-success: "&a成功重载配置文件."
+    reload-failed: "&c重载配置文件失败! 你可能需要重启服务器以应用更改, 查看后台输出信息了解更多."
 placeholderapi:
   profile-loading: '加载中...'
 guide:

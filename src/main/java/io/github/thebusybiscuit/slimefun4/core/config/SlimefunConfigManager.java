@@ -119,6 +119,7 @@ public class SlimefunConfigManager {
                     item.register(item.getAddon());
                 } else {
                     Slimefun.logger().log(Level.WARNING, "物品禁用暂时不支持热重载, 请手动重启服务器.");
+                    isSuccessful = false;
                 }
             }
 

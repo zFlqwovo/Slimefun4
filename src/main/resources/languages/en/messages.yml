@@ -39,6 +39,11 @@ commands:
     running: '&7Running debug mode with test: &6%test%'
     disabled: '&7Disabled debug mode.'
 
+  reload:
+    description: "Reload config file"
+    reload-success: "&aReloaded config file successfully."
+    reload-failed: "&cReload config failed, you may need restart server to apply change, see console for more info."
+
 placeholderapi:
   profile-loading: 'Loading...'
 
