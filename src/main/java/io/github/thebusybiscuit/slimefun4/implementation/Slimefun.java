@@ -114,6 +114,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuListener;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
+import net.guizhanss.slimefun4.updater.AutoUpdateTask;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -380,6 +381,9 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         integrations.start();
 
         gitHubService.start(this);
+
+        // 汉化版自动更新
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, new AutoUpdateTask(this, getFile()));
 
         // Hooray!
         logger.log(Level.INFO, "Slimefun 完成加载, 耗时 {0}", getStartupTime(timestamp));
