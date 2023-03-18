@@ -146,7 +146,7 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
             return Optional.empty();
         }
 
-        return PlayerBackpack.getUuid(backpack.getItemMeta());
+        return PlayerBackpack.getBackpackUUID(backpack.getItemMeta());
     }
 
 }

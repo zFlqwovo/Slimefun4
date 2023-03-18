@@ -150,7 +150,7 @@ public class BackpackListener implements Listener {
     @ParametersAreNonnullByDefault
     private void openBackpack(Player p, ItemStack item, PlayerProfile profile, int size) {
         var meta = item.getItemMeta();
-        if (PlayerBackpack.getUuid(meta).isEmpty() && PlayerBackpack.getNum(meta).isEmpty()) {
+        if (PlayerBackpack.getBackpackUUID(meta).isEmpty() && PlayerBackpack.getBackpackID(meta).isEmpty()) {
             // Create backpack
             Slimefun.getLocalization().sendMessage(p, "backpack.set-name", true);
             Slimefun.getChatCatcher().scheduleCatcher(p.getUniqueId(), name -> {

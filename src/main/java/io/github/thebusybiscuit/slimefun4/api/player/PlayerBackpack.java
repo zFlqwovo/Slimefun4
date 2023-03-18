@@ -6,6 +6,13 @@ import io.github.bakedlibs.dough.common.CommonPatterns;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.BackpackListener;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.UUID;
+import java.util.function.Consumer;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -16,14 +23,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
 import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
  * This class represents the instance of a {@link SlimefunBackpack} that is ready to
@@ -56,7 +55,7 @@ public class PlayerBackpack {
             return;
         }
 
-        var bUuid = getUuid(item.getItemMeta());
+        var bUuid = getBackpackUUID(item.getItemMeta());
         if (bUuid.isPresent()) {
             Slimefun.getDatabaseManager().getProfileDataController().getBackpackAsync(
                     bUuid.get(),
@@ -72,6 +71,7 @@ public class PlayerBackpack {
                         }
                     }
             );
+
             return;
         }
 
@@ -84,8 +84,8 @@ public class PlayerBackpack {
                 String[] splitLine = CommonPatterns.HASH.split(line);
 
                 if (CommonPatterns.NUMERIC.matcher(splitLine[1]).matches()) {
-                    id = OptionalInt.of(Integer.parseInt(splitLine[1]));
                     uuid = splitLine[0].replace(ChatColors.color("&7ID: "), "");
+                    id = OptionalInt.of(Integer.parseInt(splitLine[1]));
                 }
             }
         }
@@ -114,21 +114,21 @@ public class PlayerBackpack {
         }
     }
 
-    public static Optional<String> getUuid(ItemMeta meta) {
+    public static Optional<String> getBackpackUUID(ItemMeta meta) {
         if (meta == null) {
             return Optional.empty();
         }
         return Optional.ofNullable(meta.getPersistentDataContainer().get(KEY_BACKPACK_UUID, PersistentDataType.STRING));
     }
 
-    public static Optional<String> getOwnerUuid(ItemMeta meta) {
+    public static Optional<String> getOwnerUUID(ItemMeta meta) {
         if (meta == null) {
             return Optional.empty();
         }
         return Optional.ofNullable(meta.getPersistentDataContainer().get(KEY_OWNER_UUID, PersistentDataType.STRING));
     }
 
-    public static OptionalInt getNum(ItemMeta meta) {
+    public static OptionalInt getBackpackID(ItemMeta meta) {
         if (meta == null) {
             return OptionalInt.empty();
         }
@@ -169,7 +169,7 @@ public class PlayerBackpack {
         if (Slimefun.getCfg().getBoolean("backpack.allow-open-when-owner-offline")) {
             return true;
         }
-        var ownerUuid = PlayerBackpack.getOwnerUuid(meta);
+        var ownerUuid = PlayerBackpack.getOwnerUUID(meta);
         return ownerUuid.isEmpty() || Bukkit.getPlayer(UUID.fromString(ownerUuid.get())) != null;
     }
 

@@ -64,6 +64,8 @@ public class PlayerProfileMigrator {
         }
 
         Slimefun.logger().log(Level.INFO, "迁移玩家数据完成! 迁移前的数据已储存在 " + backupFolder.getAbsolutePath());
+        playerFolder.delete();
+
         return result;
     }
 
