@@ -30,7 +30,7 @@ public class PlayerProfileMigrator {
     public static MigrateStatus migrateOldData() {
         var result = MigrateStatus.SUCCESS;
 
-        if (!playerFolder.exists() || !playerFolder.isDirectory()) {
+        if (!playerFolder.exists() || !playerFolder.isDirectory() || playerFolder.listFiles() == null || playerFolder.listFiles().length == 0) {
             return MigrateStatus.MIGRATED;
         }
 
@@ -44,7 +44,7 @@ public class PlayerProfileMigrator {
                     var p = Bukkit.getOfflinePlayer(uuid);
 
                     if (!p.hasPlayedBefore() || p == null) {
-                        Slimefun.logger().log(Level.FINEST, "检测到从未加入服务器玩家的数据, 已自动跳过");
+                        Slimefun.logger().log(Level.INFO, "检测到从未加入服务器玩家的数据, 已自动跳过");
                         continue;
                     }
 
@@ -56,9 +56,12 @@ public class PlayerProfileMigrator {
                     backupFile.createNewFile();
                     Files.copy(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     file.delete();
-                } catch (IOException | IllegalArgumentException e) {
+                } catch (IOException e) {
                     Slimefun.logger().log(Level.WARNING, "迁移玩家数据时出现问题", e);
                     result = MigrateStatus.FAILED;
+                } catch (IllegalArgumentException ignored) {
+                    Slimefun.logger().log(Level.WARNING, "检测到不合法命名的玩家数据文件: '" + file.getName() + "'");
+                    // illegal player name, skip
                 }
             }
         }
@@ -100,7 +103,7 @@ public class PlayerProfileMigrator {
             }
             var size = configFile.getInt("backpacks." + bpID + ".size");
 
-            var bp = controller.createBackpack(p, "",bpID, size);
+            var bp = controller.createBackpack(p, "", bpID, size);
 
             var changedSlot = new HashSet<Integer>();
 

@@ -22,7 +22,7 @@ public class MigrateCommand extends SubCommand {
 
     @Override
     public void onExecute(@Nonnull CommandSender sender, @Nonnull String[] args) {
-        if (sender instanceof ConsoleCommandSender) {
+        if (sender.isOp() || sender instanceof ConsoleCommandSender) {
             try {
                 var status = PlayerProfileMigrator.migrateOldData();
                 switch (status) {
@@ -35,6 +35,8 @@ public class MigrateCommand extends SubCommand {
                 Slimefun.getLocalization().sendMessage(sender, "commands.migrate.failed", true);
                 plugin.getLogger().log(Level.WARNING, "迁移数据时出现意外", e);
             }
+        } else {
+            Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
         }
     }
 }
