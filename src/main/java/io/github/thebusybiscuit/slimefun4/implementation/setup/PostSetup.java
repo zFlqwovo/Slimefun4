@@ -1,20 +1,5 @@
 package io.github.thebusybiscuit.slimefun4.implementation.setup;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.inventory.ItemStack;
-
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
@@ -22,11 +7,21 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.multiblocks.Grind
 import io.github.thebusybiscuit.slimefun4.implementation.items.multiblocks.MakeshiftSmeltery;
 import io.github.thebusybiscuit.slimefun4.implementation.items.multiblocks.OreCrusher;
 import io.github.thebusybiscuit.slimefun4.implementation.items.multiblocks.Smeltery;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.AContainer;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecipe;
-
 import net.guizhanss.slimefun4.utils.WikiUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.inventory.ItemStack;
 
 public final class PostSetup {
 
@@ -79,7 +74,7 @@ public final class PostSetup {
 
         Slimefun.getItemCfg().save();
         Slimefun.getResearchCfg().save();
-        Slimefun.getRegistry().setAutoLoadingMode(true);
+        Slimefun.getConfigManager().setAutoLoadingMode(true);
     }
 
     /**

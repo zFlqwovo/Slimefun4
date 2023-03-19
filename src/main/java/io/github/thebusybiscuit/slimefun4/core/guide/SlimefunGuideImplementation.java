@@ -7,14 +7,13 @@ import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.core.guide.options.SlimefunGuideSettings;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.guide.SurvivalSlimefunGuide;
+import java.util.function.Consumer;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import ren.natsuyuk1.slimefun4.VaultHelper;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.function.Consumer;
 
 /**
  * This interface is used for the different implementations that add behaviour
@@ -66,7 +65,7 @@ public interface SlimefunGuideImplementation {
     default void unlockItem(Player p, SlimefunItem sfitem, Consumer<Player> callback) {
         Research research = sfitem.getResearch();
 
-        if (p.getGameMode() == GameMode.CREATIVE && Slimefun.getRegistry().isFreeCreativeResearchingEnabled()) {
+        if (p.getGameMode() == GameMode.CREATIVE && Slimefun.getConfigManager().isFreeCreativeResearchingEnabled()) {
             research.unlock(p, true, callback);
         } else {
             if (VaultHelper.isUsable()) {
@@ -75,7 +74,7 @@ public interface SlimefunGuideImplementation {
                 p.setLevel(p.getLevel() - research.getCost());
             }
 
-            boolean skipLearningAnimation = Slimefun.getRegistry().isLearningAnimationDisabled() || !SlimefunGuideSettings.hasLearningAnimationEnabled(p);
+            boolean skipLearningAnimation = Slimefun.getConfigManager().isLearningAnimationDisabled() || !SlimefunGuideSettings.hasLearningAnimationEnabled(p);
             research.unlock(p, skipLearningAnimation, callback);
         }
     }

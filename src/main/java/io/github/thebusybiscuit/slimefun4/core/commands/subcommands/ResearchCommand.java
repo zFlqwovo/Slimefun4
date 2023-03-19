@@ -1,20 +1,17 @@
 package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
-import java.util.Optional;
-import java.util.function.UnaryOperator;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import io.github.bakedlibs.dough.common.PlayerList;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 class ResearchCommand extends SubCommand {
 
@@ -34,7 +31,7 @@ class ResearchCommand extends SubCommand {
     @Override
     public void onExecute(CommandSender sender, String[] args) {
         // Check if researching is even enabled
-        if (!Slimefun.getRegistry().isResearchingEnabled()) {
+        if (!Slimefun.getConfigManager().isResearchingEnabled()) {
             Slimefun.getLocalization().sendMessage(sender, "messages.researching-is-disabled");
             return;
         }

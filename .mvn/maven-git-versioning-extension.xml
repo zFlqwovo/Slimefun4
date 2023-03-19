@@ -14,7 +14,7 @@
            <version>${ref}-${commit.short}</version>
        </ref>
        <ref type="branch">
-           <pattern>feature/(.+)</pattern>
+           <pattern>feat/(.+)</pattern>
            <version>${ref}-${commit.short}</version>
        </ref>
        <ref type = "tag">

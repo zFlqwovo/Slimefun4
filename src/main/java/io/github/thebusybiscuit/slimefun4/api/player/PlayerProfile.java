@@ -1,37 +1,9 @@
 package io.github.thebusybiscuit.slimefun4.api.player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.stream.IntStream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import io.github.bakedlibs.dough.common.ChatColors;
-import io.github.bakedlibs.dough.common.CommonPatterns;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.events.AsyncProfileLoadEvent;
 import io.github.thebusybiscuit.slimefun4.api.gps.Waypoint;
@@ -43,6 +15,25 @@ import io.github.thebusybiscuit.slimefun4.core.guide.GuideHistory;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.armor.SlimefunArmorPiece;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * A class that can store a Player's {@link Research} progress for caching purposes.
@@ -52,45 +43,39 @@ import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
  * 
  * @see Research
  * @see Waypoint
- * @see PlayerBackpack
  * @see HashedArmorpiece
  *
  */
 public class PlayerProfile {
 
-    private final UUID uuid;
-    private final String name;
-
-    private final Config configFile;
+    private final OfflinePlayer owner;
+    private int backpackNum;
     private final Config waypointsFile;
 
     private boolean dirty = false;
+    private boolean isInvalid = false;
     private boolean markedForDeletion = false;
 
-    private final Set<Research> researches = new HashSet<>();
+    private final Set<Research> researches;
     private final List<Waypoint> waypoints = new ArrayList<>();
-    private final Map<Integer, PlayerBackpack> backpacks = new HashMap<>();
     private final GuideHistory guideHistory = new GuideHistory(this);
 
     private final HashedArmorpiece[] armor = { new HashedArmorpiece(), new HashedArmorpiece(), new HashedArmorpiece(), new HashedArmorpiece() };
 
-    protected PlayerProfile(@Nonnull OfflinePlayer p) {
-        this.uuid = p.getUniqueId();
-        this.name = p.getName();
-
-        configFile = new Config("data-storage/Slimefun/Players/" + uuid.toString() + ".yml");
-        waypointsFile = new Config("data-storage/Slimefun/waypoints/" + uuid.toString() + ".yml");
-
-        loadProfileData();
+    public PlayerProfile(@Nonnull OfflinePlayer p, int backpackNum) {
+        this(p, backpackNum, new HashSet<>());
     }
 
-    private void loadProfileData() {
-        for (Research research : Slimefun.getRegistry().getResearches()) {
-            if (configFile.contains("researches." + research.getID())) {
-                researches.add(research);
-            }
-        }
+    public PlayerProfile(@Nonnull OfflinePlayer p, int backpackNum, Set<Research> researches) {
+        owner = p;
+        this.backpackNum = backpackNum;
+        this.researches = researches;
 
+        waypointsFile = new Config("data-storage/Slimefun/waypoints/" + p.getUniqueId() + ".yml");
+        loadWaypoint();
+    }
+
+    private void loadWaypoint() {
         for (String key : waypointsFile.getKeys()) {
             try {
                 if (waypointsFile.contains(key + ".world") && Bukkit.getWorld(waypointsFile.getString(key + ".world")) != null) {
@@ -99,7 +84,7 @@ public class PlayerProfile {
                     waypoints.add(new Waypoint(this, key, loc, waypointName));
                 }
             } catch (Exception x) {
-                Slimefun.logger().log(Level.WARNING, x, () -> "Could not load Waypoint \"" + key + "\" for Player \"" + name + '"');
+                Slimefun.logger().log(Level.WARNING, x, () -> "Could not load Waypoint \"" + key + "\" for Player \"" + owner.getName() + '"');
             }
         }
     }
@@ -115,22 +100,12 @@ public class PlayerProfile {
     }
 
     /**
-     * This returns the {@link Config} which is used to store the data.
-     * Only intended for internal usage.
-     * 
-     * @return The {@link Config} associated with this {@link PlayerProfile}
-     */
-    public @Nonnull Config getConfig() {
-        return configFile;
-    }
-
-    /**
      * This returns the {@link UUID} this {@link PlayerProfile} is linked to.
      * 
      * @return The {@link UUID} of our {@link PlayerProfile}
      */
     public @Nonnull UUID getUUID() {
-        return uuid;
+        return owner.getUniqueId();
     }
 
     /**
@@ -156,12 +131,8 @@ public class PlayerProfile {
      * This method will save the Player's Researches and Backpacks to the hard drive
      */
     public void save() {
-        for (PlayerBackpack backpack : backpacks.values()) {
-            backpack.save();
-        }
-
+        // As waypoints still store in file, just keep this method here for now...
         waypointsFile.save();
-        configFile.save();
         dirty = false;
     }
 
@@ -179,12 +150,11 @@ public class PlayerProfile {
         dirty = true;
 
         if (unlock) {
-            configFile.setValue("researches." + research.getID(), true);
             researches.add(research);
         } else {
-            configFile.setValue("researches." + research.getID(), null);
             researches.remove(research);
         }
+        Slimefun.getDatabaseManager().getProfileDataController().setResearch(owner.getUniqueId().toString(), research.getKey(), unlock);
     }
 
     /**
@@ -296,32 +266,19 @@ public class PlayerProfile {
         dirty = true;
     }
 
-    public @Nonnull PlayerBackpack createBackpack(int size) {
-        IntStream stream = IntStream.iterate(0, i -> i + 1).filter(i -> !configFile.contains("backpacks." + i + ".size"));
-        int id = stream.findFirst().getAsInt();
-
-        PlayerBackpack backpack = new PlayerBackpack(this, id, size);
-        backpacks.put(id, backpack);
-
-        return backpack;
+    public int nextBackpackNum() {
+        backpackNum++;
+        Slimefun.getDatabaseManager().getProfileDataController().saveProfileBackpackCount(this);
+        return backpackNum;
     }
 
-    public @Nonnull Optional<PlayerBackpack> getBackpack(int id) {
-        if (id < 0) {
-            throw new IllegalArgumentException("Backpacks cannot have negative ids!");
-        }
+    public int getBackpackCount() {
+        return backpackNum;
+    }
 
-        PlayerBackpack backpack = backpacks.get(id);
-
-        if (backpack != null) {
-            return Optional.of(backpack);
-        } else if (configFile.contains("backpacks." + id + ".size")) {
-            backpack = new PlayerBackpack(this, id);
-            backpacks.put(id, backpack);
-            return Optional.of(backpack);
-        }
-
-        return Optional.empty();
+    public void setBackpackCount(int count) {
+        backpackNum = Math.max(backpackNum, count);
+        Slimefun.getDatabaseManager().getProfileDataController().saveProfileBackpackCount(this);
     }
 
     public @Nonnull String getTitle() {
@@ -341,7 +298,7 @@ public class PlayerProfile {
         float progress = Math.round(((unlockedResearches.size() * 100.0F) / allResearches) * 100.0F) / 100.0F;
 
         sender.sendMessage("");
-        sender.sendMessage(ChatColors.color("&7玩家研究统计: &b" + name));
+        sender.sendMessage(ChatColors.color("&7玩家研究统计: &b" + owner.getName()));
         sender.sendMessage("");
         sender.sendMessage(ChatColors.color("&7研究等级: " + ChatColor.AQUA + getTitle()));
         sender.sendMessage(ChatColors.color("&7研究进度: " + NumberUtils.getColorFromPercentage(progress) + progress + " &r% " + ChatColor.YELLOW + '(' + unlockedResearches.size() + " / " + allResearches + ')'));
@@ -355,7 +312,7 @@ public class PlayerProfile {
      * @return The {@link Player} of this {@link PlayerProfile} or null
      */
     public @Nullable Player getPlayer() {
-        return Bukkit.getPlayer(getUUID());
+        return owner.getPlayer();
     }
 
     /**
@@ -388,19 +345,12 @@ public class PlayerProfile {
         UUID uuid = p.getUniqueId();
         PlayerProfile profile = Slimefun.getRegistry().getPlayerProfiles().get(uuid);
 
-        if (profile != null) {
+        if (profile != null && !profile.isInvalid) {
             callback.accept(profile);
             return true;
         }
 
-        Bukkit.getScheduler().runTaskAsynchronously(Slimefun.instance(), () -> {
-            AsyncProfileLoadEvent event = new AsyncProfileLoadEvent(new PlayerProfile(p));
-            Bukkit.getPluginManager().callEvent(event);
-
-            Slimefun.getRegistry().getPlayerProfiles().put(uuid, event.getProfile());
-            callback.accept(event.getProfile());
-        });
-
+        getOrCreate(p, callback);
         return false;
     }
 
@@ -416,13 +366,10 @@ public class PlayerProfile {
     public static boolean request(@Nonnull OfflinePlayer p) {
         Validate.notNull(p, "Cannot request a Profile for null");
 
-        if (!Slimefun.getRegistry().getPlayerProfiles().containsKey(p.getUniqueId())) {
+        var profile = Slimefun.getRegistry().getPlayerProfiles().get(p.getUniqueId());
+        if (profile == null || profile.isInvalid) {
             // Should probably prevent multiple requests for the same profile in the future
-            Bukkit.getScheduler().runTaskAsynchronously(Slimefun.instance(), () -> {
-                PlayerProfile pp = new PlayerProfile(p);
-                Slimefun.getRegistry().getPlayerProfiles().put(p.getUniqueId(), pp);
-            });
-
+            getOrCreate(p, null);
             return false;
         }
 
@@ -440,40 +387,15 @@ public class PlayerProfile {
      * @return An {@link Optional} describing the result
      */
     public static @Nonnull Optional<PlayerProfile> find(@Nonnull OfflinePlayer p) {
-        return Optional.ofNullable(Slimefun.getRegistry().getPlayerProfiles().get(p.getUniqueId()));
+        var re = Slimefun.getRegistry().getPlayerProfiles().get(p.getUniqueId());
+        if (re == null || re.isInvalid) {
+            return Optional.empty();
+        }
+        return Optional.of(re);
     }
 
     public static @Nonnull Iterator<PlayerProfile> iterator() {
         return Slimefun.getRegistry().getPlayerProfiles().values().iterator();
-    }
-
-    public static void getBackpack(@Nullable ItemStack item, @Nonnull Consumer<PlayerBackpack> callback) {
-        if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasLore()) {
-            return;
-        }
-
-        OptionalInt id = OptionalInt.empty();
-        String uuid = "";
-
-        for (String line : item.getItemMeta().getLore()) {
-            if (line.startsWith(ChatColors.color("&7ID: ")) && line.indexOf('#') != -1) {
-                String[] splitLine = CommonPatterns.HASH.split(line);
-
-                if (CommonPatterns.NUMERIC.matcher(splitLine[1]).matches()) {
-                    id = OptionalInt.of(Integer.parseInt(splitLine[1]));
-                    uuid = splitLine[0].replace(ChatColors.color("&7ID: "), "");
-                }
-            }
-        }
-
-        if (id.isPresent()) {
-            int number = id.getAsInt();
-
-            fromUUID(UUID.fromString(uuid), profile -> {
-                Optional<PlayerBackpack> backpack = profile.getBackpack(number);
-                backpack.ifPresent(callback);
-            });
-        }
     }
 
     public boolean hasFullProtectionAgainst(@Nonnull ProtectionType type) {
@@ -510,17 +432,54 @@ public class PlayerProfile {
 
     @Override
     public int hashCode() {
-        return uuid.hashCode();
+        return owner.getUniqueId().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PlayerProfile profile && uuid.equals(profile.uuid);
+        return obj instanceof PlayerProfile profile && owner.getUniqueId().equals(profile.owner.getUniqueId());
     }
 
     @Override
     public String toString() {
-        return "PlayerProfile {" + uuid + "}";
+        return "PlayerProfile {" + owner.getUniqueId() + "}";
+    }
+
+    public OfflinePlayer getOwner() {
+        return owner;
+    }
+
+    public void markInvalid() {
+        isInvalid = true;
+    }
+
+    public boolean isInvalid() {
+        return isInvalid;
+    }
+
+    private static void getOrCreate(OfflinePlayer p, Consumer<PlayerProfile> cb) {
+        var controller = Slimefun.getDatabaseManager().getProfileDataController();
+        controller.getProfileAsync(p, new IAsyncReadCallback<>() {
+            @Override
+            public void onResult(PlayerProfile result) {
+                invokeCb(result);
+            }
+
+            @Override
+            public void onResultNotFound() {
+                invokeCb(controller.createProfile(p));
+            }
+
+            private void invokeCb(PlayerProfile pf) {
+                AsyncProfileLoadEvent event = new AsyncProfileLoadEvent(pf);
+                Bukkit.getPluginManager().callEvent(event);
+
+                Slimefun.getRegistry().getPlayerProfiles().put(p.getUniqueId(), event.getProfile());
+                if (cb != null) {
+                    cb.accept(event.getProfile());
+                }
+            }
+        });
     }
 
 }

@@ -94,9 +94,6 @@
         <!-- /src/main/java/ contains all sources (production code) -->
         <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
 
-        <!-- /src/test/java/ contains all unit tests (testing code) -->
-        <testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
-
         <!-- The default goal for compiling is "clean package" -->
         <defaultGoal>clean package</defaultGoal>
 
@@ -172,18 +169,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <!-- Plugin for Unit Tests -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M9</version>
-
-                <configuration>
-                    <junitArtifactName>org.junit.jupiter:junit-jupiter</junitArtifactName>
-                    <trimStackTrace>false</trimStackTrace>
-                </configuration>
-            </plugin>
         </plugins>
 
         <resources>
@@ -197,6 +182,7 @@
                     <include>plugin.yml</include>
                     <include>config.yml</include>
                     <include>item-models.yml</include>
+                    <include>profile-storage.yml</include>
 
                     <include>wiki.json</include>
                     <include>languages/translators.json</include>
@@ -261,35 +247,6 @@
                     <!-- No need to shade Gson, Spigot does that already -->
                     <groupId>com.google.code.gson</groupId>
                     <artifactId>gson</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- Testing dependencies -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.9.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>5.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.seeseemelk</groupId>
-            <artifactId>MockBukkit-v1.18</artifactId>
-            <version>2.0.0</version>
-            <scope>test</scope>
-
-            <exclusions>
-                <exclusion>
-                    <!-- We use javax.annotation instead. Excluding this -->
-                    <!-- prevents us from using inconsistent annotations -->
-                    <groupId>org.jetbrains</groupId>
-                    <artifactId>annotations</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

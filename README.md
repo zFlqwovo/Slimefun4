@@ -131,29 +131,6 @@ Slimefun 4 是一个以 [GNU GPLv3](https://github.com/Slimefun/Slimefun4/blob/m
 已经有超过 100 人对这个项目做出了贡献. 这些人真是太棒了.<br>
 我们鼓励通过提交 PR 的方式为 Slimefun 4 做出贡献, 你的贡献将会使插件保持活力 <3.
 
-### 代码质量
-
-Slimefun 使用 [Sonarcloud.io](https://sonarcloud.io/dashboard?id=TheBusyBiscuit_Slimefun4) 监控代码质量.
-
-| [总体可维护度](https://sonarcloud.io/documentation/user-guide/metric-definitions/#maintainability)                                                                                    | "Code Smells"                                                                                                                                                                       | "Technical Debt"                                                                                                                                                                       | Test Coverage                                                                                                                                                                 |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [![可维护性等级](https://sonarcloud.io/api/project_badges/measure?project=TheBusyBiscuit_Slimefun4&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=TheBusyBiscuit_Slimefun4) | [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=TheBusyBiscuit_Slimefun4&metric=code_smells)](https://sonarcloud.io/dashboard?id=TheBusyBiscuit_Slimefun4) | [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=TheBusyBiscuit_Slimefun4&metric=sqale_index)](https://sonarcloud.io/dashboard?id=TheBusyBiscuit_Slimefun4) | [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=TheBusyBiscuit_Slimefun4&metric=coverage)](https://sonarcloud.io/dashboard?id=TheBusyBiscuit_Slimefun4) |
-
-##### "Code Smells" (代码异味)
-
-代码异味是代码中令人困惑, 缺少文档或总体上很糟糕的部分. 因此代码异味应该被维持在最低限度.
-
-_如果你要针对代码异味做出修改, 请先在 [Discord](#discord) 上联系我们. 某些设计模式可能不会突然更改，因为一些扩展能否工作可能取决于它们._
-
-##### "Technical Debt" (技术债)
-
-技术债简单来说就是解决所有问题和解决代码异味需要的预计总时长.
-
-##### Test Coverage (测试覆盖率)
-
-Slimefun 现在也使用自动化测试系统以检测一个更新是否破坏了什么东西. 覆盖率表示这些测试覆盖了代码的多少部分. 更高的覆盖率意味着更少的重大更改, 因此也可以提供更好, 更可靠的新构建.
-由于这是一个非常大的项目, 使覆盖率到达 `100%` 几乎是不可能的. 但是使这个数字稍微增加一点仍然有帮助. 因此, 请随时为 Slimefun 编写单元测试并将其放在 [/src/test/java/](https://github.com/Slimefun/Slimefun4/tree/master/src/test/java) 文件夹下.
-
 ## :exclamation: 免责声明
 
 Slimefun4 使用多种系统收集使用数据, 以及使用自动更新让你知晓关于这个项目的最新信息

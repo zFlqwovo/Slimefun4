@@ -58,6 +58,9 @@ permissions:
     default: op
   slimefun.command.backpack:
     description: Allows you to do /sf backpack
+    default: true
+  slimefun.command.backpack.other:
+    description: Allows you retrieve other player's backpack
     default: op
   slimefun.command.guide:
     description: Allows you to obtain the Slimefun guide book
@@ -76,6 +79,9 @@ permissions:
     default: op
   slimefun.command.debug:
     description: Allows you to do /sf debug
+    default: op
+  slimefun.command.reload:
+    description: Allows you to do /sf reload
     default: op
   slimefun.android.bypass:
     description: Allows you to edit other Players Androids

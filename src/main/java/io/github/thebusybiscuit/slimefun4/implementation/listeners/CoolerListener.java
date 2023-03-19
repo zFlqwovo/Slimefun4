@@ -1,5 +1,10 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
+import io.github.thebusybiscuit.slimefun4.api.events.CoolerFeedPlayerEvent;
+import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Cooler;
+import io.github.thebusybiscuit.slimefun4.implementation.items.food.Juice;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -15,13 +20,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
-
-import io.github.thebusybiscuit.slimefun4.api.events.CoolerFeedPlayerEvent;
-import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
-import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Cooler;
-import io.github.thebusybiscuit.slimefun4.implementation.items.food.Juice;
 
 /**
  * This {@link Listener} listens for a {@link FoodLevelChangeEvent} or an {@link EntityDamageEvent} for starvation
@@ -90,11 +88,9 @@ public class CoolerListener implements Listener {
      *            The {@link Cooler} {@link ItemStack} to take the {@link Juice} from
      */
     private void takeJuiceFromCooler(@Nonnull Player p, @Nonnull ItemStack cooler) {
-        PlayerProfile.getBackpack(cooler, backpack -> {
-            if (backpack != null) {
-                Slimefun.runSync(() -> consumeJuice(p, cooler, backpack));
-            }
-        });
+        if (PlayerBackpack.isOwnerOnline(cooler.getItemMeta())) {
+            PlayerBackpack.getAsync(cooler, backpack -> consumeJuice(p, cooler, backpack), true);
+        }
     }
 
     private boolean consumeJuice(@Nonnull Player p, @Nonnull ItemStack coolerItem, @Nonnull PlayerBackpack backpack) {
@@ -125,7 +121,7 @@ public class CoolerListener implements Listener {
                 p.setSaturation(6F);
                 p.playSound(p.getLocation(), Sound.ENTITY_GENERIC_DRINK, 1F, 1F);
                 inv.setItem(slot, null);
-                backpack.markDirty();
+                Slimefun.getDatabaseManager().getProfileDataController().saveBackpackInventory(backpack, slot);
 
                 return true;
             } else {

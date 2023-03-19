@@ -19,7 +19,8 @@ commands:
     description: 获取你丢失的背包
     invalid-id: '&4背包 ID 必须为非负数!'
     player-never-joined: '&4找不到叫这个名字的玩家!'
-    backpack-does-not-exist: '&4你指定的背包不存在!'
+    backpack-does-not-exist: '&4该玩家没有任何背包!'
+    searching: '&e查询中...'
     restored-backpack-given: '&a你的背包已被恢复并且已经放入了你的物品栏!'
   charge:
     description: 为你手持的物品充电
@@ -36,6 +37,15 @@ commands:
     none-running: '&7当前没有运行的测试项!'
     running: '&7正在调试模式中运行该测试项: &6%test%'
     disabled: '&7已禁用调试模式'
+  reload:
+    description: "重载 Slimefun 配置文件"
+    success: "&a成功重载配置文件."
+    failed: "&c重载配置文件失败! 你可能需要重启服务器以应用更改, 查看后台输出信息了解更多."
+  migrate:
+    description: "迁移旧数据"
+    success: "&a迁移旧数据至数据库成功."
+    failed: "&c迁移数据过程中出现了问题, 请查看后台."
+    already-migrated: "&a暂无可迁移数据."
 placeholderapi:
   profile-loading: '加载中...'
 guide:
@@ -311,6 +321,9 @@ villagers:
 backpack:
   already-open: '&c抱歉, 这个背包已在别处打开了!'
   no-stack: '&c你不能同时手持两个背包'
+  set-name: '&e请输入背包名称'
+  not-backpack-owner: '&c该背包的所有者不在线，你无权使用!'
+  not-original-item: '&c输入名字时请不要切换手上的物品!'
 workbench:
   not-enhanced: '&4你不能在普通的工作台上使用 Slimefun 物品'
 cauldron:

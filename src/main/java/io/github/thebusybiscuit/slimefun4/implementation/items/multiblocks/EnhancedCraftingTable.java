@@ -1,9 +1,14 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.multiblocks;
 
-import java.util.List;
-
-import javax.annotation.ParametersAreNonnullByDefault;
-
+import io.github.bakedlibs.dough.items.ItemUtils;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import io.papermc.lib.PaperLib;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -14,15 +19,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.bakedlibs.dough.items.ItemUtils;
-import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
-import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import io.papermc.lib.PaperLib;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 
 public class EnhancedCraftingTable extends AbstractCraftingTable {
 
@@ -68,7 +66,13 @@ public class EnhancedCraftingTable extends AbstractCraftingTable {
             SlimefunItem sfItem = SlimefunItem.getByItem(output);
 
             if (sfItem instanceof SlimefunBackpack backpack) {
-                upgradeBackpack(p, inv, backpack, output);
+                upgradeBackpack(p, inv, backpack, output, () -> {
+                    p.getWorld().playSound(b.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1, 1);
+                    outputInv.addItem(output);
+                });
+            } else {
+                p.getWorld().playSound(b.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1, 1);
+                outputInv.addItem(output);
             }
 
             for (int j = 0; j < 9; j++) {
@@ -78,11 +82,6 @@ public class EnhancedCraftingTable extends AbstractCraftingTable {
                     ItemUtils.consumeItem(item, true);
                 }
             }
-
-            p.getWorld().playSound(b.getLocation(), Sound.BLOCK_WOODEN_BUTTON_CLICK_ON, 1, 1);
-
-            outputInv.addItem(output);
-
         } else {
             Slimefun.getLocalization().sendMessage(p, "machines.full-inventory", true);
         }

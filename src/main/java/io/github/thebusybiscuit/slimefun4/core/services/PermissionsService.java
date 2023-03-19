@@ -1,22 +1,19 @@
 package io.github.thebusybiscuit.slimefun4.core.services;
 
+import io.github.bakedlibs.dough.config.Config;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
-
-import io.github.bakedlibs.dough.config.Config;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 
 /**
  * This Service is responsible for handling the {@link Permission} of a
@@ -50,23 +47,29 @@ public class PermissionsService {
     /**
      * This method registers the given {@link Iterable} of {@link SlimefunItem}s
      * for use with this {@link PermissionsService}.
-     * 
-     * @param items
-     *            An {@link Iterable} of {@link SlimefunItem}s to register
-     * @param save
-     *            Whether to save the default values to our permissions file
+     *
+     * @param items An {@link Iterable} of {@link SlimefunItem}s to register
+     * @param save  Whether to save the default values to our permissions file
      */
-    public void register(@Nonnull Iterable<SlimefunItem> items, boolean save) {
+    public void update(@Nonnull Iterable<SlimefunItem> items, boolean save) {
         for (SlimefunItem item : items) {
-            if (item != null) {
-                String path = item.getId() + ".permission";
-
-                config.setDefaultValue(path, "none");
-                config.setDefaultValue(item.getId() + ".lore", new String[] { "&rYou do not have the permission", "&rto access this item." });
-
-                permissions.put(item.getId(), config.getString(path));
-            }
+            update(item, false);
         }
+
+        if (save) {
+            config.save();
+        }
+    }
+
+    public void update(@Nonnull SlimefunItem item, boolean save) {
+        Validate.notNull(item, "The Item should not be null!");
+
+        String path = item.getId() + ".permission";
+
+        config.setDefaultValue(path, "none");
+        config.setDefaultValue(item.getId() + ".lore", new String[]{"&rYou do not have the permission", "&rto access this item."});
+
+        permissions.put(item.getId(), config.getString(path));
 
         if (save) {
             config.save();
