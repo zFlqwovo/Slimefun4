@@ -29,7 +29,7 @@ public class MigrateCommand extends SubCommand {
                 return;
             }
 
-            Bukkit.getScheduler().runTask(Slimefun.instance(), () -> {
+            Bukkit.getScheduler().runTaskAsynchronously(Slimefun.instance(), () -> {
                 try {
                     var status = PlayerProfileMigrator.migrateOldData();
                     switch (status) {
