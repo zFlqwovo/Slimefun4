@@ -46,6 +46,7 @@ public class SlimefunConfigManager {
     private boolean useMoneyUnlock;
     private boolean showVanillaRecipes;
     private boolean showHiddenItemGroupsInSearch;
+    private boolean autoUpdate;
 
     public SlimefunConfigManager(@Nonnull Slimefun plugin) {
         Validate.notNull(plugin, "The Plugin instance cannot be null");
@@ -86,6 +87,7 @@ public class SlimefunConfigManager {
             useMoneyUnlock = pluginConfig.getBoolean("researches.use-money-unlock");
             showVanillaRecipes = pluginConfig.getBoolean("guide.show-vanilla-recipes");
             showHiddenItemGroupsInSearch = pluginConfig.getBoolean("guide.show-hidden-item-groups-in-search");
+            autoUpdate = pluginConfig.getBoolean("options.auto-update");
         } catch (Exception x) {
             plugin.getLogger().log(Level.SEVERE, x, () -> "An Exception was caught while (re)loading the config files for Slimefun v" + plugin.getDescription().getVersion());
             isSuccessful = false;
@@ -250,5 +252,9 @@ public class SlimefunConfigManager {
 
     public boolean isShowHiddenItemGroupsInSearch() {
         return showHiddenItemGroupsInSearch;
+    }
+
+    public boolean isAutoUpdate() {
+        return autoUpdate;
     }
 }
