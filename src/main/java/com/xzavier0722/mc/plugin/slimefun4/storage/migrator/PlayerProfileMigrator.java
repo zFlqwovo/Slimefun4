@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -16,7 +17,7 @@ import org.bukkit.Bukkit;
 
 public class PlayerProfileMigrator {
     private static final File playerFolder = new File("data-storage/Slimefun/Players/");
-    private static boolean migrateStatus = false;
+    private static final AtomicBoolean migrateStatus = new AtomicBoolean(false);
 
     public static void checkOldData(Logger logger) {
         if (playerFolder.exists() && playerFolder.isDirectory()) {
@@ -29,16 +30,18 @@ public class PlayerProfileMigrator {
      * and try to migrate them to database
      */
     public static MigrateStatus migrateOldData() {
-        migrateStatus = true;
+        migrateStatus.set(true);
         var result = MigrateStatus.SUCCESS;
 
         if (!playerFolder.exists() || !playerFolder.isDirectory() || playerFolder.listFiles() == null || playerFolder.listFiles().length == 0) {
-            migrateStatus = false;
+            migrateStatus.set(false);
             return MigrateStatus.MIGRATED;
         }
 
         var backupFolder = new File("data-storage/Slimefun/Players_Backup");
         backupFolder.mkdirs();
+
+        var migratedCount = 0;
 
         for (File file : playerFolder.listFiles()) {
             if (file.getName().endsWith(".yml")) {
@@ -46,19 +49,19 @@ public class PlayerProfileMigrator {
                     var uuid = UUID.fromString(file.getName().replace(".yml", ""));
                     var p = Bukkit.getOfflinePlayer(uuid);
 
-                    if (!p.hasPlayedBefore() || p == null) {
+                    if (!p.hasPlayedBefore()) {
                         Slimefun.logger().log(Level.INFO, "检测到从未加入服务器玩家的数据, 已自动跳过");
                         continue;
                     }
 
-                    if (Slimefun.getDatabaseManager().getProfileDataController().getProfile(p) == null) {
-                        migratePlayerProfile(uuid);
-                    }
+                    migratePlayerProfile(uuid);
 
                     var backupFile = new File(backupFolder, file.getName());
                     backupFile.createNewFile();
                     Files.copy(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     file.delete();
+
+                    migratedCount++;
                 } catch (IOException e) {
                     Slimefun.logger().log(Level.WARNING, "迁移玩家数据时出现问题", e);
                     result = MigrateStatus.FAILED;
@@ -69,14 +72,14 @@ public class PlayerProfileMigrator {
             }
         }
 
-        Slimefun.logger().log(Level.INFO, "迁移玩家数据完成! 迁移前的数据已储存在 " + backupFolder.getAbsolutePath());
+        Slimefun.logger().log(Level.INFO, "成功迁移 {0} 个玩家数据! 迁移前的数据已储存在 " + backupFolder.getAbsolutePath(), migratedCount);
         playerFolder.delete();
-        migrateStatus = false;
+        migrateStatus.set(false);
 
         return result;
     }
 
-    public static boolean getMigrateStatus() {
+    public static AtomicBoolean getMigrateStatus() {
         return migrateStatus;
     }
 
