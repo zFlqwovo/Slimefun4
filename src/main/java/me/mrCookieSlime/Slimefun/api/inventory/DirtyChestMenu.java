@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.core.attributes.DistinctiveItem;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
@@ -84,7 +87,33 @@ public class DirtyChestMenu extends ChestMenu {
             }
         }
 
-        return InvUtils.fits(toInventory(), ItemStackWrapper.wrap(item), slots);
+        var wrapper = ItemStackWrapper.wrap(item);
+        var remain = item.getAmount();
+        if (SlimefunItem.getByItem(item) != null) {
+            // Patch: use sf item check
+            for (var slot : slots) {
+                var itemInSlot = getItemInSlot(slot);
+                if (item.getType() != itemInSlot.getType()) {
+                    continue;
+                }
+
+                if (!itemInSlot.hasItemMeta()) {
+                    continue;
+                }
+
+                if (!SlimefunUtils.isItemSimilar(itemInSlot, wrapper, true, false)) {
+                    continue;
+                }
+
+                remain -= itemInSlot.getMaxStackSize() - item.getAmount();
+                if (remain <= 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return InvUtils.fits(toInventory(), wrapper, slots);
     }
 
     /**
@@ -126,11 +155,21 @@ public class DirtyChestMenu extends ChestMenu {
                         wrapper = ItemStackWrapper.wrap(item);
                     }
 
-                    if (ItemUtils.canStack(wrapper, stack)) {
-                        amount -= (maxStackSize - stack.getAmount());
-                        stack.setAmount(Math.min(stack.getAmount() + item.getAmount(), maxStackSize));
-                        item.setAmount(amount);
+                    if (SlimefunItem.getByItem(item) != null) {
+                        // Patch: use sf item check
+                        if (!SlimefunUtils.isItemSimilar(stack, wrapper, true, false)) {
+                            continue;
+                        }
+                    } else {
+                        // Use original check
+                        if (!ItemUtils.canStack(wrapper, stack)) {
+                            continue;
+                        }
                     }
+
+                    amount -= (maxStackSize - stack.getAmount());
+                    stack.setAmount(Math.min(stack.getAmount() + item.getAmount(), maxStackSize));
+                    item.setAmount(amount);
                 }
             }
         }
