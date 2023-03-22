@@ -32,7 +32,8 @@ public class PlayerProfileMigrator {
         migrateStatus = true;
         var result = MigrateStatus.SUCCESS;
 
-        if (!playerFolder.exists() || !playerFolder.isDirectory() || playerFolder.listFiles() == null || playerFolder.listFiles().length == 0) {
+        var listFiles = playerFolder.listFiles();
+        if (!playerFolder.exists() || !playerFolder.isDirectory() || listFiles == null || listFiles.length == 0) {
             migrateStatus = false;
             return MigrateStatus.MIGRATED;
         }
@@ -42,7 +43,7 @@ public class PlayerProfileMigrator {
 
         var migratedCount = 0;
 
-        for (File file : playerFolder.listFiles()) {
+        for (File file : listFiles) {
             if (file.getName().endsWith(".yml")) {
                 try {
                     var uuid = UUID.fromString(file.getName().replace(".yml", ""));
@@ -91,7 +92,10 @@ public class PlayerProfileMigrator {
         }
 
         var controller = Slimefun.getDatabaseManager().getProfileDataController();
-        var profile = controller.createProfile(p);
+        var profile = controller.getProfile(p);
+        if (null == profile) {
+            profile = controller.createProfile(p);
+        }
 
         // Research migrate
         for (String researchID : configFile.getKeys("researches")) {
