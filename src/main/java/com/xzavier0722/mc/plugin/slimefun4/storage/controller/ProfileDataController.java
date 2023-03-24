@@ -1,18 +1,14 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.controller;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
-import com.xzavier0722.mc.plugin.slimefun4.storage.task.QueuedAsyncWriteTask;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -26,35 +22,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public class ProfileDataController {
+public class ProfileDataController extends ADataController {
     private final BackpackCache backpackCache;
     private final Map<String, PlayerProfile> profileCache;
-    private final Map<ScopeKey, QueuedAsyncWriteTask> scheduledWriteTasks;
-    private final ScopedLock lock;
-    private volatile IDataSourceAdapter<?> dataAdapter;
-    private ExecutorService readExecutor;
-    private ExecutorService writeExecutor;
-    private ExecutorService callbackExecutor;
-    private volatile boolean destroyed = false;
 
     ProfileDataController() {
+        super(DataType.PLAYER_PROFILE);
         backpackCache = new BackpackCache();
         profileCache = new ConcurrentHashMap<>();
-        scheduledWriteTasks = new ConcurrentHashMap<>();
-        lock = new ScopedLock();
-    }
 
-    public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
-        this.dataAdapter = dataAdapter;
-        dataAdapter.initStorage(DataType.PLAYER_PROFILE);
-        readExecutor = Executors.newFixedThreadPool(maxReadThread);
-        writeExecutor = Executors.newFixedThreadPool(maxWriteThread);
-        callbackExecutor = Executors.newCachedThreadPool();
     }
 
     @Nullable
@@ -70,7 +48,7 @@ public class ProfileDataController {
         key.addField(FieldKey.PLAYER_BACKPACK_NUM);
         key.addCondition(FieldKey.PLAYER_UUID, uuid);
 
-        var result = dataAdapter.getData(key);
+        var result = getData(key);
         if (result.isEmpty()) {
             return null;
         }
@@ -86,8 +64,7 @@ public class ProfileDataController {
     }
 
     public void getProfileAsync(OfflinePlayer p, IAsyncReadCallback<PlayerProfile> callback) {
-        checkDestroy();
-        readExecutor.submit(() -> invokeCallback(callback, getProfile(p)));
+        scheduleReadTask(() -> invokeCallback(callback, getProfile(p)));
     }
 
     @Nullable
@@ -106,7 +83,7 @@ public class ProfileDataController {
         key.addCondition(FieldKey.PLAYER_UUID, uuid);
         key.addCondition(FieldKey.BACKPACK_NUMBER, num + "");
 
-        var bResult = dataAdapter.getData(key);
+        var bResult = getData(key);
         if (bResult.isEmpty()) {
             return null;
         }
@@ -142,7 +119,7 @@ public class ProfileDataController {
         key.addField(FieldKey.PLAYER_UUID);
         key.addCondition(FieldKey.BACKPACK_ID, uuid);
 
-        var resultSet = dataAdapter.getData(key);
+        var resultSet = getData(key);
         if (resultSet.isEmpty()) {
             return null;
         }
@@ -171,7 +148,7 @@ public class ProfileDataController {
         key.addField(FieldKey.INVENTORY_ITEM);
         key.addCondition(FieldKey.BACKPACK_ID, uuid);
 
-        var invResult = dataAdapter.getData(key);
+        var invResult = getData(key);
         var re = new ItemStack[size];
         invResult.forEach(each -> re[each.getInt(FieldKey.INVENTORY_SLOT)] = each.getItemStack(FieldKey.INVENTORY_ITEM));
 
@@ -184,7 +161,7 @@ public class ProfileDataController {
         key.addField(FieldKey.RESEARCH_ID);
         key.addCondition(FieldKey.PLAYER_UUID, uuid);
 
-        var result = dataAdapter.getData(key);
+        var result = getData(key);
         if (result.isEmpty()) {
             return Collections.emptySet();
         }
@@ -195,13 +172,11 @@ public class ProfileDataController {
     }
 
     public void getBackpackAsync(OfflinePlayer owner, int num, IAsyncReadCallback<PlayerBackpack> callback) {
-        checkDestroy();
-        readExecutor.submit(() -> invokeCallback(callback, getBackpack(owner, num)));
+        scheduleReadTask(() -> invokeCallback(callback, getBackpack(owner, num)));
     }
 
     public void getBackpackAsync(String uuid, IAsyncReadCallback<PlayerBackpack> callback) {
-        checkDestroy();
-        readExecutor.submit(() -> invokeCallback(callback, getBackpack(uuid)));
+        scheduleReadTask(() -> invokeCallback(callback, getBackpack(uuid)));
     }
 
     @Nonnull
@@ -211,7 +186,7 @@ public class ProfileDataController {
         key.addField(FieldKey.BACKPACK_ID);
         key.addCondition(FieldKey.PLAYER_UUID, pUuid);
 
-        var result = dataAdapter.getData(key);
+        var result = getData(key);
         if (result.isEmpty()) {
             return Collections.emptySet();
         }
@@ -222,8 +197,7 @@ public class ProfileDataController {
     }
 
     public void getBackpacksAsync(String pUuid, IAsyncReadCallback<Set<PlayerBackpack>> callback) {
-        checkDestroy();
-        readExecutor.submit(() -> {
+        scheduleReadTask(() -> {
             var re = getBackpacks(pUuid);
             invokeCallback(callback, re.isEmpty() ? null : re);
         });
@@ -247,29 +221,6 @@ public class ProfileDataController {
         return re;
     }
 
-    public void shutdown() {
-        if (destroyed) {
-            return;
-        }
-        destroyed = true;
-        readExecutor.shutdownNow();
-        callbackExecutor.shutdownNow();
-        try {
-            var pendingTask = scheduledWriteTasks.size();
-            while (pendingTask > 0) {
-                Slimefun.logger().log(Level.SEVERE, "数据保存中，请稍候... 剩余 " + pendingTask + " 个任务");
-                Thread.sleep(500);
-                pendingTask = scheduledWriteTasks.size();
-            }
-        } catch (InterruptedException e) {
-            Slimefun.logger().log(Level.SEVERE, "Exception thrown while saving data: ", e);
-        }
-        writeExecutor.shutdown();
-        dataAdapter = null;
-        backpackCache.clean();
-        profileCache.clear();
-    }
-
     public void setResearch(String uuid, NamespacedKey researchKey, boolean unlocked) {
         var key = new RecordKey(DataScope.PLAYER_RESEARCH);
         key.addCondition(FieldKey.PLAYER_UUID, uuid);
@@ -280,7 +231,7 @@ public class ProfileDataController {
             data.put(FieldKey.RESEARCH_ID, researchKey.toString());
             scheduleWriteTask(new UUIDKey(DataScope.NONE, uuid), key, data, false);
         } else {
-            scheduleWriteTask(new UUIDKey(DataScope.NONE, uuid), key, false);
+            scheduleDeleteTask(new UUIDKey(DataScope.NONE, uuid), key, false);
         }
     }
 
@@ -319,7 +270,7 @@ public class ProfileDataController {
             key.addField(FieldKey.INVENTORY_ITEM);
             var is = inv.getItem(slot);
             if (is == null) {
-                scheduleWriteTask(key);
+                scheduleDeleteTask(key);
             } else {
                 var data = new RecordSet();
                 data.put(FieldKey.BACKPACK_ID, id);
@@ -340,7 +291,7 @@ public class ProfileDataController {
         key.addField(FieldKey.PLAYER_UUID);
         key.addCondition(FieldKey.PLAYER_NAME, pName);
 
-        var result = dataAdapter.getData(key);
+        var result = getData(key);
         if (result.isEmpty()) {
             return null;
         }
@@ -349,14 +300,7 @@ public class ProfileDataController {
     }
 
     public void getPlayerUuidAsync(String pName, IAsyncReadCallback<UUID> callback) {
-        checkDestroy();
-        readExecutor.submit(() -> invokeCallback(callback, getPlayerUuid(pName)));
-    }
-
-    private void checkDestroy() {
-        if (destroyed) {
-            throw new IllegalStateException("Controller cannot be accessed after destroyed.");
-        }
+        scheduleReadTask(() -> invokeCallback(callback, getPlayerUuid(pName)));
     }
 
     private static RecordSet getRecordSet(PlayerBackpack bp) {
@@ -377,14 +321,6 @@ public class ProfileDataController {
         return re;
     }
 
-    private void scheduleWriteTask(RecordKey key) {
-        scheduleWriteTask(key, key, false);
-    }
-
-    private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, boolean forceScopeKey) {
-        scheduleWriteTask(scopeKey, key, () -> dataAdapter.deleteData(key), forceScopeKey);
-    }
-
     public void invalidateCache(String pUuid) {
         var removed = profileCache.remove(pUuid);
         if (removed != null) {
@@ -393,59 +329,10 @@ public class ProfileDataController {
         backpackCache.invalidate(pUuid);
     }
 
-    private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, RecordSet data, boolean forceScopeKey) {
-        scheduleWriteTask(scopeKey, key, () -> dataAdapter.setData(key, data), forceScopeKey);
-    }
-
-    private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, Runnable task, boolean forceScopeKey) {
-        lock.lock(scopeKey);
-        try {
-            var queuedTask = scheduledWriteTasks.get(scopeKey);
-            if (queuedTask != null && queuedTask.queue(key, task)) {
-                return;
-            }
-
-            var scopeToUse = forceScopeKey ? scopeKey : key;
-            queuedTask = new QueuedAsyncWriteTask() {
-                @Override
-                protected void onSuccess() {
-                    lock.lock(scopeKey);
-                    var last = scheduledWriteTasks.remove(scopeToUse);
-                    if (this != last) {
-                        scheduledWriteTasks.put(scopeToUse, last);
-                    }
-                    lock.unlock(scopeKey);
-                }
-
-                @Override
-                protected void onError(Throwable e) {
-                    Slimefun.logger().log(Level.SEVERE, "Exception thrown while executing write task: ");
-                    e.printStackTrace();
-                    lock.lock(scopeKey);
-                    scheduledWriteTasks.remove(scopeToUse);
-                    lock.unlock(scopeKey);
-                }
-            };
-            queuedTask.queue(key, task);
-            scheduledWriteTasks.put(scopeToUse, queuedTask);
-            writeExecutor.submit(queuedTask);
-        } finally {
-            lock.unlock(scopeKey);
-        }
-    }
-
-    private <T> void invokeCallback(IAsyncReadCallback<T> callback, T result) {
-        Runnable cb;
-        if (result == null) {
-            cb = callback::onResultNotFound;
-        } else {
-            cb = () -> callback.onResult(result);
-        }
-
-        if (callback.runOnMainThread()) {
-            Slimefun.runSync(cb);
-        } else {
-            callbackExecutor.submit(cb);
-        }
+    @Override
+    public void shutdown() {
+        super.shutdown();
+        backpackCache.clean();
+        profileCache.clear();
     }
 }

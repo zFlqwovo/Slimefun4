@@ -3,12 +3,12 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.controller;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ControllerHolder<T> {
-    private static final Map<Class<?>, ControllerHolder<?>> holders = new ConcurrentHashMap<>();
+public class ControllerHolder<T extends ADataController> {
+    private static final Map<Class<? extends ADataController>, ControllerHolder<?>> holders = new ConcurrentHashMap<>();
 
     private final Map<StorageType, T> controllers;
 
-    public static <CT> CT getController(Class<CT> clazz, StorageType type) {
+    public static <CT extends ADataController> CT getController(Class<CT> clazz, StorageType type) {
         return ((ControllerHolder<CT>) holders.get(clazz)).get(type);
     }
 
@@ -16,7 +16,7 @@ public class ControllerHolder<T> {
         holders.clear();
     }
 
-    public static <CT> CT createController(Class<CT> clazz, StorageType type) {
+    public static <CT extends ADataController> CT createController(Class<CT> clazz, StorageType type) {
         try {
             var re = clazz.getDeclaredConstructor().newInstance();
             ((ControllerHolder<CT>) holders.computeIfAbsent(clazz, k -> new ControllerHolder<CT>())).put(type, re);
