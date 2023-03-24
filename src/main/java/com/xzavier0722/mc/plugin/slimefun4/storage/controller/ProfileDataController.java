@@ -276,7 +276,7 @@ public class ProfileDataController {
             var data = new RecordSet();
             data.put(FieldKey.PLAYER_UUID, uuid);
             data.put(FieldKey.RESEARCH_ID, researchKey.toString());
-            dataAdapter.setData(key, data);
+            scheduleWriteTask(new UUIDKey(DataScope.NONE, uuid), key, data, false);
         } else {
             scheduleWriteTask(new UUIDKey(DataScope.NONE, uuid), key, false);
         }
