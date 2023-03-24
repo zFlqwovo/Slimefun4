@@ -409,18 +409,19 @@ public class ProfileDataController {
                 protected void onSuccess() {
                     lock.lock(scopeKey);
                     var last = scheduledWriteTasks.remove(scopeToUse);
-                    if (this == last) {
-                        lock.unlock(scopeKey);
-                    } else {
+                    if (this != last) {
                         scheduledWriteTasks.put(scopeToUse, last);
-                        lock.unlock(scopeKey);
                     }
+                    lock.unlock(scopeKey);
                 }
 
                 @Override
                 protected void onError(Throwable e) {
                     Slimefun.logger().log(Level.SEVERE, "Exception thrown while executing write task: ");
                     e.printStackTrace();
+                    lock.lock(scopeKey);
+                    scheduledWriteTasks.remove(scopeToUse);
+                    lock.unlock(scopeKey);
                 }
             };
             queuedTask.queue(key, task);
