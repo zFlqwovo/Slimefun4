@@ -13,20 +13,8 @@ class ScopedLock {
         locks = new ConcurrentHashMap<>();
     }
 
-    void createLock(ScopeKey scopeKey) {
-        locks.put(scopeKey, new ReentrantLock());
-    }
-
-    void destroyLock(ScopeKey scopeKey) {
-        locks.remove(scopeKey);
-    }
-
     void lock(ScopeKey scopeKey) {
-        var lock = locks.get(scopeKey);
-        if (lock == null) {
-            return;
-        }
-
+        var lock = locks.computeIfAbsent(scopeKey, k -> new ReentrantLock());
         lock.lock();
     }
 
@@ -37,6 +25,8 @@ class ScopedLock {
         }
 
         lock.unlock();
-        locks.remove(scopeKey);
+        if (!lock.isLocked()) {
+            locks.remove(scopeKey);
+        }
     }
 }

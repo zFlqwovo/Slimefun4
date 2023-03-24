@@ -396,7 +396,6 @@ public class ProfileDataController {
     }
 
     private void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, Runnable task, boolean forceScopeKey) {
-        lock.createLock(scopeKey);
         lock.lock(scopeKey);
         try {
             var queuedTask = scheduledWriteTasks.get(scopeKey);
@@ -412,7 +411,6 @@ public class ProfileDataController {
                     var last = scheduledWriteTasks.remove(scopeToUse);
                     if (this == last) {
                         lock.unlock(scopeKey);
-                        lock.destroyLock(scopeKey);
                     } else {
                         scheduledWriteTasks.put(scopeToUse, last);
                         lock.unlock(scopeKey);
