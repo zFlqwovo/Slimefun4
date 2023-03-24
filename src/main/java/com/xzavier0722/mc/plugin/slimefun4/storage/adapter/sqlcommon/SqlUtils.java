@@ -30,6 +30,7 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_TICKING;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_BACKPACK;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_BACKPACK_INVENTORY;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_BLOCK_DATA;
@@ -58,6 +59,7 @@ public class SqlUtils {
         fieldMap.put(FieldKey.SLIMEFUN_ID, FIELD_SLIMEFUN_ID);
         fieldMap.put(FieldKey.DATA_KEY, FIELD_DATA_KEY);
         fieldMap.put(FieldKey.DATA_VALUE, FIELD_DATA_VALUE);
+        fieldMap.put(FieldKey.TICKING, FIELD_TICKING);
         mapper = new FieldMapper<>(fieldMap);
     }
 

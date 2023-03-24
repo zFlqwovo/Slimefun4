@@ -28,6 +28,11 @@ public class RecordSet {
         data.put(key, DataUtils.itemStack2String(itemStack));
     }
 
+    public void put(FieldKey key, boolean val) {
+        put(key, val ? "1" : "0");
+    }
+
+    @ParametersAreNonnullByDefault
     public Map<FieldKey, String> getAll() {
         return Collections.unmodifiableMap(data);
     }
@@ -50,6 +55,10 @@ public class RecordSet {
     @ParametersAreNonnullByDefault
     public ItemStack getItemStack(FieldKey key) {
         return DataUtils.string2ItemStack(data.get(key));
+    }
+
+    public boolean getBoolean(FieldKey key) {
+        return getInt(key) == 1;
     }
 
     public void readonly() {

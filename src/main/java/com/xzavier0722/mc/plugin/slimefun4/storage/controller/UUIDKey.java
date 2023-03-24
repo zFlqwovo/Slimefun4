@@ -24,6 +24,6 @@ class UUIDKey extends ScopeKey {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof UUIDKey other && scope == other.scope && uuid.equals(other.uuid);
+        return obj == this || (obj instanceof UUIDKey other && scope == other.scope && uuid.equals(other.uuid));
     }
 }

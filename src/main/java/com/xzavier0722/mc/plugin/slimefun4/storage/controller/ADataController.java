@@ -64,10 +64,6 @@ public abstract class ADataController {
         dataAdapter = null;
     }
 
-    protected void scheduleDeleteTask(RecordKey key) {
-        scheduleDeleteTask(key, key, false);
-    }
-
     protected void scheduleDeleteTask(ScopeKey scopeKey, RecordKey key, boolean forceScopeKey) {
         scheduleWriteTask(scopeKey, key, () -> dataAdapter.deleteData(key), forceScopeKey);
     }

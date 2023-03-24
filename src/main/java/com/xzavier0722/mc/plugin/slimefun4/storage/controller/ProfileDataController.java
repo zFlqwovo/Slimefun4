@@ -270,7 +270,7 @@ public class ProfileDataController extends ADataController {
             key.addField(FieldKey.INVENTORY_ITEM);
             var is = inv.getItem(slot);
             if (is == null) {
-                scheduleDeleteTask(key);
+                scheduleDeleteTask(new UUIDKey(DataScope.NONE, bp.getOwner().getUniqueId()), key, false);
             } else {
                 var data = new RecordSet();
                 data.put(FieldKey.BACKPACK_ID, id);
