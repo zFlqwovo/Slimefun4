@@ -43,33 +43,38 @@ public class PlayerProfileMigrator {
         backupFolder.mkdirs();
 
         var migratedCount = 0;
+        var total = listFiles.length;
 
         for (File file : listFiles) {
-            if (file.getName().endsWith(".yml")) {
-                try {
-                    var uuid = UUID.fromString(file.getName().replace(".yml", ""));
-                    var p = Bukkit.getOfflinePlayer(uuid);
+            if (!file.getName().endsWith(".yml")) {
+                continue;
+            }
 
-                    if (!p.hasPlayedBefore()) {
-                        Slimefun.logger().log(Level.INFO, "检测到从未加入服务器玩家的数据, 已自动跳过");
-                        continue;
-                    }
+            try {
+                var uuid = UUID.fromString(file.getName().replace(".yml", ""));
+                var p = Bukkit.getOfflinePlayer(uuid);
 
-                    migratePlayerProfile(p);
-
-                    var backupFile = new File(backupFolder, file.getName());
-                    backupFile.createNewFile();
-                    Files.copy(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    file.delete();
-
-                    migratedCount++;
-                } catch (IOException e) {
-                    Slimefun.logger().log(Level.WARNING, "迁移玩家数据时出现问题", e);
-                    result = MigrateStatus.FAILED;
-                } catch (IllegalArgumentException ignored) {
-                    Slimefun.logger().log(Level.WARNING, "检测到不合法命名的玩家数据文件: '" + file.getName() + "'");
-                    // illegal player name, skip
+                if (!p.hasPlayedBefore()) {
+                    Slimefun.logger().log(Level.INFO, "检测到从未加入服务器玩家的数据, 已自动跳过: " + uuid);
+                    total--;
+                    continue;
                 }
+
+                migratePlayerProfile(p);
+
+                var backupFile = new File(backupFolder, file.getName());
+                backupFile.createNewFile();
+                Files.copy(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                file.delete();
+
+                migratedCount++;
+                Slimefun.logger().log(Level.INFO, "成功迁移玩家数据: " + p.getName() + "(" + migratedCount + "/" + total + ")");
+            } catch (IOException e) {
+                Slimefun.logger().log(Level.WARNING, "迁移玩家数据时出现问题", e);
+                result = MigrateStatus.FAILED;
+            } catch (IllegalArgumentException ignored) {
+                Slimefun.logger().log(Level.WARNING, "检测到不合法命名的玩家数据文件: '" + file.getName() + "'");
+                // illegal player name, skip
             }
         }
 
@@ -103,7 +108,7 @@ public class PlayerProfileMigrator {
             var research = Research.getResearchByID(Integer.parseInt(researchID));
 
             if (research.isEmpty()) {
-                return;
+                continue;
             }
 
             profile.setResearched(research.get(), true);
