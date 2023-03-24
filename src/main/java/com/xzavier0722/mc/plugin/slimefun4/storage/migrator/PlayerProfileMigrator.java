@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 public class PlayerProfileMigrator {
     private static final File playerFolder = new File("data-storage/Slimefun/Players/");
@@ -54,7 +55,7 @@ public class PlayerProfileMigrator {
                         continue;
                     }
 
-                    migratePlayerProfile(uuid);
+                    migratePlayerProfile(p);
 
                     var backupFile = new File(backupFolder, file.getName());
                     backupFile.createNewFile();
@@ -83,8 +84,8 @@ public class PlayerProfileMigrator {
         return migrateStatus;
     }
 
-    private static void migratePlayerProfile(@Nonnull UUID uuid) {
-        var p = Bukkit.getOfflinePlayer(uuid);
+    private static void migratePlayerProfile(@Nonnull OfflinePlayer p) {
+        var uuid = p.getUniqueId();
         var configFile = new Config("data-storage/Slimefun/Players/" + uuid + ".yml");
 
         if (!configFile.getFile().exists()) {
