@@ -1,12 +1,11 @@
 package net.guizhanss.slimefun4.updater;
 
-import net.guizhanss.guizhanlib.updater.GuizhanBuildsUpdater;
-import org.bukkit.plugin.Plugin;
-
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.lang.reflect.Method;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import net.guizhanss.guizhanlib.updater.GuizhanBuildsCNUpdater;
+import org.bukkit.plugin.Plugin;
 
 /**
  * 自动更新任务.
@@ -44,7 +43,7 @@ public class AutoUpdateTask implements Runnable {
             updaterStart.invoke(null, plugin, file, GITHUB_USER, GITHUB_REPO, branch, false);
         } catch (Exception ignored) {
             // use updater in lib
-            new GuizhanBuildsUpdater(plugin, file, GITHUB_USER, GITHUB_REPO, branch, false).start();
+            new GuizhanBuildsCNUpdater(plugin, file, GITHUB_USER, GITHUB_REPO, branch, false).start();
         }
     }
 
