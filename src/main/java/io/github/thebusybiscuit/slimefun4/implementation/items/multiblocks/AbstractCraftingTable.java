@@ -63,8 +63,9 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
         return fakeInv;
     }
 
+    // Return: true if upgrade from existing backpack, else false
     @ParametersAreNonnullByDefault
-    protected void upgradeBackpack(Player p, Inventory inv, SlimefunBackpack backpack, ItemStack output, Runnable onReadyCb) {
+    protected boolean upgradeBackpack(Player p, Inventory inv, SlimefunBackpack backpack, ItemStack output, Runnable onReadyCb) {
         ItemStack input = null;
 
         var contents = inv.getContents();
@@ -101,7 +102,7 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
                         }
                     }
             );
-            return;
+            return true;
         } else {
             id = retrieveID(input);
             if (id.isPresent()) {
@@ -122,10 +123,10 @@ abstract class AbstractCraftingTable extends MultiBlockMachine {
                             }
                         }
                 );
-                return;
+                return true;
             }
         }
-        onReadyCb.run();
+        return false;
     }
 
 

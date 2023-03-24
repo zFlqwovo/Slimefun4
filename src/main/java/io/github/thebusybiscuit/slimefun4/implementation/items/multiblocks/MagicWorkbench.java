@@ -75,10 +75,9 @@ public class MagicWorkbench extends AbstractCraftingTable {
         if (outputInv != null) {
             SlimefunItem sfItem = SlimefunItem.getByItem(output);
 
+            var waitCallback = false;
             if (sfItem instanceof SlimefunBackpack backpack) {
-                upgradeBackpack(p, inv, backpack, output, () -> startAnimation(p, b, inv, dispenser, output));
-            } else {
-                startAnimation(p, b, inv, dispenser, output);
+                waitCallback = upgradeBackpack(p, inv, backpack, output, () -> startAnimation(p, b, inv, dispenser, output));
             }
 
             for (int j = 0; j < 9; j++) {
@@ -91,7 +90,9 @@ public class MagicWorkbench extends AbstractCraftingTable {
                 }
             }
 
-            startAnimation(p, b, inv, dispenser, output);
+            if (!waitCallback) {
+                startAnimation(p, b, inv, dispenser, output);
+            }
         } else {
             Slimefun.getLocalization().sendMessage(p, "machines.full-inventory", true);
         }
