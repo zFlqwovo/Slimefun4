@@ -143,6 +143,10 @@
                             <pattern>org.apache.commons.lang</pattern>
                             <shadedPattern>io.github.thebusybiscuit.slimefun4.libraries.commons.lang</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>net.guizhanss.guizhanlib</pattern>
+                            <shadedPattern>io.github.thebusybiscuit.slimefun4.libraries.guizhanlib</shadedPattern>
+                        </relocation>
                     </relocations>
 
                     <!-- Exclude unneeded metadata files from shaded dependencies -->
@@ -387,13 +391,6 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>net.guizhanss</groupId>
-            <artifactId>GuizhanLib-api</artifactId>
-            <version>1.1.1</version>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- TODO: Remove this dependency -->
         <dependency>
             <groupId>commons-lang</groupId>
@@ -406,6 +403,20 @@
             <groupId>com.github.Xzavier0722</groupId>
             <artifactId>SlimefunCompLib</artifactId>
             <version>b7a2bd8</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- Auto updater lib -->
+
+        <dependency>
+            <groupId>net.guizhanss</groupId>
+            <artifactId>GuizhanLib-common</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.guizhanss</groupId>
+            <artifactId>GuizhanLib-updater</artifactId>
+            <version>1.1.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
