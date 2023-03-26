@@ -66,17 +66,23 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
     private static final int MAX_ITEM_GROUPS = 36;
     private static final Sound sound = Sound.ITEM_BOOK_PAGE_TURN;
 
-    private final int[] recipeSlots = { 3, 4, 5, 12, 13, 14, 21, 22, 23 };
+    private final int[] recipeSlots = {3, 4, 5, 12, 13, 14, 21, 22, 23};
     private final ItemStack item;
 
     public SurvivalSlimefunGuide() {
         item = new SlimefunGuideItem(this, "&aSlimefun 指南 &7(箱子界面)");
     }
 
+    // fallback
+    @Deprecated
+    public SurvivalSlimefunGuide(boolean v1, boolean v2) {
+        item = new SlimefunGuideItem(this, "&aSlimefun 指南 &7(箱子界面)");
+    }
+
     /**
      * This returns the {@link Sound} which is played when someone navigates through
      * the {@link SlimefunGuide}
-     * 
+     *
      * @return The {@link Sound}
      */
     public @Nonnull Sound getSound() {
