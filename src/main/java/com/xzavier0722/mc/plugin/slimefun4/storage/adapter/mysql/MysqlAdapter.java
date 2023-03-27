@@ -27,7 +27,6 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_TICKING;
 
 public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
     private ConnectionPool pool;
@@ -207,8 +206,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + FIELD_LOCATION + " CHAR(64) PRIMARY KEY NOT NULL, "
                 + FIELD_CHUNK + " CHAR(64) NOT NULL, "
                 + FIELD_SLIMEFUN_ID + " CHAR(32) NOT NULL, "
-                + FIELD_TICKING + " TINYINT UNSIGNED NOT NULL, "
-                + "INDEX index_ticking (" + FIELD_CHUNK + ", " + FIELD_TICKING + ")"
+                + "INDEX index_ticking (" + FIELD_CHUNK + ")"
                 + ");"
         );
     }

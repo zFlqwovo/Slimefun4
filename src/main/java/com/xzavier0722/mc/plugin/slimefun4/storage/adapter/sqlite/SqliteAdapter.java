@@ -27,7 +27,6 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_TICKING;
 
 public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
     private SqliteConfig config;
@@ -208,13 +207,12 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
                 + table + "("
                 + FIELD_LOCATION + " TEXT PRIMARY KEY NOT NULL, "
                 + FIELD_CHUNK + " TEXT NOT NULL, "
-                + FIELD_SLIMEFUN_ID + " TEXT NOT NULL, "
-                + FIELD_TICKING + " INTEGER NOT NULL "
+                + FIELD_SLIMEFUN_ID + " TEXT NOT NULL"
                 + ");"
         );
 
         executeSql(
-                "CREATE INDEX IF NOT EXISTS index_chunk ON " + table + " (" + FIELD_CHUNK + ", " + FIELD_TICKING + ");"
+                "CREATE INDEX IF NOT EXISTS index_chunk ON " + table + ");"
         );
     }
 

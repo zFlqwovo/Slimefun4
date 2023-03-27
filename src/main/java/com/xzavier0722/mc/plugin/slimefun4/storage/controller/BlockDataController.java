@@ -10,19 +10,21 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BlockDataController extends ADataController {
 
+    private final Set<String> loadedChunks;
     private final Map<String, String> blockCache;
     private final Map<String, Map<String, String>> blockDataCache;
     private final Map<String, Map<String, String>> chunkDataCache;
 
     BlockDataController() {
         super(DataType.BLOCK_STORAGE);
+        loadedChunks = new HashSet<>();
         blockCache = new ConcurrentHashMap<>();
         blockDataCache = new ConcurrentHashMap<>();
         chunkDataCache = new ConcurrentHashMap<>();
@@ -38,14 +40,13 @@ public class BlockDataController extends ADataController {
         var data = new RecordSet();
         data.put(FieldKey.LOCATION, lKey);
         data.put(FieldKey.SLIMEFUN_ID, sfId);
-        data.put(FieldKey.TICKING, Slimefun.getRegistry().getTickerBlocks().contains(sfId));
 
         scheduleWriteTask(new LocationKey(DataScope.NONE, l), key, data, true);
     }
 
     public void removeBlock(Location l) {
         var lKey = LocationUtils.getLocKey(l);
-        blockCache.remove(lKey);
+        blockCache.put(lKey, null);
 
         var key = new RecordKey(DataScope.BLOCK_RECORD);
         key.addCondition(FieldKey.LOCATION, lKey);
@@ -55,9 +56,8 @@ public class BlockDataController extends ADataController {
 
     public String getBlock(Location l) {
         var lKey = LocationUtils.getLocKey(l);
-        var re = blockCache.get(lKey);
-        if (re != null) {
-            return re;
+        if (blockCache.containsKey(lKey)) {
+            return blockCache.get(lKey);
         }
 
         var key = new RecordKey(DataScope.BLOCK_RECORD);
@@ -65,11 +65,17 @@ public class BlockDataController extends ADataController {
         key.addField(FieldKey.SLIMEFUN_ID);
 
         var result = getData(key);
-        return result.isEmpty() ? null : result.get(0).get(FieldKey.SLIMEFUN_ID);
+        var re = result.isEmpty() ? null : result.get(0).get(FieldKey.SLIMEFUN_ID);
+        blockCache.put(lKey, re);
+        return re;
     }
 
     public void getBlockAsync(Location l, IAsyncReadCallback<String> callback) {
         scheduleReadTask(() -> invokeCallback(callback, getBlock(l)));
+    }
+
+    public String getLoadedBlock(Location l) {
+        return blockCache.get(LocationUtils.getLocKey(l));
     }
 
     public void setBlockData(Location l, String key, String data) {
@@ -88,14 +94,51 @@ public class BlockDataController extends ADataController {
         scheduleReadTask(() -> invokeCallback(callback, getBlockData(l)));
     }
 
-    public Set<Location> getTickingLocations(Chunk chunk) {
-        return Collections.emptySet();
+    public void loadChunk(Chunk chunk) {
+        var cKey = LocationUtils.getChunkKey(chunk);
+        if (loadedChunks.contains(cKey)) {
+            return;
+        }
+
+        synchronized (this) {
+            if (loadedChunks.contains(cKey)) {
+                return;
+            }
+            loadedChunks.add(cKey);
+        }
+
+        var key = new RecordKey(DataScope.BLOCK_RECORD);
+        key.addField(FieldKey.LOCATION);
+        key.addField(FieldKey.SLIMEFUN_ID);
+        key.addCondition(FieldKey.CHUNK, cKey);
+
+        getData(key).forEach(block -> {
+            var lKey = block.get(FieldKey.LOCATION);
+            var sfId = block.get(FieldKey.SLIMEFUN_ID);
+            blockCache.put(lKey, sfId);
+            scheduleReadTask(() -> {
+                if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
+                    loadBlockData(lKey);
+                    Slimefun.getTickerTask().enableTicker(LocationUtils.toLocation(lKey));
+                }
+            });
+        });
     }
 
-    public void getTickingLocationsAsync(Chunk chunk, IAsyncReadCallback<Set<Location>> callback) {
-        scheduleReadTask(() -> invokeCallback(callback, getTickingLocations(chunk)));
-    }
+    private void loadBlockData(String lKey) {
+        if (blockDataCache.containsKey(lKey)) {
+            return;
+        }
 
+        var key = new RecordKey(DataScope.BLOCK_DATA);
+        key.addCondition(FieldKey.LOCATION, lKey);
+        key.addField(FieldKey.DATA_KEY);
+        key.addField(FieldKey.DATA_VALUE);
+
+        getData(key).forEach(
+                recordSet -> putBlockDataCache(lKey, recordSet.get(FieldKey.DATA_KEY), recordSet.get(FieldKey.DATA_VALUE))
+        );
+    }
 
     public void setChunkData(Chunk chunk, String key, String data) {
 
