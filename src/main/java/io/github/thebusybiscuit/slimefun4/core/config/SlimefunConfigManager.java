@@ -47,6 +47,7 @@ public class SlimefunConfigManager {
     private boolean showVanillaRecipes;
     private boolean showHiddenItemGroupsInSearch;
     private boolean autoUpdate;
+    private double researchConvertMultiplier;
 
     public SlimefunConfigManager(@Nonnull Slimefun plugin) {
         Validate.notNull(plugin, "The Plugin instance cannot be null");
@@ -88,6 +89,8 @@ public class SlimefunConfigManager {
             showVanillaRecipes = pluginConfig.getBoolean("guide.show-vanilla-recipes");
             showHiddenItemGroupsInSearch = pluginConfig.getBoolean("guide.show-hidden-item-groups-in-search");
             autoUpdate = pluginConfig.getBoolean("options.auto-update");
+
+            researchConvertMultiplier = researchesConfig.getDouble("researches.money-multiply");
         } catch (Exception x) {
             plugin.getLogger().log(Level.SEVERE, x, () -> "An Exception was caught while (re)loading the config files for Slimefun v" + plugin.getDescription().getVersion());
             isSuccessful = false;
@@ -98,7 +101,7 @@ public class SlimefunConfigManager {
             try {
                 NamespacedKey key = research.getKey();
                 int cost = researchesConfig.getInt(key.getNamespace() + '.' + key.getKey() + ".cost");
-                research.setCost(cost);
+                research.setLevelCost(cost);
                 var status = researchesConfig.getBoolean(key.getNamespace() + '.' + key.getKey() + ".enabled");
 
                 if (research.isEnabled() != status) {
@@ -256,5 +259,9 @@ public class SlimefunConfigManager {
 
     public boolean isAutoUpdate() {
         return autoUpdate;
+    }
+
+    public double getResearchConvertMultiplier() {
+        return researchConvertMultiplier;
     }
 }

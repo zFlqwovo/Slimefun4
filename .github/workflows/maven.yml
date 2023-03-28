@@ -38,13 +38,13 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request' && github.ref != 'dev'
+      if: github.event_name != 'pull_request' && github.ref_name == 'master'
       with:
         name: Slimefun.jar
         path: staging
     - name: Automatic Releases
       uses: marvinpinto/action-automatic-releases@v1.2.1
-      if: github.event_name != 'pull_request' && github.ref != 'dev'
+      if: github.event_name != 'pull_request' && github.ref_name == 'master'
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "exp"

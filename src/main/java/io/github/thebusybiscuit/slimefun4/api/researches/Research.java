@@ -29,13 +29,11 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * Represents a research, which is bound to one
- * {@link SlimefunItem} or more and requires XP levels to unlock said item(s).
- * 
+ * {@link SlimefunItem} or more and requires XP levels/In-game economy to unlock said item(s).
+ *
  * @author TheBusyBiscuit
- * 
  * @see ResearchSetup
  * @see ResearchUnlockEvent
- * 
  */
 public class Research implements Keyed {
 
@@ -43,17 +41,48 @@ public class Research implements Keyed {
     private final int id;
     private final String name;
     private boolean enabled = true;
-    private int cost;
+    private int levelCost;
+    private double currencyCost;
 
     private final List<SlimefunItem> items = new LinkedList<>();
 
     /**
      * The constructor for a {@link Research}.
-     * 
+     *
      * Create a new research, then bind this research to the Slimefun items you want by calling
      * {@link #addItems(SlimefunItem...)}. Once you're finished, call {@link #register()}
      * to register it.
-     * 
+     *
+     * @param key
+     *            A unique identifier for this {@link Research}
+     * @param id
+     *            old way of identifying researches
+     * @param defaultName
+     *            The displayed name of this {@link Research}
+     * @param levelCost
+     *            The Cost in XP levels to unlock this {@link Research}
+     * @param currencyCost
+     *            The Cost in economy to unlock this {@link Research}
+     *
+     */
+    public Research(@Nonnull NamespacedKey key, int id, @Nonnull String defaultName, int levelCost, double currencyCost) {
+        Validate.notNull(key, "A NamespacedKey must be provided");
+        Validate.notNull(defaultName, "A default name must be specified");
+
+        this.key = key;
+        this.id = id;
+        this.name = defaultName;
+        this.levelCost = levelCost;
+        this.currencyCost = currencyCost;
+    }
+
+    /**
+     * The constructor for a {@link Research}.
+     *
+     * Create a new research, then bind this research to the Slimefun items you want by calling
+     * {@link #addItems(SlimefunItem...)}. Once you're finished, call {@link #register()}
+     * to register it.
+     *
      * @param key
      *            A unique identifier for this {@link Research}
      * @param id
@@ -62,8 +91,9 @@ public class Research implements Keyed {
      *            The displayed name of this {@link Research}
      * @param defaultCost
      *            The Cost in XP levels to unlock this {@link Research}
-     * 
+     *
      */
+    @Deprecated
     public Research(@Nonnull NamespacedKey key, int id, @Nonnull String defaultName, int defaultCost) {
         Validate.notNull(key, "A NamespacedKey must be provided");
         Validate.notNull(defaultName, "A default name must be specified");
@@ -71,7 +101,8 @@ public class Research implements Keyed {
         this.key = key;
         this.id = id;
         this.name = defaultName;
-        this.cost = defaultCost;
+        this.levelCost = defaultCost;
+        this.currencyCost = defaultCost * Slimefun.getConfigManager().getResearchConvertMultiplier();
     }
 
     @Override
@@ -129,25 +160,25 @@ public class Research implements Keyed {
 
     /**
      * Gets the cost in XP levels to unlock this {@link Research}.
-     * 
+     *
      * @return The cost in XP levels for this {@link Research}
      */
-    public int getCost() {
-        return cost;
+    public int getLevelCost() {
+        return levelCost;
     }
 
     /**
      * Sets the cost in XP levels to unlock this {@link Research}.
-     * 
-     * @param cost
+     *
+     * @param levelCost
      *            The cost in XP levels
      */
-    public void setCost(int cost) {
-        if (cost < 0) {
+    public void setLevelCost(int levelCost) {
+        if (levelCost < 0) {
             throw new IllegalArgumentException("Research cost must be zero or greater!");
         }
 
-        this.cost = cost;
+        this.levelCost = levelCost;
     }
 
     /**
@@ -248,9 +279,9 @@ public class Research implements Keyed {
 
         boolean canUnlock;
         if (VaultHelper.isUsable()) {
-            canUnlock = VaultHelper.getEcon().getBalance(p) >= this.getCost() * Slimefun.getCfg().getDouble("researches.money-multiply");
+            canUnlock = VaultHelper.getEcon().getBalance(p) >= this.getLevelCost() * Slimefun.getConfigManager().getResearchConvertMultiplier();
         } else {
-            canUnlock = p.getLevel() >= cost;
+            canUnlock = p.getLevel() >= levelCost;
         }
 
         boolean creativeResearch = p.getGameMode() == GameMode.CREATIVE && Slimefun.getConfigManager().isFreeCreativeResearchingEnabled();
@@ -302,10 +333,10 @@ public class Research implements Keyed {
             return;
         }
 
-        Slimefun.getResearchCfg().setDefaultValue(path + ".cost", getCost());
+        Slimefun.getResearchCfg().setDefaultValue(path + ".cost", getLevelCost());
         Slimefun.getResearchCfg().setDefaultValue(path + ".enabled", true);
 
-        setCost(Slimefun.getResearchCfg().getInt(path + ".cost"));
+        setLevelCost(Slimefun.getResearchCfg().getInt(path + ".cost"));
         enabled = true;
 
         Slimefun.getRegistry().getResearches().add(this);

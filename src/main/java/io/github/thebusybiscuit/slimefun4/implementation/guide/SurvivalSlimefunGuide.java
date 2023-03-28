@@ -302,9 +302,9 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
             String lore;
 
             if (VaultHelper.isUsable()) {
-                lore = (research.getCost() * Slimefun.getCfg().getDouble("researches.money-multiply")) + " 游戏币";
+                lore = (research.getLevelCost() * Slimefun.getCfg().getDouble("researches.money-multiply")) + " 游戏币";
             } else {
-                lore = research.getCost() + " 级经验";
+                lore = research.getLevelCost() + " 级经验";
             }
 
             menu.addItem(index, new CustomItemStack(new CustomItemStack(ChestMenuUtils.getNoPermissionItem(), "&f" + ItemUtils.getItemName(sfitem.getItem()), "&7" + sfitem.getId(), "&4&l" + Slimefun.getLocalization().getMessage(p, "guide.locked"), "", "&a> 单击解锁", "", "&7需要 &b", lore)));

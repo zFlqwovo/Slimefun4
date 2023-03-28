@@ -69,9 +69,9 @@ public interface SlimefunGuideImplementation {
             research.unlock(p, true, callback);
         } else {
             if (VaultHelper.isUsable()) {
-                VaultHelper.getEcon().withdrawPlayer(p, research.getCost() * Slimefun.getCfg().getDouble("researches.money-multiply"));
+                VaultHelper.getEcon().withdrawPlayer(p, research.getLevelCost() * Slimefun.getCfg().getDouble("researches.money-multiply"));
             } else {
-                p.setLevel(p.getLevel() - research.getCost());
+                p.setLevel(p.getLevel() - research.getLevelCost());
             }
 
             boolean skipLearningAnimation = Slimefun.getConfigManager().isLearningAnimationDisabled() || !SlimefunGuideSettings.hasLearningAnimationEnabled(p);
