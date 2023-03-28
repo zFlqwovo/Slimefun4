@@ -278,8 +278,9 @@ public class Research implements Keyed {
         }
 
         boolean canUnlock;
+
         if (VaultHelper.isUsable()) {
-            canUnlock = VaultHelper.getEcon().getBalance(p) >= this.getLevelCost() * Slimefun.getConfigManager().getResearchConvertMultiplier();
+            canUnlock = VaultHelper.getEcon().getBalance(p) >= currencyCost;
         } else {
             canUnlock = p.getLevel() >= levelCost;
         }
@@ -334,9 +335,11 @@ public class Research implements Keyed {
         }
 
         Slimefun.getResearchCfg().setDefaultValue(path + ".cost", getLevelCost());
+        Slimefun.getResearchCfg().setDefaultValue(path + ".moneycost", getCurrencyCost());
         Slimefun.getResearchCfg().setDefaultValue(path + ".enabled", true);
 
         setLevelCost(Slimefun.getResearchCfg().getInt(path + ".cost"));
+        setCurrencyCost(Slimefun.getResearchCfg().getInt(path + ".moneycost"));
         enabled = true;
 
         Slimefun.getRegistry().getResearches().add(this);
@@ -388,5 +391,13 @@ public class Research implements Keyed {
     @Override
     public String toString() {
         return "Research (" + getKey() + ')';
+    }
+
+    public double getCurrencyCost() {
+        return currencyCost;
+    }
+
+    public void setCurrencyCost(double currencyCost) {
+        this.currencyCost = currencyCost;
     }
 }

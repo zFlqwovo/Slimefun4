@@ -69,7 +69,7 @@ public interface SlimefunGuideImplementation {
             research.unlock(p, true, callback);
         } else {
             if (VaultHelper.isUsable()) {
-                VaultHelper.getEcon().withdrawPlayer(p, research.getLevelCost() * Slimefun.getCfg().getDouble("researches.money-multiply"));
+                VaultHelper.getEcon().withdrawPlayer(p, research.getCurrencyCost());
             } else {
                 p.setLevel(p.getLevel() - research.getLevelCost());
             }

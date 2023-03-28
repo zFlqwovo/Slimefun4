@@ -302,7 +302,8 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
             String lore;
 
             if (VaultHelper.isUsable()) {
-                lore = (research.getLevelCost() * Slimefun.getCfg().getDouble("researches.money-multiply")) + " 游戏币";
+                // FIXME: 格式化以避免 xx.0000000000x 这种奇怪数字
+                lore = research.getCurrencyCost() + " 游戏币";
             } else {
                 lore = research.getLevelCost() + " 级经验";
             }
