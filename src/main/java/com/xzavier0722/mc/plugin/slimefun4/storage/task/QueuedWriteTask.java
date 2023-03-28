@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-public class QueuedAsyncWriteTask implements Runnable {
+public class QueuedWriteTask implements Runnable {
     private final Queue<RecordKey> queue = new LinkedList<>();
     private final Map<RecordKey, Runnable> tasks = new HashMap<>();
     private volatile boolean done = false;

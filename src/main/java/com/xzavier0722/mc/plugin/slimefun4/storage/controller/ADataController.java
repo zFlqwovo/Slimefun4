@@ -6,7 +6,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
-import com.xzavier0722.mc.plugin.slimefun4.storage.task.QueuedAsyncWriteTask;
+import com.xzavier0722.mc.plugin.slimefun4.storage.task.QueuedWriteTask;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -19,7 +19,7 @@ import java.util.logging.Level;
 
 public abstract class ADataController {
     private final DataType dataType;
-    private final Map<ScopeKey, QueuedAsyncWriteTask> scheduledWriteTasks;
+    private final Map<ScopeKey, QueuedWriteTask> scheduledWriteTasks;
     private final ScopedLock lock;
     private volatile IDataSourceAdapter<?> dataAdapter;
     private ExecutorService readExecutor;
@@ -81,7 +81,7 @@ public abstract class ADataController {
             }
 
             var scopeToUse = forceScopeKey ? scopeKey : key;
-            queuedTask = new QueuedAsyncWriteTask() {
+            queuedTask = new QueuedWriteTask() {
                 @Override
                 protected void onSuccess() {
                     lock.lock(scopeKey);
