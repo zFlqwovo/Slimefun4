@@ -73,11 +73,7 @@ public class SlimefunDatabaseManager {
                 var profilePath = new File("data-storage/Slimefun", "profile.db");
                 profilePath.createNewFile();
 
-                ((IDataSourceAdapter<SqliteConfig>) adapter).prepare(
-                        new SqliteConfig(
-                                profilePath.getAbsolutePath(),
-                                databaseConfig.getInt("sqlite.maxReadConnection")
-                        ));
+                ((IDataSourceAdapter<SqliteConfig>) adapter).prepare(new SqliteConfig(profilePath.getAbsolutePath()));
             }
         }
     }

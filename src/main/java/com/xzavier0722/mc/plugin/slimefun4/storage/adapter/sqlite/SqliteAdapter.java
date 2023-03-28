@@ -1,7 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
-import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.ConnectionPool;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
@@ -24,27 +23,23 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 
 public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
     private SqliteConfig config;
-    private Connection writeConn;
-    private ConnectionPool readPool;
+    private Connection conn;
 
     @Override
     public void prepare(SqliteConfig config) {
         this.config = config;
-        writeConn = createConn();
-        readPool = new ConnectionPool(this::createConn, config.maxReadConnection());
+        conn = createConn();
         createTables();
     }
 
     @Override
     public void shutdown() {
-        readPool.destroy();
-        readPool = null;
         try {
-            writeConn.close();
+            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        writeConn = null;
+        conn = null;
         config = null;
     }
 
@@ -181,23 +176,17 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
 
     private synchronized void executeSql(String sql) {
         try {
-            SqlUtils.execSql(writeConn, sql);
+            SqlUtils.execSql(conn, sql);
         } catch (SQLException e) {
             throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
         }
     }
 
-    private List<RecordSet> executeQuery(String sql) {
-        Connection conn = null;
+    private synchronized List<RecordSet> executeQuery(String sql) {
         try {
-            conn = readPool.getConn();
             return SqlUtils.execQuery(conn, sql);
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException e) {
             throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
-        } finally {
-            if (conn != null) {
-                readPool.releaseConn(conn);
-            }
         }
     }
 
