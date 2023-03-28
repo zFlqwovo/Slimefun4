@@ -38,7 +38,7 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
     - uses: actions/upload-artifact@v2
-      if: github.event_name != 'pull_request' && github.ref_name == 'master'
+      if: github.event_name != 'pull_request'
       with:
         name: Slimefun.jar
         path: staging
