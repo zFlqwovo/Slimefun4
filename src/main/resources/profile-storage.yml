@@ -35,7 +35,4 @@ mysql:
   useSSL: false
   # 最大连接数
   maxConnection: 10
-sqlite:
-  # 最大读取连接数
-  maxReadConnection: 5
 #########################################################################

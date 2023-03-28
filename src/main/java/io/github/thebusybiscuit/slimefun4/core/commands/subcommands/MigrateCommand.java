@@ -24,7 +24,7 @@ public class MigrateCommand extends SubCommand {
     @Override
     public void onExecute(@Nonnull CommandSender sender, @Nonnull String[] args) {
         if (sender.hasPermission("slimefun.command.migrate") || sender instanceof ConsoleCommandSender) {
-            if (PlayerProfileMigrator.getMigrateStatus()) {
+            if (PlayerProfileMigrator.getMigrateLock()) {
                 Slimefun.getLocalization().sendMessage(sender, "commands.migrate.in-progress", true);
                 return;
             }

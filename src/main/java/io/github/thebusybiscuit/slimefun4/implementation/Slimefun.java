@@ -1,5 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation;
 
+import city.norain.slimefun4.SlimefunExtended;
+import city.norain.slimefun4.utils.LangUtil;
 import com.xzavier0722.mc.plugin.slimefun4.chat.PlayerChatCatcher;
 import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.PlayerProfileMigrator;
 import com.xzavier0722.mc.plugin.slimefuncomplib.ICompatibleSlimefun;
@@ -128,8 +130,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.scheduler.BukkitTask;
-import ren.natsuyuk1.slimefun4.SlimefunExtended;
-import ren.natsuyuk1.slimefun4.utils.LangUtil;
 
 /**
  * This is the main class of Slimefun.

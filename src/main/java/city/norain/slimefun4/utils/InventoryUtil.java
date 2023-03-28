@@ -1,9 +1,8 @@
-package ren.natsuyuk1.slimefun4.utils;
-
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.inventory.Inventory;
+package city.norain.slimefun4.utils;
 
 import java.util.LinkedList;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.Inventory;
 
 public class InventoryUtil {
     public static void closeInventory(Inventory inventory) {

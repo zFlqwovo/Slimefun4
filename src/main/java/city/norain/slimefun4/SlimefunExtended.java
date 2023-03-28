@@ -1,22 +1,29 @@
-package ren.natsuyuk1.slimefun4;
+package city.norain.slimefun4;
 
+import city.norain.slimefun4.listener.SlimefunMigrateListener;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import org.bukkit.Bukkit;
-
-import javax.annotation.Nonnull;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nonnull;
+import org.bukkit.Bukkit;
 
 public final class SlimefunExtended {
     private static Logger logger = null;
+
+    private static SlimefunMigrateListener migrateListener = new SlimefunMigrateListener();
+
     public static void register(@Nonnull Slimefun sf) {
         logger = sf.getLogger();
         scheduleSlimeGlueCheck(sf);
         VaultHelper.register(sf);
+
+        migrateListener.register(sf);
     }
 
     public static void shutdown() {
         logger = null;
+        migrateListener = null;
+
         VaultHelper.shutdown();
     }
 

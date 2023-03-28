@@ -1,9 +1,8 @@
-package ren.natsuyuk1.slimefun4.utils;
+package city.norain.slimefun4.utils;
 
 import io.papermc.lib.PaperLib;
-import org.bukkit.plugin.Plugin;
-
 import javax.annotation.Nonnull;
+import org.bukkit.plugin.Plugin;
 
 /**
  * LangUtil
