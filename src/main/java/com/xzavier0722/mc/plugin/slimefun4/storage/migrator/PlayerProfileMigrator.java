@@ -17,10 +17,15 @@ import org.bukkit.OfflinePlayer;
 
 public class PlayerProfileMigrator {
     private static final File playerFolder = new File("data-storage/Slimefun/Players/");
-    private static volatile boolean migrateStatus = false;
+    private static volatile boolean migrateLock = false;
+
+    public static boolean isOldDataExists() {
+        var listFiles = playerFolder.listFiles();
+        return playerFolder.exists() && playerFolder.isDirectory() && listFiles != null && listFiles.length > 0;
+    }
 
     public static void checkOldData(Logger logger) {
-        if (playerFolder.exists() && playerFolder.isDirectory()) {
+        if (isOldDataExists()) {
             logger.log(Level.WARNING, "检测到使用文件储存的旧玩家数据, 请使用 /sf migrate 迁移旧数据至数据库!");
         }
     }
@@ -30,12 +35,12 @@ public class PlayerProfileMigrator {
      * and try to migrate them to database
      */
     public static MigrateStatus migrateOldData() {
-        migrateStatus = true;
+        migrateLock = true;
         var result = MigrateStatus.SUCCESS;
 
         var listFiles = playerFolder.listFiles();
-        if (!playerFolder.exists() || !playerFolder.isDirectory() || listFiles == null || listFiles.length == 0) {
-            migrateStatus = false;
+        if (isOldDataExists()) {
+            migrateLock = false;
             return MigrateStatus.MIGRATED;
         }
 
@@ -80,13 +85,13 @@ public class PlayerProfileMigrator {
 
         Slimefun.logger().log(Level.INFO, "成功迁移 {0} 个玩家数据! 迁移前的数据已储存在 " + backupFolder.getAbsolutePath(), migratedCount);
         playerFolder.delete();
-        migrateStatus = false;
+        migrateLock = false;
 
         return result;
     }
 
-    public static boolean getMigrateStatus() {
-        return migrateStatus;
+    public static boolean getMigrateLock() {
+        return migrateLock;
     }
 
     private static void migratePlayerProfile(@Nonnull OfflinePlayer p) {

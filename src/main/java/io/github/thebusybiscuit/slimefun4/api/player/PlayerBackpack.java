@@ -1,5 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.api.player;
 
+import city.norain.slimefun4.holder.SlimefunBackpackHolder;
+import city.norain.slimefun4.utils.InventoryUtil;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.common.CommonPatterns;
@@ -21,8 +23,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
-import ren.natsuyuk1.slimefun4.utils.InventoryUtil;
 
 /**
  * This class represents the instance of a {@link SlimefunBackpack} that is ready to

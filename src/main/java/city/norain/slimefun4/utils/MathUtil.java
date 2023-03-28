@@ -1,4 +1,4 @@
-package ren.natsuyuk1.slimefun4.utils;
+package city.norain.slimefun4.utils;
 
 public class MathUtil {
     public static int saturatedAdd(int x, int y) {

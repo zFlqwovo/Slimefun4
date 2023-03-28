@@ -1,4 +1,4 @@
-package ren.natsuyuk1.slimefun4;
+package city.norain.slimefun4;
 
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.logging.Level;

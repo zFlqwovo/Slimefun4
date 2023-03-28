@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.api.researches;
 
+import city.norain.slimefun4.VaultHelper;
 import io.github.thebusybiscuit.slimefun4.api.events.PlayerPreResearchEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.ResearchUnlockEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -25,7 +26,6 @@ import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefun4.VaultHelper;
 
 /**
  * Represents a research, which is bound to one

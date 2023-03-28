@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.core.guide;
 
+import city.norain.slimefun4.VaultHelper;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
@@ -13,7 +14,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefun4.VaultHelper;
 
 /**
  * This interface is used for the different implementations that add behaviour

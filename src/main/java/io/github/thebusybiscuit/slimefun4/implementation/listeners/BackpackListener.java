@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
+import city.norain.slimefun4.holder.SlimefunBackpackHolder;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
@@ -28,7 +29,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
-import ren.natsuyuk1.slimefun4.inventoryholder.SlimefunBackpackHolder;
 
 /**
  * This {@link Listener} is responsible for all events centered around a {@link SlimefunBackpack}.
