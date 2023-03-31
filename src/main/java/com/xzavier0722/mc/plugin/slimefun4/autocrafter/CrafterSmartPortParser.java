@@ -4,6 +4,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.autocrafters.Abst
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
@@ -67,7 +68,9 @@ public class CrafterSmartPortParser implements CrafterInteractable{
     @Override
     public void setIngredientCount(Block b, int count) {
         BlockStorage.addBlockInfo(b.getLocation(), "ingredientCount", String.valueOf(count));
-        var pdc = inv.getItemInSlot(6).getItemMeta().getPersistentDataContainer();
+        var im = inv.getItemInSlot(6).getItemMeta();
+        im.setLore(List.of("数量: " + count));
+        var pdc = im.getPersistentDataContainer();
         pdc.set(countKey, PersistentDataType.INTEGER, count);
     }
 }
