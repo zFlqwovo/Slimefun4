@@ -41,6 +41,7 @@ public class CrafterSmartPort extends SlimefunItem {
             @Override
             public void init() {
                 addItem(6, getCountItem(), (p, slot, item, action) -> false);
+
                 for (int i = 15; i < 54; i += 9) {
                     addItem(i, ChestMenuUtils.getBackground(), (p, slot, item, action) -> false);
                 }
@@ -74,10 +75,13 @@ public class CrafterSmartPort extends SlimefunItem {
                     String countStr = BlockStorage.getLocationInfo(b.getLocation(), "ingredientCount");
                     if (countStr != null) {
                         var im = menu.getItemInSlot(6).getItemMeta();
-                        im.setLore(List.of("数量: " + countStr));
 
-                        var pdc = im.getPersistentDataContainer();
-                        pdc.set(countKey, PersistentDataType.INTEGER, Integer.parseInt(countStr));
+                        if (im != null) {
+                            im.setLore(List.of("数量: " + countStr));
+
+                            var pdc = im.getPersistentDataContainer();
+                            pdc.set(countKey, PersistentDataType.INTEGER, Integer.parseInt(countStr));
+                        }
                     }
                 }
             }
@@ -92,8 +96,13 @@ public class CrafterSmartPort extends SlimefunItem {
                 if (flow == ItemTransportFlow.WITHDRAW) return OUTPUT_SLOTS;
 
                 ItemStackWrapper wrapper = ItemStackWrapper.wrap(item);
-                var pdc = menu.getItemInSlot(6).getItemMeta().getPersistentDataContainer();
-                var count = pdc.get(countKey, PersistentDataType.INTEGER);
+                var im = menu.getItemInSlot(6).getItemMeta();
+                int count = 0;
+
+                if (im != null) {
+                    var pdc = menu.getItemInSlot(6).getItemMeta().getPersistentDataContainer();
+                    count = pdc.get(countKey, PersistentDataType.INTEGER);
+                }
 
                 int amountLimit = INPUT_SLOTS.length / count * wrapper.getMaxStackSize();
 
