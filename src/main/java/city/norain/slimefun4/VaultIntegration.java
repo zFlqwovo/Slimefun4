@@ -1,14 +1,16 @@
 package city.norain.slimefun4;
 
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.util.Objects;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.OfflinePlayer;
 
 /**
  * @author StarWishsama
  */
-public class VaultHelper {
+public class VaultIntegration {
     private static Economy econ = null;
 
     protected static void register(@Nonnull Slimefun plugin) {
@@ -25,12 +27,22 @@ public class VaultHelper {
         }
     }
 
-    protected static void shutdown() {
+    protected static void cleanup() {
         econ = null;
     }
 
-    public static Economy getEcon() {
-        return econ;
+    public static double getPlayerBalance(OfflinePlayer p) {
+        Objects.requireNonNull(p, "Player cannot be null!");
+        Objects.requireNonNull(econ, "Vault instance cannot be null!");
+
+        return econ.getBalance(p);
+    }
+
+    public static void withdrawPlayer(OfflinePlayer p, double withdraw) {
+        Objects.requireNonNull(p, "Player cannot be null!");
+        Objects.requireNonNull(econ, "Vault instance cannot be null!");
+
+        econ.withdrawPlayer(p, withdraw);
     }
 
     public static boolean isUsable() {

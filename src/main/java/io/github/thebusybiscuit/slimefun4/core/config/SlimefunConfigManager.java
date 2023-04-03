@@ -47,7 +47,7 @@ public class SlimefunConfigManager {
     private boolean showVanillaRecipes;
     private boolean showHiddenItemGroupsInSearch;
     private boolean autoUpdate;
-    private double researchConvertMultiplier;
+    private double researchCurrencyCostConvertRate;
 
     public SlimefunConfigManager(@Nonnull Slimefun plugin) {
         Validate.notNull(plugin, "The Plugin instance cannot be null");
@@ -90,7 +90,7 @@ public class SlimefunConfigManager {
             showHiddenItemGroupsInSearch = pluginConfig.getBoolean("guide.show-hidden-item-groups-in-search");
             autoUpdate = pluginConfig.getBoolean("options.auto-update");
 
-            researchConvertMultiplier = researchesConfig.getDouble("researches.money-multiply");
+            researchCurrencyCostConvertRate = researchesConfig.getDouble("researches.currency-cost-convert-rate");
         } catch (Exception x) {
             plugin.getLogger().log(Level.SEVERE, x, () -> "An Exception was caught while (re)loading the config files for Slimefun v" + plugin.getDescription().getVersion());
             isSuccessful = false;
@@ -261,7 +261,7 @@ public class SlimefunConfigManager {
         return autoUpdate;
     }
 
-    public double getResearchConvertMultiplier() {
-        return researchConvertMultiplier;
+    public double getResearchCurrencyCostConvertRate() {
+        return researchCurrencyCostConvertRate;
     }
 }

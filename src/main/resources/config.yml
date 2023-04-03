@@ -1,5 +1,5 @@
 # options:
-#   auto-update - Github 新版本自动检查并更新
+#    auto-update - Github 新版本自动检查并更新
 #    armor-update-interval - 粘液科技护甲效果更新周期
 #    enable-armor-effects - 护甲效果的开关
 #    chat-prefix - 粘液科技所有消息的前缀
@@ -12,6 +12,9 @@
 #    backwards-compatibility - 物品向后兼容模式, 关闭后物品会使用新版物品系统
 #                             将会提升服务器性能
 #    log-duplicate-block-entries - 是否输出发现重复方块的警告
+#    burn-players-when-radioactive - 是否在当玩家暴露在辐射中时灼烧玩家
+#    drop-excess-sf-give-items - 是否在背包已满时使用命令给予 Slimefun 物品直接掉落溢出的物品
+#    backup-data - 自动备份数据
 options:
   auto-update: true
   backwards-compatibility: false
@@ -34,6 +37,7 @@ guide:
   show-vanilla-recipes: true
   # 是否在玩家第一次进入服务器时自动赠送粘液科技指南
   receive-on-first-join: true
+  # 是否在搜索中显示隐藏物品
   show-hidden-item-groups-in-search: false
 
 researches:
@@ -44,7 +48,8 @@ researches:
   # 是否使用游戏币替代使用经验解锁
   use-money-unlock: false
   # 经验自动转换到游戏币倍率
-  money-multiply: 25.0
+  currency-cost-convert-rate: 25.0
+  # 是否禁用解锁研究时的动画
   disable-learning-animation: false
 
 URID:

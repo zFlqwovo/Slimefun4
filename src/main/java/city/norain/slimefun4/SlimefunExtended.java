@@ -15,7 +15,7 @@ public final class SlimefunExtended {
     public static void register(@Nonnull Slimefun sf) {
         logger = sf.getLogger();
         scheduleSlimeGlueCheck(sf);
-        VaultHelper.register(sf);
+        VaultIntegration.register(sf);
 
         migrateListener.register(sf);
     }
@@ -24,7 +24,7 @@ public final class SlimefunExtended {
         logger = null;
         migrateListener = null;
 
-        VaultHelper.shutdown();
+        VaultIntegration.cleanup();
     }
 
     public static Logger getLogger() {

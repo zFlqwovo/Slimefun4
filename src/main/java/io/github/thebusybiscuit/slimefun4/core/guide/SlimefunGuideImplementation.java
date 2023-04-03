@@ -1,6 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.core.guide;
 
-import city.norain.slimefun4.VaultHelper;
+import city.norain.slimefun4.VaultIntegration;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
@@ -68,8 +68,8 @@ public interface SlimefunGuideImplementation {
         if (p.getGameMode() == GameMode.CREATIVE && Slimefun.getConfigManager().isFreeCreativeResearchingEnabled()) {
             research.unlock(p, true, callback);
         } else {
-            if (VaultHelper.isUsable()) {
-                VaultHelper.getEcon().withdrawPlayer(p, research.getCurrencyCost());
+            if (VaultIntegration.isUsable()) {
+                VaultIntegration.withdrawPlayer(p, research.getCurrencyCost());
             } else {
                 p.setLevel(p.getLevel() - research.getLevelCost());
             }

@@ -1,6 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.api.researches;
 
-import city.norain.slimefun4.VaultHelper;
+import city.norain.slimefun4.VaultIntegration;
 import io.github.thebusybiscuit.slimefun4.api.events.PlayerPreResearchEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.ResearchUnlockEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -102,7 +102,8 @@ public class Research implements Keyed {
         this.id = id;
         this.name = defaultName;
         this.levelCost = defaultCost;
-        this.currencyCost = defaultCost * Slimefun.getConfigManager().getResearchConvertMultiplier();
+        // By default, we use a fixed rate to convert currency cost from level directly
+        this.currencyCost = defaultCost * Slimefun.getConfigManager().getResearchCurrencyCostConvertRate();
     }
 
     @Override
@@ -279,8 +280,8 @@ public class Research implements Keyed {
 
         boolean canUnlock;
 
-        if (VaultHelper.isUsable()) {
-            canUnlock = VaultHelper.getEcon().getBalance(p) >= currencyCost;
+        if (VaultIntegration.isUsable()) {
+            canUnlock = VaultIntegration.getPlayerBalance(p) >= currencyCost;
         } else {
             canUnlock = p.getLevel() >= levelCost;
         }

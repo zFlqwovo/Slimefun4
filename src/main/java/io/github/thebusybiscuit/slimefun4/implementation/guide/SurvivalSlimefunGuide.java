@@ -1,6 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.guide;
 
-import city.norain.slimefun4.VaultHelper;
+import city.norain.slimefun4.VaultIntegration;
 import io.github.bakedlibs.dough.chat.ChatInput;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.bakedlibs.dough.items.ItemUtils;
@@ -301,9 +301,8 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
         } else if (isSurvivalMode() && research != null && !profile.hasUnlocked(research)) {
             String lore;
 
-            if (VaultHelper.isUsable()) {
-                // FIXME: 格式化以避免 xx.0000000000x 这种奇怪数字
-                lore = research.getCurrencyCost() + " 游戏币";
+            if (VaultIntegration.isUsable()) {
+                lore = String.format("%.2f", research.getCurrencyCost()) + " 游戏币";
             } else {
                 lore = research.getLevelCost() + " 级经验";
             }
