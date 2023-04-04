@@ -1,6 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.guide;
 
-import city.norain.slimefun4.VaultHelper;
+import city.norain.slimefun4.VaultIntegration;
 import io.github.bakedlibs.dough.chat.ChatInput;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.bakedlibs.dough.items.ItemUtils;
@@ -301,10 +301,10 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
         } else if (isSurvivalMode() && research != null && !profile.hasUnlocked(research)) {
             String lore;
 
-            if (VaultHelper.isUsable()) {
-                lore = (research.getCost() * Slimefun.getCfg().getDouble("researches.money-multiply")) + " 游戏币";
+            if (VaultIntegration.isUsable()) {
+                lore = String.format("%.2f", research.getCurrencyCost()) + " 游戏币";
             } else {
-                lore = research.getCost() + " 级经验";
+                lore = research.getLevelCost() + " 级经验";
             }
 
             menu.addItem(index, new CustomItemStack(new CustomItemStack(ChestMenuUtils.getNoPermissionItem(), "&f" + ItemUtils.getItemName(sfitem.getItem()), "&7" + sfitem.getId(), "&4&l" + Slimefun.getLocalization().getMessage(p, "guide.locked"), "", "&a> 单击解锁", "", "&7需要 &b", lore)));

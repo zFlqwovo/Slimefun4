@@ -46,6 +46,11 @@ public class RecordKey extends ScopeKey {
         conditions.add(new Pair<>(key, val));
     }
 
+    @ParametersAreNonnullByDefault
+    public void addCondition(FieldKey key, boolean val) {
+        addCondition(key, val ? "1" : "0");
+    }
+
     @Nonnull
     public List<Pair<FieldKey, String>> getConditions() {
         return Collections.unmodifiableList(conditions);

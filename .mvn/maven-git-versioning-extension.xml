@@ -1,15 +1,19 @@
 <configuration xmlns="https://github.com/qoomon/maven-git-versioning-extension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xsi:schemaLocation="https://github.com/qoomon/maven-git-versioning-extension https://qoomon.github.io/maven-git-versioning-extension/configuration-7.1.0.xsd">
    <refs>
-       <ref type ="branch">
+       <ref type="branch">
            <pattern>master</pattern>
            <version>${commit.short}-canary</version>
        </ref>
-       <ref type ="branch">
+       <ref type="branch">
+           <pattern>dev</pattern>
+           <version>${commit.short}-DEV</version>
+       </ref>
+       <ref type="branch">
            <pattern>release</pattern>
            <version>${commit.timestamp.year}.${commit.timestamp.month}-release</version>
        </ref>
-       <ref type ="branch">
+       <ref type="branch">
            <pattern>test/(.+)</pattern>
            <version>${ref}-${commit.short}</version>
        </ref>

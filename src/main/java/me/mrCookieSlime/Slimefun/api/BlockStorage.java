@@ -40,6 +40,11 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 
 // This class really needs a VERY big overhaul
+
+/**
+ * Deprecated: use {@link com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController} instead
+ */
+@Deprecated
 public class BlockStorage {
 
     private static final String PATH_BLOCKS = "data-storage/Slimefun/stored-blocks/";
