@@ -44,6 +44,7 @@ public final class SlimefunSubCommands {
         commands.add(new TransformCommand(plugin, cmd));
         commands.add(new ReloadCommand(plugin, cmd));
         commands.add(new MigrateCommand(plugin, cmd));
+        commands.add(new BlockDataCommand(plugin, cmd));
 
         return commands;
     }

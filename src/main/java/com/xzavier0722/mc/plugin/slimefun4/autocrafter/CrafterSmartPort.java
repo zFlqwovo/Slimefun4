@@ -10,6 +10,8 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
+import java.util.List;
+import javax.annotation.Nonnull;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -24,14 +26,13 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import javax.annotation.Nonnull;
-import java.util.List;
+import org.bukkit.persistence.PersistentDataType;
+import static com.xzavier0722.mc.plugin.slimefun4.autocrafter.SmartNamespacedKey.countKey;
 
 public class CrafterSmartPort extends SlimefunItem {
 
-    public static final int[] INPUT_SLOTS = {0,1,2,3,4,5,9,10,11,12,13,14,18,19,20,21,22,23,27,28,29,30,31,32,36,37,38,39,40,41,45,46,47,48,49,50};
-    public static final int[] OUTPUT_SLOTS = {7,8,16,17,25,26,34,35,43,44,52,53};
+    public static final int[] INPUT_SLOTS = {0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14, 18, 19, 20, 21, 22, 23, 27, 28, 29, 30, 31, 32, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49, 50};
+    public static final int[] OUTPUT_SLOTS = {7, 8, 16, 17, 25, 26, 34, 35, 43, 44, 52, 53};
 
     public CrafterSmartPort(ItemGroup category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(category, item, recipeType, recipe);
@@ -39,9 +40,10 @@ public class CrafterSmartPort extends SlimefunItem {
         new BlockMenuPreset("CRAFTER_SMART_PORT", "&a合成机智能交互接口") {
             @Override
             public void init() {
-                addItem(6, getCountItem(),(p, slot, item, action)->false);
-                for (int i = 15; i < 54 ; i+=9) {
-                    addItem(i, ChestMenuUtils.getBackground(),(p, slot, item, action)->false);
+                addItem(6, getCountItem(), (p, slot, item, action) -> false);
+
+                for (int i = 15; i < 54; i += 9) {
+                    addItem(i, ChestMenuUtils.getBackground(), (p, slot, item, action) -> false);
                 }
 
                 for (int slot : OUTPUT_SLOTS) {
@@ -67,14 +69,20 @@ public class CrafterSmartPort extends SlimefunItem {
 
             @Override
             public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block b) {
-                // Check if has inv
+                // Check if it has inventory
                 if (BlockStorage.hasInventory(b)) {
                     // Resume the ingredient count
-                    String countStr = BlockStorage.getLocationInfo(b.getLocation(),"ingredientCount");
+                    String countStr = BlockStorage.getLocationInfo(b.getLocation(), "ingredientCount");
                     if (countStr != null) {
-                        menu.getItemInSlot(6).setAmount(Integer.parseInt(countStr));
-                    }
+                        var im = menu.getItemInSlot(6).getItemMeta();
 
+                        if (im != null) {
+                            im.setLore(List.of("数量: " + countStr));
+
+                            var pdc = im.getPersistentDataContainer();
+                            pdc.set(countKey, PersistentDataType.INTEGER, Integer.parseInt(countStr));
+                        }
+                    }
                 }
             }
 
@@ -88,7 +96,15 @@ public class CrafterSmartPort extends SlimefunItem {
                 if (flow == ItemTransportFlow.WITHDRAW) return OUTPUT_SLOTS;
 
                 ItemStackWrapper wrapper = ItemStackWrapper.wrap(item);
-                int amountLimit = INPUT_SLOTS.length / menu.getItemInSlot(6).getAmount() * wrapper.getMaxStackSize();
+                var im = menu.getItemInSlot(6).getItemMeta();
+                int count = 0;
+
+                if (im != null) {
+                    var pdc = menu.getItemInSlot(6).getItemMeta().getPersistentDataContainer();
+                    count = pdc.get(countKey, PersistentDataType.INTEGER);
+                }
+
+                int amountLimit = INPUT_SLOTS.length / count * wrapper.getMaxStackSize();
 
                 // Check the current amount
                 int itemAmount = wrapper.getAmount();
