@@ -27,6 +27,6 @@ public interface SqlConstants {
     String FIELD_CHUNK = "chunk";
     String FIELD_SLIMEFUN_ID = "sf_id";
 
-    String FIELD_DATA_KEY = "key";
-    String FIELD_DATA_VALUE = "val";
+    String FIELD_DATA_KEY = "data_key";
+    String FIELD_DATA_VALUE = "data_val";
 }
