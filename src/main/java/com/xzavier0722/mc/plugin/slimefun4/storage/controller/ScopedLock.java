@@ -29,4 +29,8 @@ class ScopedLock {
             locks.remove(scopeKey);
         }
     }
+
+    boolean hasLock(ScopeKey scopeKey) {
+        return locks.containsKey(scopeKey);
+    }
 }
