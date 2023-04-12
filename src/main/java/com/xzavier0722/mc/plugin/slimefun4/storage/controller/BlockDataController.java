@@ -13,6 +13,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -110,7 +111,9 @@ public class BlockDataController extends ADataController {
 
         var result = getData(key);
         var re = result.isEmpty() ? null : result.get(0).get(FieldKey.SLIMEFUN_ID);
-        blockCache.put(lKey, re);
+        if (re != null) {
+            blockCache.put(lKey, re);
+        }
         return re;
     }
 
@@ -244,6 +247,19 @@ public class BlockDataController extends ADataController {
 
     public void getChunkDataAsync(Chunk chunk, String key, IAsyncReadCallback<String> callback) {
         scheduleReadTask(() -> invokeCallback(callback, getChunkData(chunk, key)));
+    }
+
+    public void saveInventory(Location l) {
+        // TODO
+    }
+
+    public ItemStack[] getInventory(Location l) {
+        // TODO
+        return null;
+    }
+
+    public void getInventoryAsync(Location l, IAsyncReadCallback<ItemStack[]> callback) {
+        scheduleReadTask(() -> invokeCallback(callback, getInventory(l)));
     }
 
     @Override

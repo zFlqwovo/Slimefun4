@@ -5,6 +5,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.MysqlAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.MysqlConfig;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteConfig;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ControllerHolder;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ProfileDataController;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.StorageType;
@@ -81,6 +82,10 @@ public class SlimefunDatabaseManager {
     @Nullable
     public ProfileDataController getProfileDataController() {
         return ControllerHolder.getController(ProfileDataController.class, storageType);
+    }
+
+    public BlockDataController getBlockDataController() {
+        return ControllerHolder.getController(BlockDataController.class, storageType);
     }
 
     public void shutdown() {
