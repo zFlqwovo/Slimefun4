@@ -9,6 +9,8 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedSavingLooperTask;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedTask;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
+import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -20,8 +22,8 @@ import org.bukkit.scheduler.BukkitTask;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +31,7 @@ public class BlockDataController extends ADataController {
 
     private final Map<LinkedKey, DelayedTask> delayedWriteTasks;
     private final Map<String, SlimefunChunkData> loadedChunk;
+    private final Map<String, List<Pair<ItemStack, Integer>>> invSnapshots;
     private final ScopedLock lock;
     private boolean enableDelayedSaving = false;
     private int delayedSecond = 0;
@@ -38,6 +41,7 @@ public class BlockDataController extends ADataController {
         super(DataType.BLOCK_STORAGE);
         delayedWriteTasks = new HashMap<>();
         loadedChunk = new ConcurrentHashMap<>();
+        invSnapshots = new ConcurrentHashMap<>();
         lock = new ScopedLock();
     }
 
@@ -201,7 +205,7 @@ public class BlockDataController extends ADataController {
         }
     }
 
-    private void loadBlockData(SlimefunBlockData blockData) {
+    public void loadBlockData(SlimefunBlockData blockData) {
         if (blockData.isDataLoaded()) {
             return;
         }
@@ -222,10 +226,30 @@ public class BlockDataController extends ADataController {
                             recordSet.get(FieldKey.DATA_VALUE),
                             false)
             );
+
+            key = new RecordKey(DataScope.BLOCK_INVENTORY);
+            key.addCondition(FieldKey.LOCATION, blockData.getKey());
+            key.addField(FieldKey.INVENTORY_SLOT);
+            key.addField(FieldKey.INVENTORY_ITEM);
+            var items = getData(key);
+
+            if (!items.isEmpty()) {
+                var inv = new ItemStack[54];
+                items.forEach(record -> inv[record.getInt(FieldKey.INVENTORY_SLOT)] = record.getItemStack(FieldKey.INVENTORY_ITEM));
+                blockData.setInvContents(inv);
+            }
+
             blockData.setIsDataLoaded(true);
         } finally {
             lock.unlock(key);
         }
+    }
+
+    public void loadBlockDataAsync(SlimefunBlockData blockData, IAsyncReadCallback<SlimefunBlockData> callback) {
+        scheduleReadTask(() -> {
+            loadBlockData(blockData);
+            invokeCallback(callback, blockData);
+        });
     }
 
     public SlimefunChunkData getChunkData(Chunk chunk) {
@@ -238,17 +262,55 @@ public class BlockDataController extends ADataController {
         scheduleReadTask(() -> invokeCallback(callback, getChunkData(chunk)));
     }
 
-    public void saveInventory(Location l) {
-        // TODO
+    public void saveBlockInventory(SlimefunBlockData blockData) {
+        var newInv = blockData.getInvContents();
+        List<Pair<ItemStack, Integer>> lastSave;
+        if (newInv == null) {
+            lastSave = invSnapshots.remove(blockData.getKey());
+            if (lastSave == null) {
+                return;
+            }
+        } else {
+            lastSave = invSnapshots.put(blockData.getKey(), InvStorageUtils.getInvSnapshot(newInv));
+        }
+
+        var changed = InvStorageUtils.getChangedSlots(lastSave, newInv);
+        if (changed.isEmpty()) {
+            return;
+        }
+
+        changed.forEach(slot -> scheduleDelayedBlockInvUpdate(blockData, slot));
     }
 
-    public ItemStack[] getInventory(Location l) {
-        // TODO
-        return null;
+    private void scheduleDelayedBlockInvUpdate(SlimefunBlockData blockData, int slot) {
+        var scopeKey = new LocationKey(DataScope.NONE, blockData.getLocation());
+        var reqKey = new RecordKey(DataScope.BLOCK_INVENTORY);
+        reqKey.addCondition(FieldKey.LOCATION, blockData.getKey());
+        reqKey.addCondition(FieldKey.INVENTORY_SLOT, slot + "");
+        reqKey.addField(FieldKey.INVENTORY_ITEM);
+
+        if (enableDelayedSaving) {
+            scheduleDelayedUpdateTask(
+                    new LinkedKey(scopeKey, reqKey),
+                    () -> scheduleBlockInvUpdate(scopeKey, reqKey, blockData.getKey(), blockData.getInvContents(), slot)
+            );
+        } else {
+            scheduleBlockInvUpdate(scopeKey, reqKey, blockData.getKey(), blockData.getInvContents(), slot);
+        }
     }
 
-    public void getInventoryAsync(Location l, IAsyncReadCallback<ItemStack[]> callback) {
-        scheduleReadTask(() -> invokeCallback(callback, getInventory(l)));
+    private void scheduleBlockInvUpdate(ScopeKey scopeKey, RecordKey reqKey, String lKey, ItemStack[] inv, int slot) {
+        var item = inv != null && slot < inv.length ? inv[slot] : null;
+
+        if (item == null) {
+            scheduleDeleteTask(scopeKey, reqKey, true);
+        } else {
+            var data = new RecordSet();
+            data.put(FieldKey.LOCATION, lKey);
+            data.put(FieldKey.INVENTORY_SLOT, slot + "");
+            data.put(FieldKey.INVENTORY_ITEM, item);
+            scheduleWriteTask(scopeKey, reqKey, data, true);
+        }
     }
 
     @Override
@@ -265,25 +327,13 @@ public class BlockDataController extends ADataController {
         var reqKey = new RecordKey(DataScope.BLOCK_DATA);
         reqKey.addCondition(FieldKey.LOCATION, blockData.getKey());
         reqKey.addCondition(FieldKey.DATA_KEY, key);
-        if (!enableDelayedSaving) {
-            scheduleBlockDataUpdate(scopeKey, reqKey, blockData.getKey(), key, blockData.getData(key));
-            return;
-        }
-
-        synchronized (delayedWriteTasks) {
-            var linkedKey = new LinkedKey(scopeKey, reqKey);
-            var task = delayedWriteTasks.get(linkedKey);
-            if (task != null && !task.isExecuted()) {
-                task.setRunAfter(delayedSecond, TimeUnit.SECONDS);
-                return;
-            }
-
-            task = new DelayedTask(
-                    delayedSecond,
-                    TimeUnit.SECONDS,
+        if (enableDelayedSaving) {
+            scheduleDelayedUpdateTask(
+                    new LinkedKey(scopeKey, reqKey),
                     () -> scheduleBlockDataUpdate(scopeKey, reqKey, blockData.getKey(), key, blockData.getData(key))
             );
-            delayedWriteTasks.put(linkedKey, task);
+        } else {
+            scheduleBlockDataUpdate(scopeKey, reqKey, blockData.getKey(), key, blockData.getData(key));
         }
     }
 
@@ -312,25 +362,26 @@ public class BlockDataController extends ADataController {
         reqKey.addCondition(FieldKey.CHUNK, chunkData.getKey());
         reqKey.addCondition(FieldKey.DATA_KEY, key);
 
-        if (!enableDelayedSaving) {
+        if (enableDelayedSaving) {
+            scheduleDelayedUpdateTask(
+                    new LinkedKey(scopeKey, reqKey),
+                    () -> scheduleChunkDataUpdate(scopeKey, reqKey, chunkData.getKey(), key, chunkData.getData(key))
+            );
+        } else {
             scheduleChunkDataUpdate(scopeKey, reqKey, chunkData.getKey(), key, chunkData.getData(key));
-            return;
         }
+    }
 
+    private void scheduleDelayedUpdateTask(LinkedKey key, Runnable run) {
         synchronized (delayedWriteTasks) {
-            var linkedKey = new LinkedKey(scopeKey, reqKey);
-            var task = delayedWriteTasks.get(linkedKey);
+            var task = delayedWriteTasks.get(key);
             if (task != null && !task.isExecuted()) {
                 task.setRunAfter(delayedSecond, TimeUnit.SECONDS);
                 return;
             }
 
-            task = new DelayedTask(
-                    delayedSecond,
-                    TimeUnit.SECONDS,
-                    () -> scheduleChunkDataUpdate(scopeKey, reqKey, chunkData.getKey(), key, chunkData.getData(key))
-            );
-            delayedWriteTasks.put(linkedKey, task);
+            task = new DelayedTask(delayedSecond, TimeUnit.SECONDS, run);
+            delayedWriteTasks.put(key, task);
         }
     }
 
