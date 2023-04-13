@@ -39,7 +39,7 @@ public class PlayerProfileMigrator {
         var result = MigrateStatus.SUCCESS;
 
         var listFiles = playerFolder.listFiles();
-        if (isOldDataExists()) {
+        if (!isOldDataExists()) {
             migrateLock = false;
             return MigrateStatus.MIGRATED;
         }
