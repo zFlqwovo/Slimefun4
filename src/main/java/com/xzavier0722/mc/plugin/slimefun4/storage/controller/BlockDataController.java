@@ -17,22 +17,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class BlockDataController extends ADataController {
 
     private final Map<LinkedKey, DelayedTask> delayedWriteTasks;
-    private final Set<String> loadedChunks;
-    private final Set<String> loadedData;
-    private final Map<String, String> blockCache;
-    private final Map<String, Map<String, String>> blockDataCache;
-    private final Map<String, Map<String, String>> chunkDataCache;
+    private final Map<String, SlimefunChunkData> loadedChunk;
     private final ScopedLock lock;
     private boolean enableDelayedSaving = false;
     private int delayedSecond = 0;
@@ -41,11 +37,7 @@ public class BlockDataController extends ADataController {
     BlockDataController() {
         super(DataType.BLOCK_STORAGE);
         delayedWriteTasks = new HashMap<>();
-        loadedChunks = new HashSet<>();
-        loadedData = new HashSet<>();
-        blockCache = new ConcurrentHashMap<>();
-        blockDataCache = new ConcurrentHashMap<>();
-        chunkDataCache = new ConcurrentHashMap<>();
+        loadedChunk = new ConcurrentHashMap<>();
         lock = new ScopedLock();
     }
 
@@ -67,10 +59,20 @@ public class BlockDataController extends ADataController {
         ), 20, 20);
     }
 
-    public void setBlock(Location l, String sfId) {
+    public void createBlock(Location l, String sfId) {
         checkDestroy();
+        var chunk = l.getChunk();
+        var chunkData = getChunkDataCache(chunk, shouldLoadChunkCache(chunk));
+        if (chunkData == null) {
+            saveNewBlock(l, sfId);
+            return;
+        }
+
+        chunkData.createBlockData(l, sfId);
+    }
+
+    void saveNewBlock(Location l, String sfId) {
         var lKey = LocationUtils.getLocKey(l);
-        blockCache.put(lKey, sfId);
 
         var key = new RecordKey(DataScope.BLOCK_RECORD);
         key.addCondition(FieldKey.LOCATION, lKey);
@@ -86,23 +88,37 @@ public class BlockDataController extends ADataController {
 
     public void removeBlock(Location l) {
         checkDestroy();
-        var lKey = LocationUtils.getLocKey(l);
-        blockCache.put(lKey, null);
+        var chunk = l.getChunk();
+        var chunkData = getChunkDataCache(chunk, shouldLoadChunkCache(chunk));
+        if (chunkData == null) {
+            removeBlockDirectly(l);
+            return;
+        }
+        chunkData.removeBlockData(l);
+    }
+
+    void removeBlockDirectly(Location l) {
+        checkDestroy();
+        var scopeKey = new LocationKey(DataScope.NONE, l);
+        removeDelayedBlockDataUpdates(scopeKey);
 
         var key = new RecordKey(DataScope.BLOCK_RECORD);
-        key.addCondition(FieldKey.LOCATION, lKey);
-
-        var scopeKey = new LocationKey(DataScope.NONE, l);
-        blockDataCache.put(lKey, null);
-        removeDelayedBlockDataUpdates(scopeKey);
+        key.addCondition(FieldKey.LOCATION, LocationUtils.getLocKey(l));
         scheduleDeleteTask(scopeKey, key, true);
     }
 
-    public String getBlock(Location l) {
+    @Nullable
+    @ParametersAreNonnullByDefault
+    public SlimefunBlockData getBlockData(Location l) {
         checkDestroy();
+        var chunk = l.getChunk();
+        var chunkData = getChunkDataCache(chunk, false);
         var lKey = LocationUtils.getLocKey(l);
-        if (blockCache.containsKey(lKey)) {
-            return blockCache.get(lKey);
+        if (chunkData != null) {
+            var re = chunkData.getBlockCacheInternal(lKey);
+            if (re != null || chunkData.isDataLoaded()) {
+                return re;
+            }
         }
 
         var key = new RecordKey(DataScope.BLOCK_RECORD);
@@ -110,143 +126,116 @@ public class BlockDataController extends ADataController {
         key.addField(FieldKey.SLIMEFUN_ID);
 
         var result = getData(key);
-        var re = result.isEmpty() ? null : result.get(0).get(FieldKey.SLIMEFUN_ID);
+        var re = result.isEmpty() ? null : new SlimefunBlockData(l, result.get(0).get(FieldKey.SLIMEFUN_ID));
         if (re != null) {
-            blockCache.put(lKey, re);
+            chunkData = getChunkDataCache(chunk, true);
+            chunkData.addBlockCacheInternal(lKey, re);
         }
         return re;
     }
 
-    public void getBlockAsync(Location l, IAsyncReadCallback<String> callback) {
-        scheduleReadTask(() -> invokeCallback(callback, getBlock(l)));
+    public void getBlockDataAsync(Location l, IAsyncReadCallback<SlimefunBlockData> callback) {
+        scheduleReadTask(() -> invokeCallback(callback, getBlockData(l)));
     }
 
-    public String getLoadedBlock(Location l) {
+    public SlimefunBlockData getBlockDataFromCache(Location l) {
+        return getBlockDataFromCache(LocationUtils.getChunkKey(l.getChunk()), LocationUtils.getLocKey(l));
+    }
+
+    private SlimefunBlockData getBlockDataFromCache(String cKey, String lKey) {
         checkDestroy();
-        return blockCache.get(LocationUtils.getLocKey(l));
-    }
-
-    public void setBlockData(Location l, String key, String data) {
-        checkDestroy();
-        putBlockDataCache(LocationUtils.getLocKey(l), key, data, true);
-        scheduleDelayedBlockDataUpdate(l, key);
-    }
-
-    public void removeBlockData(Location l, String key) {
-        checkDestroy();
-        putBlockDataCache(LocationUtils.getLocKey(l), key, null, true);
-        scheduleDelayedBlockDataUpdate(l, key);
-    }
-
-    public String getBlockData(Location l, String key) {
-        checkDestroy();
-        var lKey = LocationUtils.getLocKey(l);
-        loadBlockData(lKey);
-        return getBlockDataCache(lKey, key);
-    }
-
-    public void getBlockDataAsync(Location l, String key, IAsyncReadCallback<String> callback) {
-        scheduleReadTask(() -> invokeCallback(callback, getBlockData(l, key)));
+        var chunkData = loadedChunk.get(cKey);
+        return chunkData == null ? null : chunkData.getBlockCacheInternal(lKey);
     }
 
     public void loadChunk(Chunk chunk) {
         checkDestroy();
-        var cKey = LocationUtils.getChunkKey(chunk);
-        if (loadedChunks.contains(cKey)) {
+        var chunkData = getChunkDataCache(chunk, true);
+        if (chunkData.isDataLoaded()) {
             return;
         }
 
-        synchronized (loadedChunks) {
-            if (loadedChunks.contains(cKey)) {
-                return;
-            }
-            loadedChunks.add(cKey);
-        }
-
-        loadChunkData(cKey);
+        loadChunkData(chunkData);
 
         var key = new RecordKey(DataScope.BLOCK_RECORD);
         key.addField(FieldKey.LOCATION);
         key.addField(FieldKey.SLIMEFUN_ID);
-        key.addCondition(FieldKey.CHUNK, cKey);
+        key.addCondition(FieldKey.CHUNK, chunkData.getKey());
 
         getData(key).forEach(block -> {
             var lKey = block.get(FieldKey.LOCATION);
             var sfId = block.get(FieldKey.SLIMEFUN_ID);
-            blockCache.put(lKey, sfId);
+            var cache = getBlockDataFromCache(chunkData.getKey(), lKey);
+            var blockData = cache == null ? new SlimefunBlockData(LocationUtils.toLocation(lKey), sfId) : cache;
             if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
                 scheduleReadTask(() -> {
-                    loadBlockData(lKey);
-                    Slimefun.getTickerTask().enableTicker(LocationUtils.toLocation(lKey));
+                    loadBlockData(blockData);
+                    Slimefun.getTickerTask().enableTicker(blockData.getLocation());
                 });
             }
         });
     }
 
-    private void loadChunkData(String cKey) {
-        if (isDataLoaded(cKey)) {
+    private void loadChunkData(SlimefunChunkData chunkData) {
+        if (chunkData.isDataLoaded()) {
             return;
         }
         var key = new RecordKey(DataScope.CHUNK_DATA);
         key.addField(FieldKey.DATA_KEY);
         key.addField(FieldKey.DATA_VALUE);
-        key.addCondition(FieldKey.CHUNK, cKey);
+        key.addCondition(FieldKey.CHUNK, chunkData.getKey());
         try {
             lock.lock(key);
-            if (isDataLoaded(cKey)) {
+            if (chunkData.isDataLoaded()) {
                 return;
             }
 
-            getData(key).forEach(data -> putChunkDataCache(cKey, data.get(FieldKey.DATA_KEY), data.get(FieldKey.DATA_VALUE), false));
-            synchronized (loadedData) {
-                loadedData.add(cKey);
-            }
+            getData(key).forEach(data -> chunkData.setCacheInternal(
+                    data.get(FieldKey.DATA_KEY),
+                    data.get(FieldKey.DATA_VALUE),
+                    false)
+            );
+            chunkData.setIsDataLoaded(true);
         } finally {
             lock.unlock(key);
         }
     }
 
-    private void loadBlockData(String lKey) {
-        if (isDataLoaded(lKey)) {
+    private void loadBlockData(SlimefunBlockData blockData) {
+        if (blockData.isDataLoaded()) {
             return;
         }
         var key = new RecordKey(DataScope.BLOCK_DATA);
-        key.addCondition(FieldKey.LOCATION, lKey);
+        key.addCondition(FieldKey.LOCATION, blockData.getKey());
         key.addField(FieldKey.DATA_KEY);
         key.addField(FieldKey.DATA_VALUE);
 
         try {
             lock.lock(key);
-            if (isDataLoaded(lKey)) {
+            if (blockData.isDataLoaded()) {
                 return;
             }
 
             getData(key).forEach(
-                    recordSet -> putBlockDataCache(lKey, recordSet.get(FieldKey.DATA_KEY), recordSet.get(FieldKey.DATA_VALUE), false)
+                    recordSet -> blockData.setCacheInternal(
+                            recordSet.get(FieldKey.DATA_KEY),
+                            recordSet.get(FieldKey.DATA_VALUE),
+                            false)
             );
-            synchronized (loadedData) {
-                loadedData.add(lKey);
-            }
+            blockData.setIsDataLoaded(true);
         } finally {
             lock.unlock(key);
         }
     }
 
-    public void setChunkData(Chunk chunk, String key, String data) {
+    public SlimefunChunkData getChunkData(Chunk chunk) {
         checkDestroy();
-        putChunkDataCache(LocationUtils.getChunkKey(chunk), key, data, true);
-        scheduleDelayedChunkDataUpdate(chunk, key);
+        loadChunk(chunk);
+        return getChunkDataCache(chunk, false);
     }
 
-    public String getChunkData(Chunk chunk, String key) {
-        checkDestroy();
-        var cKey = LocationUtils.getChunkKey(chunk);
-        loadChunkData(cKey);
-        return getChunkDataCache(cKey, key);
-    }
-
-    public void getChunkDataAsync(Chunk chunk, String key, IAsyncReadCallback<String> callback) {
-        scheduleReadTask(() -> invokeCallback(callback, getChunkData(chunk, key)));
+    public void getChunkDataAsync(Chunk chunk, IAsyncReadCallback<SlimefunChunkData> callback) {
+        scheduleReadTask(() -> invokeCallback(callback, getChunkData(chunk)));
     }
 
     public void saveInventory(Location l) {
@@ -271,15 +260,13 @@ public class BlockDataController extends ADataController {
         super.shutdown();
     }
 
-    private void scheduleDelayedBlockDataUpdate(Location l, String key) {
-        var scopeKey = new LocationKey(DataScope.NONE, l);
-        var lKey = LocationUtils.getLocKey(l);
-        var val = getBlockDataCache(lKey, key);
+    void scheduleDelayedBlockDataUpdate(SlimefunBlockData blockData, String key) {
+        var scopeKey = new LocationKey(DataScope.NONE, blockData.getLocation());
         var reqKey = new RecordKey(DataScope.BLOCK_DATA);
-        reqKey.addCondition(FieldKey.LOCATION, lKey);
+        reqKey.addCondition(FieldKey.LOCATION, blockData.getKey());
         reqKey.addCondition(FieldKey.DATA_KEY, key);
         if (!enableDelayedSaving) {
-            scheduleBlockDataUpdate(scopeKey, reqKey, lKey, key);
+            scheduleBlockDataUpdate(scopeKey, reqKey, blockData.getKey(), key, blockData.getData(key));
             return;
         }
 
@@ -291,14 +278,11 @@ public class BlockDataController extends ADataController {
                 return;
             }
 
-            task = new DelayedTask(delayedSecond, TimeUnit.SECONDS, () -> {
-                var newVal = getBlockDataCache(lKey, key);
-                if (Objects.equals(val, newVal)) {
-                    return;
-                }
-
-                scheduleBlockDataUpdate(scopeKey, reqKey, lKey, key);
-            });
+            task = new DelayedTask(
+                    delayedSecond,
+                    TimeUnit.SECONDS,
+                    () -> scheduleBlockDataUpdate(scopeKey, reqKey, blockData.getKey(), key, blockData.getData(key))
+            );
             delayedWriteTasks.put(linkedKey, task);
         }
     }
@@ -309,8 +293,7 @@ public class BlockDataController extends ADataController {
         }
     }
 
-    private void scheduleBlockDataUpdate(ScopeKey scopeKey, RecordKey reqKey, String lKey, String key) {
-        var val = getBlockDataCache(lKey, key);
+    private void scheduleBlockDataUpdate(ScopeKey scopeKey, RecordKey reqKey, String lKey, String key, String val) {
         if (val == null) {
             scheduleDeleteTask(scopeKey, reqKey, false);
         } else {
@@ -323,16 +306,14 @@ public class BlockDataController extends ADataController {
         }
     }
 
-    private void scheduleDelayedChunkDataUpdate(Chunk chunk, String key) {
-        var scopeKey = new ChunkKey(DataScope.NONE, chunk);
-        var cKey = LocationUtils.getChunkKey(chunk);
-        var val = getChunkDataCache(cKey, key);
-        var reqKey = new RecordKey(DataScope.BLOCK_DATA);
-        reqKey.addCondition(FieldKey.CHUNK, cKey);
+    void scheduleDelayedChunkDataUpdate(SlimefunChunkData chunkData, String key) {
+        var scopeKey = new ChunkKey(DataScope.NONE, chunkData.getChunk());
+        var reqKey = new RecordKey(DataScope.CHUNK_DATA);
+        reqKey.addCondition(FieldKey.CHUNK, chunkData.getKey());
         reqKey.addCondition(FieldKey.DATA_KEY, key);
 
         if (!enableDelayedSaving) {
-            scheduleChunkDataUpdate(scopeKey, reqKey, cKey, key);
+            scheduleChunkDataUpdate(scopeKey, reqKey, chunkData.getKey(), key, chunkData.getData(key));
             return;
         }
 
@@ -344,20 +325,16 @@ public class BlockDataController extends ADataController {
                 return;
             }
 
-            task = new DelayedTask(delayedSecond, TimeUnit.SECONDS, () -> {
-                var newVal = getChunkDataCache(cKey, key);
-                if (Objects.equals(val, newVal)) {
-                    return;
-                }
-
-                scheduleChunkDataUpdate(scopeKey, reqKey, cKey, key);
-            });
+            task = new DelayedTask(
+                    delayedSecond,
+                    TimeUnit.SECONDS,
+                    () -> scheduleChunkDataUpdate(scopeKey, reqKey, chunkData.getKey(), key, chunkData.getData(key))
+            );
             delayedWriteTasks.put(linkedKey, task);
         }
     }
 
-    private void scheduleChunkDataUpdate(ScopeKey scopeKey, RecordKey reqKey, String cKey, String key) {
-        var val = getChunkDataCache(cKey, key);
+    private void scheduleChunkDataUpdate(ScopeKey scopeKey, RecordKey reqKey, String cKey, String key, String val) {
         if (val == null) {
             scheduleDeleteTask(scopeKey, reqKey, false);
         } else {
@@ -374,51 +351,14 @@ public class BlockDataController extends ADataController {
         delayedWriteTasks.values().forEach(DelayedTask::runUnsafely);
     }
 
-    private void putBlockDataCache(String locKey, String key, String data, boolean override) {
-        var cache = blockDataCache.get(locKey);
-        if (cache == null) {
-            if (data == null) {
-                return;
-            }
-            cache = new ConcurrentHashMap<>();
-            blockDataCache.put(locKey, cache);
-        }
-        if (override) {
-            cache.put(key, data);
-        } else {
-            cache.putIfAbsent(key, data);
-        }
+    private SlimefunChunkData getChunkDataCache(Chunk chunk, boolean createOnNotExists) {
+        return createOnNotExists
+                ? loadedChunk.computeIfAbsent(LocationUtils.getChunkKey(chunk), k -> new SlimefunChunkData(chunk))
+                : loadedChunk.get(LocationUtils.getChunkKey(chunk));
     }
 
-    private String getBlockDataCache(String locKey, String key) {
-        var cache = blockDataCache.get(locKey);
-        return cache == null ? null : cache.get(key);
-    }
-
-    private void putChunkDataCache(String chunkKey, String key, String data, boolean override) {
-        var cache = chunkDataCache.get(chunkKey);
-        if (cache == null) {
-            if (data == null) {
-                return;
-            }
-            cache = new ConcurrentHashMap<>();
-            chunkDataCache.put(chunkKey, cache);
-        }
-        if (override) {
-            cache.put(key, data);
-        } else {
-            cache.putIfAbsent(key, data);
-        }
-    }
-
-    private String getChunkDataCache(String chunkKey, String key) {
-        var cache = chunkDataCache.get(chunkKey);
-        return cache == null ? null : cache.get(key);
-    }
-
-    private boolean isDataLoaded(String key) {
-        synchronized (loadedData) {
-            return loadedData.contains(key);
-        }
+    private boolean shouldLoadChunkCache(Chunk chunk) {
+        // TODO: config memory cache mode
+        return chunk.isLoaded();
     }
 }
