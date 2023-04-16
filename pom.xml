@@ -225,9 +225,9 @@
 
         <!-- Shaded packages -->
         <dependency>
-            <groupId>io.github.baked-libs</groupId>
+            <groupId>com.github.StarWishsama.dough</groupId>
             <artifactId>dough-api</artifactId>
-            <version>1.2.0</version>
+            <version>4f7357184a</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
