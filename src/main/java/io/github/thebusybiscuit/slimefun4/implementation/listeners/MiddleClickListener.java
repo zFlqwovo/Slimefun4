@@ -3,6 +3,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.HumanEntity;
@@ -14,8 +15,6 @@ import org.bukkit.event.inventory.InventoryType.SlotType;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 
 /**
  * The {@link MiddleClickListener} is responsible for listening to
@@ -52,7 +51,7 @@ public class MiddleClickListener implements Listener {
             }
 
             // find the actual slimefun item the user is looking at
-            SlimefunItem sfItem = BlockStorage.check(b);
+            SlimefunItem sfItem = StorageCacheUtils.getSfItem(b.getLocation());
 
             // vanilla block -> ignore
             if (sfItem == null) {

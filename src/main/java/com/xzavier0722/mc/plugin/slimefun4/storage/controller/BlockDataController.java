@@ -12,6 +12,8 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedTask;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -65,14 +67,10 @@ public class BlockDataController extends ADataController {
 
     public void createBlock(Location l, String sfId) {
         checkDestroy();
-        var chunk = l.getChunk();
-        var chunkData = getChunkDataCache(chunk, shouldLoadChunkCache(chunk));
-        if (chunkData == null) {
-            saveNewBlock(l, sfId);
-            return;
+        getChunkDataCache(l.getChunk(), true).createBlockData(l, sfId);
+        if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
+            Slimefun.getTickerTask().enableTicker(l);
         }
-
-        chunkData.createBlockData(l, sfId);
     }
 
     void saveNewBlock(Location l, String sfId) {
@@ -92,13 +90,14 @@ public class BlockDataController extends ADataController {
 
     public void removeBlock(Location l) {
         checkDestroy();
-        var chunk = l.getChunk();
-        var chunkData = getChunkDataCache(chunk, shouldLoadChunkCache(chunk));
-        if (chunkData == null) {
-            removeBlockDirectly(l);
+        var removed = getChunkDataCache(l.getChunk(), true).removeBlockData(l);
+        if (removed == null) {
             return;
         }
-        chunkData.removeBlockData(l);
+
+        if (Slimefun.getRegistry().getTickerBlocks().contains(removed.getSfId())) {
+            Slimefun.getTickerTask().disableTicker(l);
+        }
     }
 
     void removeBlockDirectly(Location l) {
@@ -120,7 +119,7 @@ public class BlockDataController extends ADataController {
         var lKey = LocationUtils.getLocKey(l);
         if (chunkData != null) {
             var re = chunkData.getBlockCacheInternal(lKey);
-            if (re != null || chunkData.isDataLoaded()) {
+            if (re != null || chunkData.hasBlockCache(lKey)) {
                 return re;
             }
         }
@@ -133,7 +132,7 @@ public class BlockDataController extends ADataController {
         var re = result.isEmpty() ? null : new SlimefunBlockData(l, result.get(0).get(FieldKey.SLIMEFUN_ID));
         if (re != null) {
             chunkData = getChunkDataCache(chunk, true);
-            chunkData.addBlockCacheInternal(lKey, re);
+            chunkData.addBlockCacheInternal(lKey, re, false);
         }
         return re;
     }
@@ -171,6 +170,7 @@ public class BlockDataController extends ADataController {
             var sfId = block.get(FieldKey.SLIMEFUN_ID);
             var cache = getBlockDataFromCache(chunkData.getKey(), lKey);
             var blockData = cache == null ? new SlimefunBlockData(LocationUtils.toLocation(lKey), sfId) : cache;
+            chunkData.addBlockCacheInternal(lKey, blockData, false);
             if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
                 scheduleReadTask(() -> {
                     loadBlockData(blockData);
@@ -227,16 +227,16 @@ public class BlockDataController extends ADataController {
                             false)
             );
 
-            key = new RecordKey(DataScope.BLOCK_INVENTORY);
-            key.addCondition(FieldKey.LOCATION, blockData.getKey());
-            key.addField(FieldKey.INVENTORY_SLOT);
-            key.addField(FieldKey.INVENTORY_ITEM);
-            var items = getData(key);
+            var menuPreset = BlockMenuPreset.getPreset(blockData.getSfId());
+            if (menuPreset != null) {
+                key = new RecordKey(DataScope.BLOCK_INVENTORY);
+                key.addCondition(FieldKey.LOCATION, blockData.getKey());
+                key.addField(FieldKey.INVENTORY_SLOT);
+                key.addField(FieldKey.INVENTORY_ITEM);
 
-            if (!items.isEmpty()) {
                 var inv = new ItemStack[54];
-                items.forEach(record -> inv[record.getInt(FieldKey.INVENTORY_SLOT)] = record.getItemStack(FieldKey.INVENTORY_ITEM));
-                blockData.setInvContents(inv);
+                getData(key).forEach(record -> inv[record.getInt(FieldKey.INVENTORY_SLOT)] = record.getItemStack(FieldKey.INVENTORY_ITEM));
+                blockData.setBlockMenu(new BlockMenu(menuPreset, blockData.getLocation(), inv));
             }
 
             blockData.setIsDataLoaded(true);
@@ -263,7 +263,7 @@ public class BlockDataController extends ADataController {
     }
 
     public void saveBlockInventory(SlimefunBlockData blockData) {
-        var newInv = blockData.getInvContents();
+        var newInv = blockData.getMenuContents();
         List<Pair<ItemStack, Integer>> lastSave;
         if (newInv == null) {
             lastSave = invSnapshots.remove(blockData.getKey());
@@ -292,10 +292,10 @@ public class BlockDataController extends ADataController {
         if (enableDelayedSaving) {
             scheduleDelayedUpdateTask(
                     new LinkedKey(scopeKey, reqKey),
-                    () -> scheduleBlockInvUpdate(scopeKey, reqKey, blockData.getKey(), blockData.getInvContents(), slot)
+                    () -> scheduleBlockInvUpdate(scopeKey, reqKey, blockData.getKey(), blockData.getMenuContents(), slot)
             );
         } else {
-            scheduleBlockInvUpdate(scopeKey, reqKey, blockData.getKey(), blockData.getInvContents(), slot);
+            scheduleBlockInvUpdate(scopeKey, reqKey, blockData.getKey(), blockData.getMenuContents(), slot);
         }
     }
 
@@ -406,10 +406,5 @@ public class BlockDataController extends ADataController {
         return createOnNotExists
                 ? loadedChunk.computeIfAbsent(LocationUtils.getChunkKey(chunk), k -> new SlimefunChunkData(chunk))
                 : loadedChunk.get(LocationUtils.getChunkKey(chunk));
-    }
-
-    private boolean shouldLoadChunkCache(Chunk chunk) {
-        // TODO: config memory cache mode
-        return chunk.isLoaded();
     }
 }

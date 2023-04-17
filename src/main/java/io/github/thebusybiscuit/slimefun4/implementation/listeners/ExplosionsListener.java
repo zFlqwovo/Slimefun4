@@ -1,10 +1,12 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.attributes.WitherProof;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -50,13 +52,32 @@ public class ExplosionsListener implements Listener {
     private void removeResistantBlocks(@Nonnull Iterator<Block> blocks) {
         while (blocks.hasNext()) {
             Block block = blocks.next();
-            SlimefunItem item = BlockStorage.check(block);
+            var loc = block.getLocation();
+            var blockData = StorageCacheUtils.getBlock(loc);
+            SlimefunItem item = blockData == null ? null : SlimefunItem.getById(blockData.getSfId());
 
             if (item != null) {
                 blocks.remove();
 
-                if (!(item instanceof WitherProof) && !item.callItemHandler(BlockBreakHandler.class, handler -> handleExplosion(handler, block))) {
-                    BlockStorage.clearBlockInfo(block);
+                var controller = Slimefun.getDatabaseManager().getBlockDataController();
+                if (!(item instanceof WitherProof) && !item.callItemHandler(BlockBreakHandler.class, handler -> {
+                    if (blockData.isDataLoaded()) {
+                        handleExplosion(handler, block);
+                    } else {
+                        controller.loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
+                            @Override
+                            public boolean runOnMainThread() {
+                                return true;
+                            }
+
+                            @Override
+                            public void onResult(SlimefunBlockData result) {
+                                handleExplosion(handler, block);
+                            }
+                        });
+                    }
+                })) {
+                    controller.removeBlock(loc);
                     block.setType(Material.AIR);
                 }
             }
@@ -66,11 +87,11 @@ public class ExplosionsListener implements Listener {
     @ParametersAreNonnullByDefault
     private void handleExplosion(BlockBreakHandler handler, Block block) {
         if (handler.isExplosionAllowed(block)) {
-            BlockStorage.clearBlockInfo(block);
             block.setType(Material.AIR);
 
             List<ItemStack> drops = new ArrayList<>();
             handler.onExplode(block, drops);
+            Slimefun.getDatabaseManager().getBlockDataController().removeBlock(block.getLocation());
 
             for (ItemStack drop : drops) {
                 if (drop != null && !drop.getType().isAir()) {

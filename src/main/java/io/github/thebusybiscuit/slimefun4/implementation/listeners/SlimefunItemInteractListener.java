@@ -5,6 +5,10 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -25,7 +29,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
@@ -139,26 +142,52 @@ public class SlimefunItemInteractListener implements Listener {
             if (!p.isSneaking() || event.getItem().getType() == Material.AIR) {
                 event.getInteractEvent().setCancelled(true);
 
-                if (BlockStorage.hasUniversalInventory(item.getId())) {
-                    UniversalBlockMenu menu = BlockStorage.getUniversalInventory(item.getId());
+                if (InvStorageUtils.hasUniversalInventory(item.getId())) {
+                    UniversalBlockMenu menu = InvStorageUtils.getUniversalInventory(item.getId());
 
                     if (menu.canOpen(clickedBlock, p)) {
                         menu.open(p);
                     } else {
                         Slimefun.getLocalization().sendMessage(p, "inventory.no-access", true);
                     }
-                } else if (BlockStorage.getStorage(clickedBlock.getWorld()).hasInventory(clickedBlock.getLocation())) {
-                    BlockMenu menu = BlockStorage.getInventory(clickedBlock.getLocation());
+                } else {
+                    var blockData = StorageCacheUtils.getBlock(clickedBlock.getLocation());
+                    if (blockData == null) {
+                        return;
+                    }
 
-                    if (menu.canOpen(clickedBlock, p)) {
-                        menu.open(p);
+                    if (blockData.isDataLoaded()) {
+                        openMenu(blockData.getBlockMenu(), clickedBlock, p);
                     } else {
-                        Slimefun.getLocalization().sendMessage(p, "inventory.no-access", true);
+                        Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
+                                blockData,
+                                new IAsyncReadCallback<>() {
+                                    @Override
+                                    public boolean runOnMainThread() {
+                                        return true;
+                                    }
+
+                                    @Override
+                                    public void onResult(SlimefunBlockData result) {
+                                        openMenu(blockData.getBlockMenu(), clickedBlock, p);
+                                    }
+                                }
+                        );
                     }
                 }
             }
         } catch (Exception | LinkageError x) {
             item.error("An Exception was caught while trying to open the Inventory", x);
+        }
+    }
+
+    private void openMenu(BlockMenu menu, Block b, Player p) {
+        if (menu != null) {
+            if (menu.canOpen(b, p)) {
+                menu.open(p);
+            } else {
+                Slimefun.getLocalization().sendMessage(p, "inventory.no-access", true);
+            }
         }
     }
 

@@ -48,6 +48,22 @@ public class BlockMenu extends DirtyChestMenu {
         this.getContents();
     }
 
+    public BlockMenu(BlockMenuPreset preset, Location l, ItemStack[] contents) {
+        super(preset);
+        this.location = l;
+
+        for (int i = 0; i < contents.length; i++) {
+            var item = contents[i];
+            if (item == null) {
+                continue;
+            }
+            addItem(i, item);
+        }
+
+        preset.clone(this);
+        this.getContents();
+    }
+
     public void save(Location l) {
         if (!isDirty()) {
             return;

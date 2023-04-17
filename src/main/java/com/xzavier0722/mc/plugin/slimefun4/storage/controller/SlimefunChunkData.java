@@ -30,7 +30,7 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
     @ParametersAreNonnullByDefault
     public SlimefunBlockData createBlockData(Location l, String sfId) {
         var lKey = LocationUtils.getLocKey(l);
-        if (sfBlocks.containsKey(lKey)) {
+        if (sfBlocks.get(lKey) != null) {
             throw new IllegalStateException("There already a block in this location: " + lKey);
         }
         var re = new SlimefunBlockData(l, sfId);
@@ -49,20 +49,32 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
     @Nullable
     @ParametersAreNonnullByDefault
     public SlimefunBlockData removeBlockData(Location l) {
-        checkData();
-        var re = sfBlocks.remove(LocationUtils.getLocKey(l));
-        if (re != null) {
-            Slimefun.getDatabaseManager().getBlockDataController().removeBlockDirectly(l);
+        var lKey = LocationUtils.getLocKey(l);
+        var re = sfBlocks.remove(lKey);
+        if (re == null) {
+            if (isDataLoaded()) {
+                return null;
+            }
+            sfBlocks.put(lKey, null);
         }
+        Slimefun.getDatabaseManager().getBlockDataController().removeBlockDirectly(l);
         return re;
     }
 
-    void addBlockCacheInternal(String lKey, SlimefunBlockData data) {
-        sfBlocks.put(lKey, data);
+    void addBlockCacheInternal(String lKey, SlimefunBlockData data, boolean override) {
+        if (override) {
+            sfBlocks.put(lKey, data);
+        } else {
+            sfBlocks.putIfAbsent(lKey, data);
+        }
     }
 
     SlimefunBlockData getBlockCacheInternal(String lKey) {
         return sfBlocks.get(lKey);
+    }
+
+    boolean hasBlockCache(String lKey) {
+        return sfBlocks.containsKey(lKey);
     }
 
     SlimefunBlockData removeBlockDataCacheInternal(String lKey) {

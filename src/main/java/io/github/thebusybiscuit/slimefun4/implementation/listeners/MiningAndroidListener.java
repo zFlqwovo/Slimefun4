@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
 import javax.annotation.Nonnull;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -9,8 +10,6 @@ import io.github.thebusybiscuit.slimefun4.api.events.AndroidMineEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 
 /**
  * This {@link Listener} makes sure that an {@link AndroidMineEvent} gets properly propagated
@@ -30,7 +29,7 @@ public class MiningAndroidListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onAndroidMine(AndroidMineEvent e) {
-        SlimefunItem slimefunItem = BlockStorage.check(e.getBlock());
+        SlimefunItem slimefunItem = StorageCacheUtils.getSfItem(e.getBlock().getLocation());
 
         // Fixes #2839 - Can't believe we forgot a null check here
         if (slimefunItem != null) {

@@ -1,6 +1,7 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.controller;
 
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -12,7 +13,8 @@ import javax.annotation.ParametersAreNullableByDefault;
 public class SlimefunBlockData extends ASlimefunDataContainer {
     private final Location location;
     private final String sfId;
-    private volatile ItemStack[] invContents;
+    private volatile BlockMenu menu;
+    private volatile boolean pendingRemove = false;
 
     @ParametersAreNonnullByDefault
     SlimefunBlockData(Location location, String sfId) {
@@ -46,12 +48,38 @@ public class SlimefunBlockData extends ASlimefunDataContainer {
     }
 
     @ParametersAreNullableByDefault
-    public void setInvContents(ItemStack[] contents) {
-        invContents = contents;
+    void setBlockMenu(BlockMenu blockMenu) {
+        menu = blockMenu;
     }
 
     @Nullable
-    public ItemStack[] getInvContents() {
-        return invContents;
+    public BlockMenu getBlockMenu() {
+        return menu;
+    }
+
+    @Nullable
+    public ItemStack[] getMenuContents() {
+        if (menu == null) {
+            return null;
+        }
+        var re = new ItemStack[54];
+        var presetSlots = menu.getPreset().getPresetSlots();
+        var inv = menu.toInventory().getContents();
+        for (var i = 0; i < inv.length; i++) {
+            if (presetSlots.contains(i)) {
+                continue;
+            }
+            re[i] = inv[i];
+        }
+
+        return re;
+    }
+
+    public void setPendingRemove(boolean pendingRemove) {
+        this.pendingRemove = pendingRemove;
+    }
+
+    public boolean isPendingRemove() {
+        return pendingRemove;
     }
 }

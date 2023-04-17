@@ -7,6 +7,9 @@ import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -31,8 +34,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.utils.HeadTexture;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
-
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 
 /**
  * This {@link Listener} is responsible for handling our debugging tool, the debug fish.
@@ -79,8 +80,10 @@ public class DebugFishListener implements Listener {
     @ParametersAreNonnullByDefault
     private void onLeftClick(Player p, Block b, PlayerInteractEvent e) {
         if (p.isSneaking()) {
-            if (BlockStorage.hasBlockInfo(b)) {
-                BlockStorage.clearBlockInfo(b);
+            var controller = Slimefun.getDatabaseManager().getBlockDataController();
+            var loc = b.getLocation();
+            if (controller.getBlockDataFromCache(loc) != null) {
+                controller.removeBlock(loc);
             }
         } else {
             e.setCancelled(false);
@@ -98,9 +101,28 @@ public class DebugFishListener implements Listener {
                 PlayerHead.setSkin(block, HeadTexture.MISSING_TEXTURE.getAsSkin(), true);
                 p.playSound(block.getLocation(), Sound.BLOCK_BAMBOO_PLACE, 1, 1);
             }, 2L);
-        } else if (BlockStorage.hasBlockInfo(b)) {
+            return;
+        }
+
+        var controller = Slimefun.getDatabaseManager().getBlockDataController();
+        var blockData = controller.getBlockDataFromCache(b.getLocation());
+        if (blockData != null) {
             try {
-                sendInfo(p, b);
+                if (blockData.isDataLoaded()) {
+                    sendInfo(p, b);
+                } else {
+                    controller.loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
+                        @Override
+                        public boolean runOnMainThread() {
+                            return true;
+                        }
+
+                        @Override
+                        public void onResult(SlimefunBlockData result) {
+                            sendInfo(p, b);
+                        }
+                    });
+                }
             } catch (Exception x) {
                 Slimefun.logger().log(Level.SEVERE, "An Exception occurred while using a Debug-Fish", x);
             }
@@ -129,7 +151,8 @@ public class DebugFishListener implements Listener {
 
     @ParametersAreNonnullByDefault
     private void sendInfo(Player p, Block b) {
-        SlimefunItem item = BlockStorage.check(b);
+        var blockData = StorageCacheUtils.getBlock(b.getLocation());
+        SlimefunItem item = SlimefunItem.getById(blockData.getSfId());
 
         p.sendMessage(" ");
         p.sendMessage(ChatColors.color("&d" + b.getType() + " &e@ X: " + b.getX() + " Y: " + b.getY() + " Z: " + b.getZ()));
@@ -147,7 +170,7 @@ public class DebugFishListener implements Listener {
             }
         }
 
-        if (BlockStorage.getStorage(b.getWorld()).hasInventory(b.getLocation())) {
+        if (blockData.getBlockMenu() != null) {
             p.sendMessage(ChatColors.color("&dInventory: " + greenCheckmark));
         } else {
             p.sendMessage(ChatColors.color("&dInventory: " + redCross));
@@ -180,7 +203,7 @@ public class DebugFishListener implements Listener {
             }
         }
 
-        p.sendMessage(ChatColors.color("&6" + BlockStorage.getBlockInfoAsJson(b)));
+        blockData.getAllData().forEach((k, v) -> p.sendMessage(ChatColors.color("&6" + k + ": " + v)));
         p.sendMessage(" ");
     }
 }
