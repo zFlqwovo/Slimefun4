@@ -53,7 +53,7 @@ public class SlimefunDatabaseManager {
             initAdapter(blockDataStorageType, DataType.BLOCK_STORAGE, blockStorageConfig);
 
             var blockDataController = ControllerHolder.createController(BlockDataController.class, blockDataStorageType);
-            blockDataController.init(profileAdapter, readExecutorThread, writeExecutorThread);
+            blockDataController.init(blockStorageAdapter, readExecutorThread, writeExecutorThread);
 
             if (blockStorageConfig.getBoolean("delayedWriting.enable")) {
                 blockDataController.initDelayedSaving(
