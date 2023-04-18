@@ -1,5 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.controller;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
@@ -21,6 +22,13 @@ public class SlimefunBlockData extends ASlimefunDataContainer {
         super(LocationUtils.getLocKey(location));
         this.location = location;
         this.sfId = sfId;
+    }
+
+    @ParametersAreNonnullByDefault
+    SlimefunBlockData(Location location, SlimefunBlockData other) {
+        super(LocationUtils.getLocKey(location), other);
+        this.location = location;
+        this.sfId = other.sfId;
     }
 
     @Nonnull

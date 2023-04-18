@@ -152,15 +152,7 @@ public class BlockPhysicsListener implements Listener {
             // Check if this Block holds any data
             if (StorageCacheUtils.hasBlock(block.getLocation())) {
                 e.setCancelled(true);
-            } else {
-                Location loc = block.getLocation();
-
-                // Fixes #2496 - Make sure it is not a moving block
-                if (Slimefun.getTickerTask().isOccupiedSoon(loc)) {
-                    e.setCancelled(true);
-                }
             }
-
             return;
         }
 

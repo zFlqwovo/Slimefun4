@@ -1,8 +1,9 @@
-package com.xzavier0722.mc.plugin.slimefun4.storage.controller;
+package com.xzavier0722.mc.plugin.slimefun4.storage.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 
 public class LocationUtils {
     public static String getLocKey(Location l) {
@@ -22,5 +23,17 @@ public class LocationUtils {
                 Double.parseDouble(loc[1]),
                 Double.parseDouble(loc[2])
         );
+    }
+
+    public static boolean isSameChunk(Chunk c1, Chunk c2) {
+        return c1 == c2 || (isSameWorld(c1.getWorld(), c2.getWorld()) && c1.getX() == c2.getX() && c1.getZ() == c2.getZ());
+    }
+
+    public static boolean isSameLoc(Location l1, Location l2) {
+        return l1 == l2 || (isSameChunk(l1.getChunk(), l2.getChunk()) && l1.getBlockX() == l2.getBlockX() && l1.getBlockY() == l2.getBlockY() && l1.getBlockZ() == l2.getBlockZ());
+    }
+
+    public static boolean isSameWorld(World w1, World w2) {
+        return w1.getName().equals(w2.getName());
     }
 }

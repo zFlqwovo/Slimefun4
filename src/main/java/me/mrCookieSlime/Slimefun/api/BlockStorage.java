@@ -604,7 +604,7 @@ public class BlockStorage {
     }
 
     public static void clearBlockInfo(Location l, boolean destroy) {
-        Slimefun.getTickerTask().queueDelete(l, destroy);
+        Slimefun.getDatabaseManager().getBlockDataController().removeBlock(l);
     }
 
     /**
@@ -642,43 +642,6 @@ public class BlockStorage {
 
             Slimefun.getTickerTask().disableTicker(l);
         }
-    }
-
-    @ParametersAreNonnullByDefault
-    public static void moveBlockInfo(Location from, Location to) {
-        Slimefun.getTickerTask().queueMove(from, to);
-    }
-
-    /**
-     * <strong>Do not call this method!</strong>.
-     * This method is used for internal purposes only.
-     * 
-     * @param from
-     *            The origin {@link Location}
-     * @param to
-     *            The destination {@link Location}
-     */
-    @ParametersAreNonnullByDefault
-    public static void moveLocationInfoUnsafely(Location from, Location to) {
-        if (!hasBlockInfo(from)) {
-            return;
-        }
-
-        BlockStorage storage = getStorage(from.getWorld());
-        Config previousData = getLocationInfo(from);
-        setBlockInfo(to, previousData, true);
-
-        if (storage.inventories.containsKey(from)) {
-            BlockMenu menu = storage.inventories.get(from);
-            storage.inventories.put(to, menu);
-            storage.clearInventory(from);
-            menu.move(to);
-        }
-
-        refreshCache(storage, from, previousData.getString("id"), null, true);
-        storage.storage.remove(from);
-
-        Slimefun.getTickerTask().disableTicker(from);
     }
 
     private static void refreshCache(BlockStorage storage, Location l, String key, String value, boolean updateTicker) {

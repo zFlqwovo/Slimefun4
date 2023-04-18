@@ -10,6 +10,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedSavingLooperTask;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedTask;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -132,7 +133,7 @@ public class BlockDataController extends ADataController {
         var re = result.isEmpty() ? null : new SlimefunBlockData(l, result.get(0).get(FieldKey.SLIMEFUN_ID));
         if (re != null) {
             chunkData = getChunkDataCache(chunk, true);
-            chunkData.addBlockCacheInternal(lKey, re, false);
+            chunkData.addBlockCacheInternal(re, false);
         }
         return re;
     }
@@ -143,6 +144,49 @@ public class BlockDataController extends ADataController {
 
     public SlimefunBlockData getBlockDataFromCache(Location l) {
         return getBlockDataFromCache(LocationUtils.getChunkKey(l.getChunk()), LocationUtils.getLocKey(l));
+    }
+
+    public void setBlockDataLocation(SlimefunBlockData blockData, Location target) {
+        if (LocationUtils.isSameLoc(blockData.getLocation(), target)) {
+            return;
+        }
+
+        if (Slimefun.getRegistry().getTickerBlocks().contains(blockData.getSfId())) {
+            Slimefun.getTickerTask().disableTicker(blockData.getLocation());
+            Slimefun.getTickerTask().enableTicker(target);
+        }
+
+        var chunk = blockData.getLocation().getChunk();
+        var chunkData = getChunkDataCache(chunk, false);
+        if (chunkData != null) {
+            chunkData.removeBlockDataCacheInternal(blockData.getKey());
+        }
+
+        var newBlockData = new SlimefunBlockData(target, blockData);
+        var key = new RecordKey(DataScope.BLOCK_RECORD);
+        if (LocationUtils.isSameChunk(blockData.getLocation().getChunk(), target.getChunk())) {
+            if (chunkData == null) {
+                chunkData = getChunkDataCache(chunk, true);
+            }
+            key.addField(FieldKey.CHUNK);
+        } else {
+            chunkData = getChunkDataCache(target.getChunk(), true);
+        }
+        chunkData.addBlockCacheInternal(newBlockData, true);
+
+        var menu = blockData.getBlockMenu();
+        if (menu != null) {
+            newBlockData.setBlockMenu(new BlockMenu(menu.getPreset(), target, blockData.getMenuContents()));
+        }
+
+        key.addField(FieldKey.LOCATION);
+        key.addCondition(FieldKey.LOCATION, blockData.getKey());
+
+        var data = new RecordSet();
+        data.put(FieldKey.LOCATION, newBlockData.getKey());
+        data.put(FieldKey.CHUNK, chunkData.getKey());
+        data.put(FieldKey.SLIMEFUN_ID, blockData.getSfId());
+        scheduleWriteTask(new LocationKey(DataScope.NONE, blockData.getLocation()), key, data, true);
     }
 
     private SlimefunBlockData getBlockDataFromCache(String cKey, String lKey) {
@@ -170,7 +214,7 @@ public class BlockDataController extends ADataController {
             var sfId = block.get(FieldKey.SLIMEFUN_ID);
             var cache = getBlockDataFromCache(chunkData.getKey(), lKey);
             var blockData = cache == null ? new SlimefunBlockData(LocationUtils.toLocation(lKey), sfId) : cache;
-            chunkData.addBlockCacheInternal(lKey, blockData, false);
+            chunkData.addBlockCacheInternal(blockData, false);
             if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
                 scheduleReadTask(() -> {
                     loadBlockData(blockData);

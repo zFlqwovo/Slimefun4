@@ -1,5 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.androids;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.chat.ChatInput;
 import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.common.CommonPatterns;
@@ -23,23 +25,12 @@ import io.github.thebusybiscuit.slimefun4.utils.HeadTexture;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.papermc.lib.PaperLib;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Predicate;
-import java.util.logging.Level;
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.AdvancedMenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineFuel;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
@@ -55,7 +46,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Dispenser;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rotatable;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -65,6 +55,16 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 
 public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock, RecipeDisplayItem {
 
@@ -95,7 +95,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
             @Override
             public boolean canOpen(Block b, Player p) {
-                boolean isOwner = p.getUniqueId().toString().equals(BlockStorage.getLocationInfo(b.getLocation(), "owner")) || p.hasPermission("slimefun.android.bypass");
+                boolean isOwner = p.getUniqueId().toString().equals(StorageCacheUtils.getData(b.getLocation(), "owner")) || p.hasPermission("slimefun.android.bypass");
 
                 if (isOwner || AndroidShareMenu.isTrustedUser(b, p.getUniqueId())) {
                     return true;
@@ -111,21 +111,21 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                 menu.replaceExistingItem(15, new CustomItemStack(HeadTexture.SCRIPT_START.getAsItemStack(), "&a启动/继续运行"));
                 menu.addMenuClickHandler(15, (p, slot, item, action) -> {
                     Slimefun.getLocalization().sendMessage(p, "android.started", true);
-                    BlockStorage.addBlockInfo(b, "paused", "false");
+                    StorageCacheUtils.setData(b.getLocation(), "paused", "false");
                     p.closeInventory();
                     return false;
                 });
 
                 menu.replaceExistingItem(17, new CustomItemStack(HeadTexture.SCRIPT_PAUSE.getAsItemStack(), "&4暂停运行"));
                 menu.addMenuClickHandler(17, (p, slot, item, action) -> {
-                    BlockStorage.addBlockInfo(b, "paused", "true");
+                    StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     return false;
                 });
 
                 menu.replaceExistingItem(16, new CustomItemStack(HeadTexture.ENERGY_REGULATOR.getAsItemStack(), "&b内存核心", "", "&8\u21E8 &7单击打开脚本编辑器"));
                 menu.addMenuClickHandler(16, (p, slot, item, action) -> {
-                    BlockStorage.addBlockInfo(b, "paused", "true");
+                    StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     openScriptEditor(p, b);
                     return false;
@@ -133,7 +133,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
                 menu.replaceExistingItem(25, new CustomItemStack(HeadTexture.MOTOR.getAsItemStack(), Slimefun.getLocalization().getMessage("android.access-manager.title"), "", Slimefun.getLocalization().getMessage("android.access-manager.subtitle")));
                 menu.addMenuClickHandler(25, (p, slot, item, action) -> {
-                    BlockStorage.addBlockInfo(b, "paused", "true");
+                    StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     AndroidShareMenu.openShareMenu(p, b);
                     return false;
@@ -158,20 +158,19 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                 Player p = e.getPlayer();
                 Block b = e.getBlock();
 
-                BlockStorage.addBlockInfo(b, "owner", p.getUniqueId().toString());
-                BlockStorage.addBlockInfo(b, "script", DEFAULT_SCRIPT);
-                BlockStorage.addBlockInfo(b, "index", "0");
-                BlockStorage.addBlockInfo(b, "fuel", "0");
-                BlockStorage.addBlockInfo(b, "rotation", p.getFacing().getOppositeFace().toString());
-                BlockStorage.addBlockInfo(b, "paused", "true");
+                var blockData = StorageCacheUtils.getBlock(b.getLocation());
+                blockData.setData("owner", p.getUniqueId().toString());
+                blockData.setData("script", DEFAULT_SCRIPT);
+                blockData.setData("index", "0");
+                blockData.setData("fuel", "0");
+                blockData.setData("rotation", p.getFacing().getOppositeFace().toString());
+                blockData.setData("paused", "true");
 
-                BlockData blockData = Material.PLAYER_HEAD.createBlockData(data -> {
+                b.setBlockData(Material.PLAYER_HEAD.createBlockData(data -> {
                     if (data instanceof Rotatable rotatable) {
                         rotatable.setRotation(p.getFacing());
                     }
-                });
-
-                b.setBlockData(blockData);
+                }));
             }
         };
     }
@@ -183,7 +182,8 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
             @Override
             public void onPlayerBreak(BlockBreakEvent e, ItemStack item, List<ItemStack> drops) {
                 Block b = e.getBlock();
-                String owner = BlockStorage.getLocationInfo(b.getLocation(), "owner");
+                var blockData = StorageCacheUtils.getBlock(b.getLocation());
+                String owner = blockData.getData("owner");
 
                 if (!e.getPlayer().hasPermission("slimefun.android.bypass") && !e.getPlayer().getUniqueId().toString().equals(owner)) {
                     // The Player is not allowed to break this android
@@ -191,7 +191,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                     return;
                 }
 
-                BlockMenu inv = BlockStorage.getInventory(b);
+                BlockMenu inv = blockData.getBlockMenu();
 
                 if (inv != null) {
                     inv.dropItems(b.getLocation(), 43);
@@ -232,7 +232,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
         addItemHandler(new BlockTicker() {
 
             @Override
-            public void tick(Block b, SlimefunItem item, Config data) {
+            public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
                 if (b != null && data != null) {
                     ProgrammableAndroid.this.tick(b, data);
                 }
@@ -252,7 +252,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
         menu.addItem(0, new CustomItemStack(Instruction.START.getItem(), Slimefun.getLocalization().getMessage(p, "android.scripts.instructions.START"), "", "&7\u21E8 &e左键 &7返回机器人的控制面板"));
         menu.addMenuClickHandler(0, (pl, slot, item, action) -> {
-            BlockMenu inv = BlockStorage.getInventory(b);
+            BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
             // Fixes #2937
             if (inv != null) {
                 inv.open(pl);
@@ -281,7 +281,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                 int slot = i + (hasFreeSlot ? 1 : 0);
                 menu.addItem(slot, new CustomItemStack(Instruction.REPEAT.getItem(), Slimefun.getLocalization().getMessage(p, "android.scripts.instructions.REPEAT"), "", "&7\u21E8 &e左键 &7返回机器人的控制面板"));
                 menu.addMenuClickHandler(slot, (pl, s, item, action) -> {
-                    BlockMenu inv = BlockStorage.getInventory(b);
+                    BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
                     // Fixes #2937
                     if (inv != null) {
                         inv.open(pl);
@@ -503,7 +503,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
         menu.addItem(1, new CustomItemStack(HeadTexture.SCRIPT_FORWARD.getAsItemStack(), "&2> 编辑脚本", "", "&a修改你现有的脚本"));
         menu.addMenuClickHandler(1, (pl, slot, item, action) -> {
-            String script = BlockStorage.getLocationInfo(b.getLocation()).getString("script");
+            String script = StorageCacheUtils.getData(b.getLocation(), "script");
             // Fixes #2937
             if (script != null) {
                 if (CommonPatterns.DASH.split(script).length <= MAX_SCRIPT_LENGTH) {
@@ -532,7 +532,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
         menu.addItem(8, new CustomItemStack(HeadTexture.SCRIPT_LEFT.getAsItemStack(), "&6> 返回", "", "&7返回机器人控制面板"));
         menu.addMenuClickHandler(8, (pl, slot, item, action) -> {
-            BlockMenu inv = BlockStorage.getInventory(b);
+            BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
             // Fixes #2937
             if (inv != null) {
                 inv.open(pl);
@@ -592,7 +592,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
     @Nonnull
     public String getScript(@Nonnull Location l) {
         Validate.notNull(l, "Location for android not specified");
-        String script = BlockStorage.getLocationInfo(l, "script");
+        String script = StorageCacheUtils.getData(l, "script");
         return script != null ? script : DEFAULT_SCRIPT;
     }
 
@@ -603,7 +603,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
         Validate.isTrue(script.endsWith('-' + Instruction.REPEAT.name()), "A script must end with a 'REPEAT' token.");
         Validate.isTrue(CommonPatterns.DASH.split(script).length <= MAX_SCRIPT_LENGTH, "Scripts may not have more than " + MAX_SCRIPT_LENGTH + " segments");
 
-        BlockStorage.addBlockInfo(l, "script", script);
+        StorageCacheUtils.setData(l, "script", script);
     }
 
     private void registerDefaultFuelTypes() {
@@ -684,32 +684,32 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
         return tier;
     }
 
-    protected void tick(Block b, Config data) {
+    protected void tick(Block b, SlimefunBlockData data) {
         if (b.getType() != Material.PLAYER_HEAD) {
             // The Android was destroyed or moved.
             return;
         }
 
-        if ("false".equals(data.getString("paused"))) {
-            BlockMenu menu = BlockStorage.getInventory(b);
+        if ("false".equals(data.getData("paused"))) {
+            BlockMenu menu = data.getBlockMenu();
 
-            String fuelData = data.getString("fuel");
+            String fuelData = data.getData("fuel");
             float fuel = fuelData == null ? 0 : Float.parseFloat(fuelData);
 
             if (fuel < 0.001) {
                 consumeFuel(b, menu);
             } else {
-                String code = data.getString("script");
+                String code = data.getData("script");
                 String[] script = CommonPatterns.DASH.split(code == null ? DEFAULT_SCRIPT : code);
 
-                String indexData = data.getString("index");
+                String indexData = data.getData("index");
                 int index = (indexData == null ? 0 : Integer.parseInt(indexData)) + 1;
 
                 if (index >= script.length) {
                     index = 0;
                 }
 
-                BlockStorage.addBlockInfo(b, "fuel", String.valueOf(fuel - 1));
+                data.setData("fuel", String.valueOf(fuel - 1));
                 Instruction instruction = Instruction.getInstruction(script[index]);
 
                 if (instruction == null) {
@@ -723,30 +723,30 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
     }
 
     @ParametersAreNonnullByDefault
-    private void executeInstruction(Instruction instruction, Block b, BlockMenu inv, Config data, int index) {
+    private void executeInstruction(Instruction instruction, Block b, BlockMenu inv, SlimefunBlockData data, int index) {
         if (getAndroidType().isType(instruction.getRequiredType())) {
-            String rotationData = data.getString("rotation");
+            String rotationData = data.getData("rotation");
             BlockFace face = rotationData == null ? BlockFace.NORTH : BlockFace.valueOf(rotationData);
 
             switch (instruction) {
                 case START:
                 case WAIT:
                     // We are "waiting" here, so we only move a step forward
-                    BlockStorage.addBlockInfo(b, "index", String.valueOf(index));
+                    data.setData("index", String.valueOf(index));
                     break;
                 case REPEAT:
                     // "repeat" just means, we reset our index
-                    BlockStorage.addBlockInfo(b, "index", String.valueOf(0));
+                    data.setData("index", String.valueOf(0));
                     break;
                 case CHOP_TREE:
                     // We only move to the next step if we finished chopping wood
                     if (chopTree(b, inv, face)) {
-                        BlockStorage.addBlockInfo(b, "index", String.valueOf(index));
+                        data.setData("index", String.valueOf(index));
                     }
                     break;
                 default:
                     // We set the index here in advance to fix moving android issues
-                    BlockStorage.addBlockInfo(b, "index", String.valueOf(index));
+                    data.setData("index", String.valueOf(index));
                     instruction.execute(this, b, inv, face);
                     break;
             }
@@ -764,18 +764,16 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
         BlockFace rotation = POSSIBLE_ROTATIONS.get(index);
 
-        BlockData blockData = Material.PLAYER_HEAD.createBlockData(data -> {
+        b.setBlockData(Material.PLAYER_HEAD.createBlockData(data -> {
             if (data instanceof Rotatable rotatable) {
                 rotatable.setRotation(rotation.getOppositeFace());
             }
-        });
-
-        b.setBlockData(blockData);
-        BlockStorage.addBlockInfo(b, "rotation", rotation.name());
+        }));
+        StorageCacheUtils.setData(b.getLocation(), "rotation", rotation.name());
     }
 
     protected void depositItems(BlockMenu menu, Block facedBlock) {
-        if (facedBlock.getType() == Material.DISPENSER && BlockStorage.check(facedBlock, "ANDROID_INTERFACE_ITEMS")) {
+        if (facedBlock.getType() == Material.DISPENSER && StorageCacheUtils.isBlock(facedBlock.getLocation(), "ANDROID_INTERFACE_ITEMS")) {
             BlockState state = PaperLib.getBlockState(facedBlock, false).getState();
 
             if (state instanceof Dispenser dispenser) {
@@ -797,7 +795,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
     }
 
     protected void refuel(BlockMenu menu, Block facedBlock) {
-        if (facedBlock.getType() == Material.DISPENSER && BlockStorage.check(facedBlock, "ANDROID_INTERFACE_FUEL")) {
+        if (facedBlock.getType() == Material.DISPENSER && StorageCacheUtils.isBlock(facedBlock.getLocation(), "ANDROID_INTERFACE_FUEL")) {
             BlockState state = PaperLib.getBlockState(facedBlock, false).getState();
 
             if (state instanceof Dispenser dispenser) {
@@ -846,7 +844,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                     }
 
                     int fuelLevel = fuel.getTicks();
-                    BlockStorage.addBlockInfo(b, "fuel", String.valueOf(fuelLevel));
+                    StorageCacheUtils.setData(b.getLocation(), "fuel", String.valueOf(fuelLevel));
                     break;
                 }
             }
@@ -879,7 +877,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
     public void addItems(Block b, ItemStack... items) {
         Validate.notNull(b, "The Block cannot be null.");
 
-        BlockMenu inv = BlockStorage.getInventory(b);
+        BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
 
         if (inv != null) {
             for (ItemStack item : items) {
@@ -890,7 +888,8 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
 
     @ParametersAreNonnullByDefault
     protected void move(Block b, BlockFace face, Block block) {
-        OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(BlockStorage.getLocationInfo(b.getLocation(), "owner")));
+        var blockData = StorageCacheUtils.getBlock(b.getLocation());
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(blockData.getData("owner")));
 
         if (!Slimefun.getProtectionManager().hasPermission(owner, block.getLocation(), Interaction.PLACE_BLOCK)) {
             return;
@@ -902,13 +901,11 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                 return;
             }
 
-            BlockData blockData = Material.PLAYER_HEAD.createBlockData(data -> {
+            block.setBlockData(Material.PLAYER_HEAD.createBlockData(data -> {
                 if (data instanceof Rotatable rotatable) {
                     rotatable.setRotation(face.getOppositeFace());
                 }
-            });
-
-            block.setBlockData(blockData);
+            }));
 
             Slimefun.runSync(() -> {
                 PlayerSkin skin = PlayerSkin.fromBase64(texture);
@@ -916,7 +913,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
             });
 
             b.setType(Material.AIR);
-            BlockStorage.moveBlockInfo(b.getLocation(), block.getLocation());
+            Slimefun.getDatabaseManager().getBlockDataController().setBlockDataLocation(blockData, block.getLocation());
         }
     }
 

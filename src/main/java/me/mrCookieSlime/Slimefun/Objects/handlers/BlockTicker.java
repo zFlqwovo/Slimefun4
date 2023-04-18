@@ -2,6 +2,7 @@ package me.mrCookieSlime.Slimefun.Objects.handlers;
 
 import java.util.Optional;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import org.bukkit.block.Block;
 
 import io.github.thebusybiscuit.slimefun4.api.exceptions.IncompatibleItemHandlerException;
@@ -53,7 +54,7 @@ public abstract class BlockTicker implements ItemHandler {
      * @param data
      *            The data stored in this {@link Block}
      */
-    public abstract void tick(Block b, SlimefunItem item, Config data);
+    public abstract void tick(Block b, SlimefunItem item, SlimefunBlockData data);
 
     /**
      * This method is called every tick but not per-block and only once.

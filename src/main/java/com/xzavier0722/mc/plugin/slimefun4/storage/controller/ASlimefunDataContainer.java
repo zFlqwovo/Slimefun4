@@ -19,6 +19,13 @@ public abstract class ASlimefunDataContainer {
         data = new ConcurrentHashMap<>();
     }
 
+    @ParametersAreNonnullByDefault
+    public ASlimefunDataContainer(String key, ASlimefunDataContainer other) {
+        this.key = key;
+        this.data = other.data;
+        this.isDataLoaded = other.isDataLoaded;
+    }
+
     public boolean isDataLoaded() {
         return isDataLoaded;
     }

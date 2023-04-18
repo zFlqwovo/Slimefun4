@@ -117,11 +117,6 @@ public class BlockListener implements Listener {
             return;
         }
 
-        // Ignore blocks which we have marked as deleted (Fixes #2771)
-        if (Slimefun.getTickerTask().isDeletedSoon(e.getBlock().getLocation())) {
-            return;
-        }
-
         ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
         checkForSensitiveBlockAbove(e, item);
 

@@ -1,6 +1,9 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.controller;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
@@ -34,7 +37,14 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
             throw new IllegalStateException("There already a block in this location: " + lKey);
         }
         var re = new SlimefunBlockData(l, sfId);
+        re.setIsDataLoaded(true);
         sfBlocks.put(lKey, re);
+
+        var preset = BlockMenuPreset.getPreset(sfId);
+        if (preset != null) {
+            re.setBlockMenu(new BlockMenu(preset, l));
+        }
+
         Slimefun.getDatabaseManager().getBlockDataController().saveNewBlock(l, sfId);
         return re;
     }
@@ -61,11 +71,11 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
         return re;
     }
 
-    void addBlockCacheInternal(String lKey, SlimefunBlockData data, boolean override) {
+    void addBlockCacheInternal(SlimefunBlockData data, boolean override) {
         if (override) {
-            sfBlocks.put(lKey, data);
+            sfBlocks.put(data.getKey(), data);
         } else {
-            sfBlocks.putIfAbsent(lKey, data);
+            sfBlocks.putIfAbsent(data.getKey(), data);
         }
     }
 

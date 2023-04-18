@@ -85,13 +85,6 @@ public class BlockMenu extends DirtyChestMenu {
         changes = 0;
     }
 
-    public void move(Location l) {
-        this.delete(this.location);
-        this.location = l;
-        this.preset.newInstance(this, l);
-        this.save(l);
-    }
-
     /**
      * Reload this {@link BlockMenu} based on its {@link BlockMenuPreset}.
      */

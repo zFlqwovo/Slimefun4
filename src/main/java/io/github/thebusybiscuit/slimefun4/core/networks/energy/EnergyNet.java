@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.core.networks.energy;
 
 import city.norain.slimefun4.utils.MathUtil;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.ErrorReport;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.network.Network;
@@ -11,6 +12,13 @@ import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
+import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,13 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongConsumer;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 
 /**
  * The {@link EnergyNet} is an implementation of {@link Network} that deals with
@@ -238,7 +239,10 @@ public class EnergyNet extends Network implements HologramOwner {
             SlimefunItem item = (SlimefunItem) provider;
 
             try {
-                Config data = BlockStorage.getLocationInfo(loc);
+                var data = StorageCacheUtils.getBlock(loc);
+                if (data == null || !data.isDataLoaded() || data.isPendingRemove()) {
+                    continue;
+                }
                 int energy = provider.getGeneratedOutput(loc, data);
 
                 if (provider.isChargeable()) {

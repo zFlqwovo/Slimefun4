@@ -1,10 +1,13 @@
 package io.github.thebusybiscuit.slimefun4.core.handlers;
 
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import io.github.bakedlibs.dough.collections.LoopIterator;
+import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.RainbowBlock;
+import io.github.thebusybiscuit.slimefun4.utils.ColoredMaterial;
+import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -12,15 +15,9 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.GlassPane;
 
-import io.github.bakedlibs.dough.collections.LoopIterator;
-import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.RainbowBlock;
-import io.github.thebusybiscuit.slimefun4.utils.ColoredMaterial;
-
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
+import javax.annotation.Nonnull;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This is a {@link BlockTicker} that is exclusively used for Rainbow blocks.
@@ -90,7 +87,7 @@ public class RainbowTickHandler extends BlockTicker {
     }
 
     @Override
-    public void tick(Block b, SlimefunItem item, Config data) {
+    public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
         if (b.getType().isAir()) {
             /*
               The block was broken, setting the Material now would result in a
