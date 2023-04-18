@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.blocks;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.BlockPlacerPlaceEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -16,7 +17,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.VanillaInvento
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
 import io.papermc.lib.PaperLib;
 import io.papermc.lib.features.blockstatesnapshot.BlockStateSnapshotResult;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -69,9 +69,8 @@ public class BlockPlacer extends SlimefunItem {
             @Override
             public void onPlayerPlace(BlockPlaceEvent e) {
                 Player p = e.getPlayer();
-                Block b = e.getBlock();
 
-                BlockStorage.addBlockInfo(b, "owner", p.getUniqueId().toString());
+                StorageCacheUtils.setData(e.getBlock().getLocation(), "owner", p.getUniqueId().toString());
             }
         };
     }
@@ -125,7 +124,7 @@ public class BlockPlacer extends SlimefunItem {
      */
     @ParametersAreNonnullByDefault
     private boolean hasPermission(Dispenser dispenser, Block target) {
-        String owner = BlockStorage.getLocationInfo(dispenser.getLocation(), "owner");
+        String owner = StorageCacheUtils.getData(dispenser.getLocation(), "owner");
 
         if (owner == null) {
             /*
@@ -188,7 +187,7 @@ public class BlockPlacer extends SlimefunItem {
                 if (handler.isBlockPlacerAllowed()) {
                     schedulePlacement(block, dispenser.getInventory(), item, () -> {
                         block.setType(item.getType());
-                        BlockStorage.store(block, sfItem.getId());
+                        Slimefun.getDatabaseManager().getBlockDataController().createBlock(block.getLocation(), sfItem.getId());
 
                         handler.onBlockPlacerPlace(e);
                     });
@@ -198,7 +197,7 @@ public class BlockPlacer extends SlimefunItem {
             if (!hasItemHandler) {
                 schedulePlacement(block, dispenser.getInventory(), item, () -> {
                     block.setType(item.getType());
-                    BlockStorage.store(block, sfItem.getId());
+                    Slimefun.getDatabaseManager().getBlockDataController().createBlock(block.getLocation(), sfItem.getId());
                 });
             }
         }

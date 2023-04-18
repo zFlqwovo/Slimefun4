@@ -1,5 +1,19 @@
 package io.github.thebusybiscuit.slimefun4.core.networks.cargo;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import com.xzavier0722.mc.plugin.slimefuncomplib.event.cargo.CargoTickEvent;
+import io.github.bakedlibs.dough.common.CommonPatterns;
+import io.github.thebusybiscuit.slimefun4.api.network.Network;
+import io.github.thebusybiscuit.slimefun4.api.network.NetworkComponent;
+import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -8,23 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import com.xzavier0722.mc.plugin.slimefuncomplib.event.cargo.CargoTickEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
-
-import io.github.bakedlibs.dough.common.CommonPatterns;
-import io.github.thebusybiscuit.slimefun4.api.network.Network;
-import io.github.thebusybiscuit.slimefun4.api.network.NetworkComponent;
-import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 
 /**
  * The {@link CargoNet} is a type of {@link Network} which deals with {@link ItemStack} transportation.
@@ -89,13 +86,13 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
 
     @Override
     public NetworkComponent classifyLocation(@Nonnull Location l) {
-        String id = BlockStorage.checkID(l);
+        var data = StorageCacheUtils.getBlock(l);
 
-        if (id == null) {
+        if (data == null) {
             return null;
         }
 
-        return switch (id) {
+        return switch (data.getSfId()) {
             case "CARGO_MANAGER" -> NetworkComponent.REGULATOR;
             case "CARGO_NODE" -> NetworkComponent.CONNECTOR;
             case "CARGO_NODE_INPUT",
@@ -115,8 +112,8 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
         }
 
         if (to == NetworkComponent.TERMINUS) {
-            String id = BlockStorage.checkID(l);
-            switch (id) {
+            var data = StorageCacheUtils.getBlock(l);
+            switch (data.getSfId()) {
                 case "CARGO_NODE_INPUT" -> inputNodes.add(l);
                 case "CARGO_NODE_OUTPUT",
                     "CARGO_NODE_OUTPUT_ADVANCED" -> outputNodes.add(l);
@@ -151,7 +148,7 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
             Map<Location, Integer> inputs = mapInputNodes();
             Map<Integer, List<Location>> outputs = mapOutputNodes();
 
-            if (BlockStorage.getLocationInfo(b.getLocation(), "visualizer") == null) {
+            if (StorageCacheUtils.getData(b.getLocation(), "visualizer") == null) {
                 display();
             }
 
@@ -226,7 +223,7 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
      * @return The frequency of the given node
      */
     private static int getFrequency(@Nonnull Location node) {
-        String frequency = BlockStorage.getLocationInfo(node, "frequency");
+        String frequency = StorageCacheUtils.getData(node, "frequency");
 
         if (frequency == null) {
             return 0;

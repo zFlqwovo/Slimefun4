@@ -12,7 +12,6 @@ import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -251,7 +250,7 @@ public class EnergyNet extends Network implements HologramOwner {
 
                 if (provider.willExplode(loc, data)) {
                     explodedBlocks.add(loc);
-                    BlockStorage.clearBlockInfo(loc);
+                    Slimefun.getDatabaseManager().getBlockDataController().removeBlock(loc);
 
                     Slimefun.runSync(() -> {
                         loc.getBlock().setType(Material.LAVA);
@@ -299,7 +298,7 @@ public class EnergyNet extends Network implements HologramOwner {
 
     @Nullable
     private static EnergyNetComponent getComponent(@Nonnull Location l) {
-        SlimefunItem item = BlockStorage.check(l);
+        SlimefunItem item = StorageCacheUtils.getSfItem(l);
 
         if (item instanceof EnergyNetComponent component) {
             return component;

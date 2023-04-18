@@ -10,7 +10,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.Capacitor;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 
@@ -79,7 +78,6 @@ public interface EnergyNetComponent extends ItemAttribute {
 
     /**
      * This returns the currently stored charge at a given {@link Location}.
-     * This is a more performance saving option if you already have a {@link Config}
      * object for this {@link Location}.
      * 
      * @param l

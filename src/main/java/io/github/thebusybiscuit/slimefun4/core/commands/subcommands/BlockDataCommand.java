@@ -1,9 +1,9 @@
 package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import net.guizhanss.slimefun4.utils.ChatUtils;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.block.Block;
@@ -48,8 +48,9 @@ class BlockDataCommand extends SubCommand {
         }
 
         Block target = player.getTargetBlockExact(8, FluidCollisionMode.NEVER);
+        var blockData = StorageCacheUtils.getBlock(target.getLocation());
 
-        if (target == null || target.getType().isAir() || !BlockStorage.hasBlockInfo(target)) {
+        if (target == null || target.getType().isAir() || blockData == null) {
             ChatUtils.sendMessage(player, "&c你需要看向一个 Slimefun 方块才能执行该指令!");
             return;
         }
@@ -58,7 +59,7 @@ class BlockDataCommand extends SubCommand {
 
         switch (args[1]) {
             case "get" -> {
-                String value = BlockStorage.getLocationInfo(target.getLocation(), key);
+                String value = blockData.getData(key);
                 ChatUtils.sendMessage(player, "&a该方块 &b%key% &a的值为: &e%value%",
                     msg -> msg.replace("%key%", key).replace("%value%", value)
                 );
@@ -78,7 +79,7 @@ class BlockDataCommand extends SubCommand {
 
                 String value = args[2];
 
-                BlockStorage.addBlockInfo(target, key, value);
+                blockData.setData(key, value);
                 ChatUtils.sendMessage(player, "&a已设置该方块 &b%key% &a的值为: &e%value%",
                     msg -> msg.replace("%key%", key).replace("%value%", value)
                 );
@@ -89,7 +90,7 @@ class BlockDataCommand extends SubCommand {
                     return;
                 }
 
-                BlockStorage.addBlockInfo(target, key, null);
+                blockData.removeData(key);
                 ChatUtils.sendMessage(player, "&a已移除该方块 &b%key% &a的值",
                     msg -> msg.replace("%key%", key)
                 );

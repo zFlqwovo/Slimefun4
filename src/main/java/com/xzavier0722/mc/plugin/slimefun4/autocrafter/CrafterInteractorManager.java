@@ -1,6 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.autocrafter;
 
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import org.bukkit.block.Block;
 
 import java.util.HashMap;
@@ -37,14 +37,16 @@ public class CrafterInteractorManager {
 
     public static CrafterInteractable getInteractor(Block b) {
         if (hasInterator(b)) {
-            CrafterInteractorHandler handler = handlers.get(BlockStorage.getLocationInfo(b.getLocation(),"id"));
-            return handler.getInteractor(BlockStorage.getInventory(b));
+            var blockData = StorageCacheUtils.getBlock(b.getLocation());
+            CrafterInteractorHandler handler = handlers.get(blockData.getSfId());
+            return handler.getInteractor(blockData.getBlockMenu());
         }
         return null;
     }
 
     public static boolean hasInterator(Block b) {
-        return BlockStorage.hasBlockInfo(b) && handlers.containsKey(BlockStorage.getLocationInfo(b.getLocation(),"id"));
+        var blockData = StorageCacheUtils.getBlock(b.getLocation());
+        return blockData != null && handlers.containsKey(blockData.getSfId());
     }
 
 }
