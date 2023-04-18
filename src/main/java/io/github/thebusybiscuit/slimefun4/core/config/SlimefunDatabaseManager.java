@@ -134,6 +134,7 @@ public class SlimefunDatabaseManager {
 
     public void shutdown() {
         getProfileDataController().shutdown();
+        getBlockDataController().shutdown();
         blockStorageAdapter.shutdown();
         profileAdapter.shutdown();
         ControllerHolder.clearControllers();

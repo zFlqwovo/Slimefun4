@@ -39,6 +39,7 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
 
     @Override
     public void initStorage(DataType type) {
+        executeSql("PRAGMA foreign_keys = ON;");
         switch (type) {
             case PLAYER_PROFILE -> createProfileTables();
             case BLOCK_STORAGE -> createBlockStorageTables();
@@ -207,7 +208,7 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         );
 
         executeSql(
-                "CREATE INDEX IF NOT EXISTS index_chunk ON " + table + ");"
+                "CREATE INDEX IF NOT EXISTS index_chunk ON " + table + "(" + FIELD_CHUNK + ");"
         );
     }
 

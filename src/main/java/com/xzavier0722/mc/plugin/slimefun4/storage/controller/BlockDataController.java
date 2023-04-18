@@ -13,13 +13,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
@@ -28,6 +21,15 @@ import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class BlockDataController extends ADataController {
 
@@ -81,6 +83,7 @@ public class BlockDataController extends ADataController {
 
         var data = new RecordSet();
         data.put(FieldKey.LOCATION, lKey);
+        data.put(FieldKey.CHUNK, LocationUtils.getChunkKey(l.getChunk()));
         data.put(FieldKey.SLIMEFUN_ID, sfId);
 
         var scopeKey = new LocationKey(DataScope.NONE, l);
@@ -133,6 +136,7 @@ public class BlockDataController extends ADataController {
         if (re != null) {
             chunkData = getChunkDataCache(chunk, true);
             chunkData.addBlockCacheInternal(re, false);
+            re = chunkData.getBlockCacheInternal(lKey);
         }
         return re;
     }
@@ -185,7 +189,18 @@ public class BlockDataController extends ADataController {
         data.put(FieldKey.LOCATION, newBlockData.getKey());
         data.put(FieldKey.CHUNK, chunkData.getKey());
         data.put(FieldKey.SLIMEFUN_ID, blockData.getSfId());
-        scheduleWriteTask(new LocationKey(DataScope.NONE, blockData.getLocation()), key, data, true);
+        var scopeKey = new LocationKey(DataScope.NONE, blockData.getLocation());
+        synchronized (delayedWriteTasks) {
+            var it = delayedWriteTasks.entrySet().iterator();
+            while (it.hasNext()) {
+                var next = it.next();
+                if (scopeKey.equals(next.getKey().getParent())) {
+                    next.getValue().runUnsafely();
+                    it.remove();
+                }
+            }
+        }
+        scheduleWriteTask(scopeKey, key, data, true);
     }
 
     private SlimefunBlockData getBlockDataFromCache(String cKey, String lKey) {
@@ -305,6 +320,21 @@ public class BlockDataController extends ADataController {
         scheduleReadTask(() -> invokeCallback(callback, getChunkData(chunk)));
     }
 
+    public void saveAllBlockInventories() {
+        var chunks = new HashSet<>(loadedChunk.values());
+        chunks.forEach(chunk -> chunk.getAllCacheInternal().forEach(block -> {
+            if (block.isPendingRemove() || !block.isDataLoaded()) {
+                return;
+            }
+            var menu = block.getBlockMenu();
+            if (menu == null || !menu.isDirty()) {
+                return;
+            }
+
+            saveBlockInventory(block);
+        }));
+    }
+
     public void saveBlockInventory(SlimefunBlockData blockData) {
         var newInv = blockData.getMenuContents();
         List<Pair<ItemStack, Integer>> lastSave;
@@ -358,6 +388,7 @@ public class BlockDataController extends ADataController {
 
     @Override
     public void shutdown() {
+        saveAllBlockInventories();
         if (enableDelayedSaving) {
             looperTask.cancel();
             executeAllDelayedTasks();

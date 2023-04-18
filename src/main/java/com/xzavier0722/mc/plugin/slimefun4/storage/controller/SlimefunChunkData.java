@@ -10,7 +10,9 @@ import org.bukkit.Location;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SlimefunChunkData extends ASlimefunDataContainer {
@@ -81,6 +83,10 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
 
     SlimefunBlockData getBlockCacheInternal(String lKey) {
         return sfBlocks.get(lKey);
+    }
+
+    Set<SlimefunBlockData> getAllCacheInternal() {
+        return new HashSet<>(sfBlocks.values());
     }
 
     boolean hasBlockCache(String lKey) {

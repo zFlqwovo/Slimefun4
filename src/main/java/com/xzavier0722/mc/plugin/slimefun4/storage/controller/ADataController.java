@@ -53,12 +53,13 @@ public abstract class ADataController {
         try {
             var pendingTask = scheduledWriteTasks.size();
             while (pendingTask > 0) {
-                Slimefun.logger().log(Level.SEVERE, "数据保存中，请稍候... 剩余 " + pendingTask + " 个任务");
+                System.out.println("[Slimefun] 数据保存中，请稍候... 剩余 " + pendingTask + " 个任务");
                 Thread.sleep(500);
                 pendingTask = scheduledWriteTasks.size();
             }
         } catch (InterruptedException e) {
-            Slimefun.logger().log(Level.SEVERE, "Exception thrown while saving data: ", e);
+            System.err.println("[Slimefun] Exception thrown while saving data: ");
+            e.printStackTrace();
         }
         writeExecutor.shutdown();
         dataAdapter = null;
