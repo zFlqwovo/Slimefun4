@@ -29,6 +29,7 @@ public class MigrateCommand extends SubCommand {
                 return;
             }
 
+            // FIXME: 弃用上线后迁移
             Bukkit.getScheduler().runTaskAsynchronously(Slimefun.instance(), () -> {
                 try {
                     var status = PlayerProfileMigrator.migrateOldData();
