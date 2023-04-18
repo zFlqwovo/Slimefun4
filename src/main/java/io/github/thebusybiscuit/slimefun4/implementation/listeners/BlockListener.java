@@ -157,6 +157,7 @@ public class BlockListener implements Listener {
                                     blockData.setPendingRemove(false);
                                     return;
                                 }
+                                e.setDropItems(true);
                                 dropItems(e, drops);
                             }
                         });
