@@ -46,9 +46,9 @@ public class SlimefunDatabaseManager {
 
     public void init() {
         try {
-            blockDataStorageType = StorageType.valueOf(profileConfig.getString("storageType"));
-            var readExecutorThread = profileConfig.getInt("readExecutorThread");
-            var writeExecutorThread = blockDataStorageType == StorageType.SQLITE ? 1 : profileConfig.getInt("writeExecutorThread");
+            blockDataStorageType = StorageType.valueOf(blockStorageConfig.getString("storageType"));
+            var readExecutorThread = blockStorageConfig.getInt("readExecutorThread");
+            var writeExecutorThread = blockDataStorageType == StorageType.SQLITE ? 1 : blockStorageConfig.getInt("writeExecutorThread");
 
             initAdapter(blockDataStorageType, DataType.BLOCK_STORAGE, blockStorageConfig);
 
