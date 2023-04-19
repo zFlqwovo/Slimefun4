@@ -1,5 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.migrator;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.FileUtils;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -10,7 +11,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -20,13 +20,12 @@ public class PlayerProfileMigrator {
     private static volatile boolean migrateLock = false;
 
     public static boolean isOldDataExists() {
-        var listFiles = playerFolder.listFiles();
-        return playerFolder.exists() && playerFolder.isDirectory() && listFiles != null && listFiles.length > 0;
+        return FileUtils.checkDirectoryExists(playerFolder);
     }
 
-    public static void checkOldData(Logger logger) {
+    public static void checkOldData() {
         if (isOldDataExists()) {
-            logger.log(Level.WARNING, "检测到使用文件储存的旧玩家数据, 请使用 /sf migrate 迁移旧数据至数据库!");
+            Slimefun.logger().log(Level.WARNING, "检测到使用文件储存的旧玩家数据, 请使用 /sf migrate 迁移旧数据至数据库!");
         }
     }
 
@@ -35,6 +34,10 @@ public class PlayerProfileMigrator {
      * and try to migrate them to database
      */
     public static MigrateStatus migrateOldData() {
+        if (migrateLock) {
+            return MigrateStatus.MIGRATING;
+        }
+
         migrateLock = true;
         var result = MigrateStatus.SUCCESS;
 

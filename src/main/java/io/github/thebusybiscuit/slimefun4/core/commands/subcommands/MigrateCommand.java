@@ -24,11 +24,6 @@ public class MigrateCommand extends SubCommand {
     @Override
     public void onExecute(@Nonnull CommandSender sender, @Nonnull String[] args) {
         if (sender.hasPermission("slimefun.command.migrate") || sender instanceof ConsoleCommandSender) {
-            if (PlayerProfileMigrator.getMigrateLock()) {
-                Slimefun.getLocalization().sendMessage(sender, "commands.migrate.in-progress", true);
-                return;
-            }
-
             // FIXME: 弃用上线后迁移
             Bukkit.getScheduler().runTaskAsynchronously(Slimefun.instance(), () -> {
                 try {
@@ -37,6 +32,8 @@ public class MigrateCommand extends SubCommand {
                         case SUCCESS ->
                                 Slimefun.getLocalization().sendMessage(sender, "commands.migrate.success", true);
                         case FAILED -> Slimefun.getLocalization().sendMessage(sender, "commands.migrate.failed", true);
+                        case MIGRATING ->
+                                Slimefun.getLocalization().sendMessage(sender, "commands.migrate.in-progress", true);
                         case MIGRATED ->
                                 Slimefun.getLocalization().sendMessage(sender, "commands.migrate.already-migrated", true);
                     }

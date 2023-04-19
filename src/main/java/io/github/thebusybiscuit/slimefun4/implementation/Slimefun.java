@@ -105,7 +105,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -297,7 +296,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         registry.load(this);
 
         logger.log(Level.INFO, "正在加载数据库...");
-        PlayerProfileMigrator.checkOldData(logger);
+        PlayerProfileMigrator.checkOldData();
         databaseManager.init();
 
         // Set up localization

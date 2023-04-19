@@ -24,6 +24,11 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.operations.MiningOperation;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.OptionalInt;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.AdvancedMenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
@@ -38,12 +43,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.OptionalInt;
 
 /**
  * The {@link GEOMiner} is an electrical machine that allows you to obtain a {@link GEOResource}.
@@ -318,7 +317,7 @@ public class GEOMiner extends SlimefunItem implements RecipeDisplayItem, EnergyN
             return;
         }
 
-        Slimefun.getDatabaseManager().getBlockDataController().getChunkDataAsync(b.getChunk(), new IAsyncReadCallback<SlimefunChunkData>() {
+        Slimefun.getDatabaseManager().getBlockDataController().getChunkDataAsync(b.getChunk(), new IAsyncReadCallback<>() {
             @Override
             public void onResult(SlimefunChunkData result) {
                 if (result.getAllData().isEmpty()) {
