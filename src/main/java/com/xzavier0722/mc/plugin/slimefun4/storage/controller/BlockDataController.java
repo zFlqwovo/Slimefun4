@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
@@ -67,12 +68,14 @@ public class BlockDataController extends ADataController {
         ), 20, 20);
     }
 
-    public void createBlock(Location l, String sfId) {
+    @Nonnull
+    public SlimefunBlockData createBlock(Location l, String sfId) {
         checkDestroy();
-        getChunkDataCache(l.getChunk(), true).createBlockData(l, sfId);
+        var re = getChunkDataCache(l.getChunk(), true).createBlockData(l, sfId);
         if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
             Slimefun.getTickerTask().enableTicker(l);
         }
+        return re;
     }
 
     void saveNewBlock(Location l, String sfId) {
