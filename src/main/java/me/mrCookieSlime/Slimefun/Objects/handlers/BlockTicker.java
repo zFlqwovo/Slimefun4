@@ -2,15 +2,15 @@ package me.mrCookieSlime.Slimefun.Objects.handlers;
 
 import java.util.Optional;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataConfigWrapper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import io.github.bakedlibs.dough.config.Config;
 import org.bukkit.block.Block;
 
 import io.github.thebusybiscuit.slimefun4.api.exceptions.IncompatibleItemHandlerException;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemHandler;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
-
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 
 public abstract class BlockTicker implements ItemHandler {
 
@@ -54,7 +54,14 @@ public abstract class BlockTicker implements ItemHandler {
      * @param data
      *            The data stored in this {@link Block}
      */
-    public abstract void tick(Block b, SlimefunItem item, SlimefunBlockData data);
+    public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
+        tick(b, item, new BlockDataConfigWrapper(data));
+    }
+
+    @Deprecated
+    public void tick(Block b, SlimefunItem item, Config data) {
+
+    }
 
     /**
      * This method is called every tick but not per-block and only once.

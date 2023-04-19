@@ -1,6 +1,8 @@
 package io.github.thebusybiscuit.slimefun4.core.attributes;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataConfigWrapper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNet;
 import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNetComponentType;
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.AbstractEnergyProvider;
@@ -39,7 +41,13 @@ public interface EnergyNetProvider extends EnergyNetComponent {
      * @param data The stored block data
      * @return The generated output energy of this {@link EnergyNetProvider}.
      */
-    int getGeneratedOutput(@Nonnull Location l, @Nonnull SlimefunBlockData data);
+    default int getGeneratedOutput(@Nonnull Location l, @Nonnull SlimefunBlockData data) {
+        return getGeneratedOutput(l, new BlockDataConfigWrapper(data));
+    }
+
+    default int getGeneratedOutput(@Nonnull Location l, @Nonnull Config data) {
+        return 0;
+    }
 
     /**
      * This method returns whether the given {@link Location} is going to explode on the
@@ -50,6 +58,10 @@ public interface EnergyNetProvider extends EnergyNetComponent {
      * @return Whether or not this {@link Location} will explode.
      */
     default boolean willExplode(@Nonnull Location l, @Nonnull SlimefunBlockData data) {
+        return willExplode(l, new BlockDataConfigWrapper(data));
+    }
+
+    default boolean willExplode(@Nonnull Location l, @Nonnull Config data) {
         return false;
     }
 
