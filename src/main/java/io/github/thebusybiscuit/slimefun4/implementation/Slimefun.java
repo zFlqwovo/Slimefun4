@@ -583,7 +583,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * This method creates all necessary directories (and sub directories) for Slimefun.
      */
     private void createDirectories() {
-        String[] storageFolders = { "Players", "blocks", "stored-blocks", "stored-inventories", "stored-chunks", "universal-inventories", "waypoints", "block-backups" };
+        String[] storageFolders = {"universal-inventories", "waypoints", "block-backups" };
         String[] pluginFolders = { "scripts", "error-reports", "cache/github", "world-settings" };
 
         for (String folder : storageFolders) {
