@@ -62,7 +62,15 @@ public class BlockStorage {
     }
 
     private static SlimefunBlockData getBlockData(Location l) {
-        return Slimefun.getDatabaseManager().getBlockDataController().getBlockData(l);
+        var re = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(l);
+        if (re == null) {
+            return null;
+        }
+
+        if (!re.isDataLoaded()) {
+            Slimefun.getDatabaseManager().getBlockDataController().loadBlockData(re);
+        }
+        return re;
     }
 
     public static String getLocationInfo(Location l, String key) {

@@ -388,12 +388,7 @@ final class CargoUtils {
 
     @Nullable
     static DirtyChestMenu getChestMenu(@Nonnull Block block) {
-        var blockData = StorageCacheUtils.getBlock(block.getLocation());
-        if (blockData == null) {
-            return null;
-        }
-        var menu = blockData.getBlockMenu();
-        return menu;
+        return StorageCacheUtils.getMenu(block.getLocation());
     }
 
     static boolean matchesFilter(@Nonnull AbstractItemNetwork network, @Nonnull Block node, @Nullable ItemStack item) {

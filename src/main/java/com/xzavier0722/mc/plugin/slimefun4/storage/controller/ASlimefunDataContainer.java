@@ -78,4 +78,6 @@ public abstract class ASlimefunDataContainer {
     public String getKey() {
         return key;
     }
+
+    public abstract void setData(String key, String val);
 }

@@ -1,15 +1,16 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.util;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Location;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.logging.Level;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Utils to access the cached block data.
@@ -18,6 +19,8 @@ import java.util.logging.Level;
  * {@link com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController#getBlockData}
  */
 public class StorageCacheUtils {
+    private static final Set<SlimefunBlockData> loadingData = new HashSet<>();
+
     @ParametersAreNonnullByDefault
     public static boolean hasBlock(Location l) {
         return getBlock(l) != null;
@@ -58,6 +61,35 @@ public class StorageCacheUtils {
     @Nullable
     public static BlockMenu getMenu(Location loc) {
         var blockData = getBlock(loc);
-        return blockData == null ? null : blockData.getBlockMenu();
+        if (blockData == null) {
+            return null;
+        }
+
+        if (!blockData.isDataLoaded()) {
+            if (loadingData.contains(blockData)) {
+                return null;
+            }
+            synchronized (loadingData) {
+                if (loadingData.contains(blockData)) {
+                    return null;
+                }
+                loadingData.add(blockData);
+            }
+
+            Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
+                    blockData,
+                    new IAsyncReadCallback<>() {
+                        @Override
+                        public void onResult(SlimefunBlockData result) {
+                            synchronized (loadingData) {
+                                loadingData.remove(blockData);
+                            }
+                        }
+                    }
+            );
+            return null;
+        }
+
+        return blockData.getBlockMenu();
     }
 }

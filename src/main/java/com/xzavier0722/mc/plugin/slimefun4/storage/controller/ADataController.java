@@ -117,6 +117,10 @@ public abstract class ADataController {
     }
 
     protected <T> void invokeCallback(IAsyncReadCallback<T> callback, T result) {
+        if (callback == null) {
+            return;
+        }
+
         Runnable cb;
         if (result == null) {
             cb = callback::onResultNotFound;

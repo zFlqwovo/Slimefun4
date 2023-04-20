@@ -37,9 +37,14 @@ public class CrafterInteractorManager {
 
     public static CrafterInteractable getInteractor(Block b) {
         if (hasInterator(b)) {
-            var blockData = StorageCacheUtils.getBlock(b.getLocation());
-            CrafterInteractorHandler handler = handlers.get(blockData.getSfId());
-            return handler.getInteractor(blockData.getBlockMenu());
+            var handler = handlers.get(StorageCacheUtils.getBlock(b.getLocation()).getSfId());
+
+            var menu = StorageCacheUtils.getMenu(b.getLocation());
+            if (menu == null) {
+                return null;
+            }
+
+            return handler.getInteractor(menu);
         }
         return null;
     }

@@ -1,9 +1,12 @@
 package io.github.thebusybiscuit.slimefun4.core.networks.cargo;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
 import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.cargo.CargoNode;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
@@ -54,7 +57,7 @@ class ItemFilter implements Predicate<ItemStack> {
      * If an {@link ItemFilter} is marked as dirty / outdated, then it will be updated
      * on the next tick.
      */
-    private boolean dirty = false;
+    private boolean dirty = true;
 
     /**
      * This creates a new {@link ItemFilter} for the given {@link Block}.
@@ -77,8 +80,27 @@ class ItemFilter implements Predicate<ItemStack> {
     public void update(@Nonnull Block b) {
         // Store the returned Config instance to avoid heavy calls
         var blockData = StorageCacheUtils.getBlock(b.getLocation());
-        String id = blockData.getData("id");
-        SlimefunItem item = SlimefunItem.getById(id);
+        if (blockData.isDataLoaded()) {
+            update(blockData);
+        } else {
+            Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
+                    blockData,
+                    new IAsyncReadCallback<>() {
+                        @Override
+                        public void onResult(SlimefunBlockData result) {
+                            update(blockData);
+                        }
+                    }
+            );
+        }
+    }
+
+    private void update(SlimefunBlockData blockData) {
+        if (!isDirty()) {
+            return;
+        }
+
+        SlimefunItem item = SlimefunItem.getById(blockData.getSfId());
         BlockMenu menu = blockData.getBlockMenu();
 
         if (!(item instanceof CargoNode) || menu == null) {
@@ -157,6 +179,10 @@ class ItemFilter implements Predicate<ItemStack> {
 
     @Override
     public boolean test(@Nonnull ItemStack item) {
+        if (isDirty()) {
+            return false;
+        }
+
         Debug.log(TestCase.CARGO_INPUT_TESTING, "ItemFilter#test({})", item);
         /*
          * An empty Filter does not need to be iterated over.
