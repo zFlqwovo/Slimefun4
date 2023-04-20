@@ -1,10 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.util;
 
 import io.github.bakedlibs.dough.collections.Pair;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -70,13 +66,5 @@ public class InvStorageUtils {
         }
 
         return re;
-    }
-
-    public static boolean hasUniversalInventory(String id) {
-        return Slimefun.getRegistry().getUniversalInventories().containsKey(id);
-    }
-
-    public static UniversalBlockMenu getUniversalInventory(String id) {
-        return Slimefun.getRegistry().getUniversalInventories().get(id);
     }
 }

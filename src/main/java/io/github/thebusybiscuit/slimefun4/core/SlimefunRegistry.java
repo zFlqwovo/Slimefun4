@@ -16,7 +16,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.guide.CheatSheetSlimefu
 import io.github.thebusybiscuit.slimefun4.implementation.guide.SurvivalSlimefunGuide;
 import me.mrCookieSlime.Slimefun.api.BlockInfoConfig;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
 import org.apache.commons.lang.Validate;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -74,7 +73,7 @@ public final class SlimefunRegistry {
     private final Map<EntityType, Set<ItemStack>> mobDrops = new EnumMap<>(EntityType.class);
 
     private final Map<String, BlockMenuPreset> blockMenuPresets = new HashMap<>();
-    private final Map<String, UniversalBlockMenu> universalInventories = new HashMap<>();
+
     private final Map<Class<? extends ItemHandler>, Set<ItemHandler>> globalItemHandlers = new HashMap<>();
 
     public void load(@Nonnull Slimefun plugin) {
@@ -223,11 +222,6 @@ public final class SlimefunRegistry {
     @Nonnull
     public Map<String, BlockMenuPreset> getMenuPresets() {
         return blockMenuPresets;
-    }
-
-    @Nonnull
-    public Map<String, UniversalBlockMenu> getUniversalInventories() {
-        return universalInventories;
     }
 
     @Nonnull

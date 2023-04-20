@@ -1,14 +1,17 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
-import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.api.events.PlayerRightClickEvent;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.core.handlers.BlockUseHandler;
+import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -21,17 +24,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.thebusybiscuit.slimefun4.api.events.PlayerRightClickEvent;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.core.handlers.BlockUseHandler;
-import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-
-import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Optional;
 
 /**
  * This {@link Listener} listens to the {@link PlayerInteractEvent}.
@@ -142,38 +137,28 @@ public class SlimefunItemInteractListener implements Listener {
             if (!p.isSneaking() || event.getItem().getType() == Material.AIR) {
                 event.getInteractEvent().setCancelled(true);
 
-                if (InvStorageUtils.hasUniversalInventory(item.getId())) {
-                    UniversalBlockMenu menu = InvStorageUtils.getUniversalInventory(item.getId());
+                var blockData = StorageCacheUtils.getBlock(clickedBlock.getLocation());
+                if (blockData == null) {
+                    return;
+                }
 
-                    if (menu.canOpen(clickedBlock, p)) {
-                        menu.open(p);
-                    } else {
-                        Slimefun.getLocalization().sendMessage(p, "inventory.no-access", true);
-                    }
+                if (blockData.isDataLoaded()) {
+                    openMenu(blockData.getBlockMenu(), clickedBlock, p);
                 } else {
-                    var blockData = StorageCacheUtils.getBlock(clickedBlock.getLocation());
-                    if (blockData == null) {
-                        return;
-                    }
-
-                    if (blockData.isDataLoaded()) {
-                        openMenu(blockData.getBlockMenu(), clickedBlock, p);
-                    } else {
-                        Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
-                                blockData,
-                                new IAsyncReadCallback<>() {
-                                    @Override
-                                    public boolean runOnMainThread() {
-                                        return true;
-                                    }
-
-                                    @Override
-                                    public void onResult(SlimefunBlockData result) {
-                                        openMenu(blockData.getBlockMenu(), clickedBlock, p);
-                                    }
+                    Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
+                            blockData,
+                            new IAsyncReadCallback<>() {
+                                @Override
+                                public boolean runOnMainThread() {
+                                    return true;
                                 }
-                        );
-                    }
+
+                                @Override
+                                public void onResult(SlimefunBlockData result) {
+                                    openMenu(blockData.getBlockMenu(), clickedBlock, p);
+                                }
+                            }
+                    );
                 }
             }
         } catch (Exception | LinkageError x) {

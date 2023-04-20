@@ -5,7 +5,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunChunkData;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -156,23 +155,6 @@ public class BlockStorage {
 
         String id = checkID(l);
         return id != null && id.equals(slimefunItem);
-    }
-
-    public static boolean hasUniversalInventory(String id) {
-        return Slimefun.getRegistry().getUniversalInventories().containsKey(id);
-    }
-
-    public static UniversalBlockMenu getUniversalInventory(Block block) {
-        return getUniversalInventory(block.getLocation());
-    }
-
-    public static UniversalBlockMenu getUniversalInventory(Location l) {
-        String id = checkID(l);
-        return id == null ? null : getUniversalInventory(id);
-    }
-
-    public static UniversalBlockMenu getUniversalInventory(String id) {
-        return Slimefun.getRegistry().getUniversalInventories().get(id);
     }
 
     public static BlockMenu getInventory(Block b) {
