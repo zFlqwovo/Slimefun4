@@ -71,28 +71,37 @@ public class StorageCacheUtils {
         }
 
         if (!blockData.isDataLoaded()) {
-            if (loadingData.contains(blockData)) {
-                return null;
-            }
-            synchronized (loadingData) {
-                if (loadingData.contains(blockData)) {
-                    return null;
-                }
-                loadingData.add(blockData);
-            }
-
-            Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
-                    blockData,
-                    new IAsyncReadCallback<>() {
-                        @Override
-                        public void onResult(SlimefunBlockData result) {
-                            loadingData.remove(blockData);
-                        }
-                    }
-            );
+            requestLoad(blockData);
             return null;
         }
 
         return blockData.getBlockMenu();
+    }
+
+    public static void requestLoad(SlimefunBlockData blockData) {
+        if (blockData.isDataLoaded()) {
+            return;
+        }
+
+        if (loadingData.contains(blockData)) {
+            return;
+        }
+
+        synchronized (loadingData) {
+            if (loadingData.contains(blockData)) {
+                return;
+            }
+            loadingData.add(blockData);
+        }
+
+        Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
+                blockData,
+                new IAsyncReadCallback<>() {
+                    @Override
+                    public void onResult(SlimefunBlockData result) {
+                        loadingData.remove(blockData);
+                    }
+                }
+        );
     }
 }
