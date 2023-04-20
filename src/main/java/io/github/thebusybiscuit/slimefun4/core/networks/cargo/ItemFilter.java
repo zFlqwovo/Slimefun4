@@ -57,7 +57,9 @@ class ItemFilter implements Predicate<ItemStack> {
      * If an {@link ItemFilter} is marked as dirty / outdated, then it will be updated
      * on the next tick.
      */
-    private boolean dirty = true;
+    private volatile boolean dirty = true;
+
+    private volatile boolean isLoading = false;
 
     /**
      * This creates a new {@link ItemFilter} for the given {@link Block}.
@@ -78,17 +80,22 @@ class ItemFilter implements Predicate<ItemStack> {
      *            The {@link Block}
      */
     public void update(@Nonnull Block b) {
-        // Store the returned Config instance to avoid heavy calls
+        if (!isDirty() || isLoading) {
+            return;
+        }
+
         var blockData = StorageCacheUtils.getBlock(b.getLocation());
         if (blockData.isDataLoaded()) {
             update(blockData);
         } else {
+            isLoading = true;
             Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
                     blockData,
                     new IAsyncReadCallback<>() {
                         @Override
                         public void onResult(SlimefunBlockData result) {
                             update(blockData);
+                            isLoading = false;
                         }
                     }
             );
