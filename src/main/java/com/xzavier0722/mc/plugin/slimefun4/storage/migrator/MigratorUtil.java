@@ -12,6 +12,8 @@ import java.util.zip.ZipOutputStream;
 class MigratorUtil {
     protected static boolean createDirBackup(File dir) {
         try {
+            var oldDataDir = new File("data-storage/Slimefun/old_data/");
+            oldDataDir.mkdirs();
             var zipPath = Files.createFile(Path.of("data-storage/Slimefun/old_data/" + dir.getName() + ".zip"));
             try (var zs = new ZipOutputStream(Files.newOutputStream(zipPath))) {
                 var src = dir.toPath();
