@@ -63,6 +63,7 @@ public class BlockStorageMigrator {
     }
 
     private static void migrateWorld(World w) {
+        Slimefun.logger().log(Level.FINE, "开始迁移方块数据: " + w.getName());
         var fList = new File(blockFolder, w.getName()).listFiles();
         if (fList == null) {
             return;
