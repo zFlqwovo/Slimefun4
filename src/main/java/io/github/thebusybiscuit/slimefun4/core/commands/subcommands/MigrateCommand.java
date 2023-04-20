@@ -1,5 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.BlockStorageMigrator;
+import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.MigrateStatus;
 import com.xzavier0722.mc.plugin.slimefun4.storage.migrator.PlayerProfileMigrator;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
@@ -24,26 +26,42 @@ public class MigrateCommand extends SubCommand {
     @Override
     public void onExecute(@Nonnull CommandSender sender, @Nonnull String[] args) {
         if (sender.hasPermission("slimefun.command.migrate") || sender instanceof ConsoleCommandSender) {
-            // FIXME: 弃用上线后迁移
-            Bukkit.getScheduler().runTaskAsynchronously(Slimefun.instance(), () -> {
-                try {
-                    var status = PlayerProfileMigrator.migrateOldData();
-                    switch (status) {
-                        case SUCCESS ->
-                                Slimefun.getLocalization().sendMessage(sender, "commands.migrate.success", true);
-                        case FAILED -> Slimefun.getLocalization().sendMessage(sender, "commands.migrate.failed", true);
-                        case MIGRATING ->
-                                Slimefun.getLocalization().sendMessage(sender, "commands.migrate.in-progress", true);
-                        case MIGRATED ->
-                                Slimefun.getLocalization().sendMessage(sender, "commands.migrate.already-migrated", true);
+            if (args.length > 0 && args[1].equalsIgnoreCase("confirm")) {
+                Slimefun.getLocalization().sendMessage(sender, "commands.migrate.started", true);
+
+                Bukkit.getScheduler().runTaskAsynchronously(Slimefun.instance(), () -> {
+                    try {
+                        var status = PlayerProfileMigrator.migrateOldData();
+                        sendMigrateStatus(sender, status);
+                    } catch (Exception e) {
+                        Slimefun.getLocalization().sendMessage(sender, "commands.migrate.failed", true);
+                        plugin.getLogger().log(Level.WARNING, "迁移数据时出现意外", e);
                     }
-                } catch (Exception e) {
-                    Slimefun.getLocalization().sendMessage(sender, "commands.migrate.failed", true);
-                    plugin.getLogger().log(Level.WARNING, "迁移数据时出现意外", e);
-                }
-            });
+                });
+
+                Bukkit.getScheduler().runTaskAsynchronously(Slimefun.instance(), () -> {
+                    try {
+                        var status = BlockStorageMigrator.migrateData();
+                        sendMigrateStatus(sender, status);
+                    } catch (Exception e) {
+                        Slimefun.getLocalization().sendMessage(sender, "commands.migrate.failed", true);
+                        plugin.getLogger().log(Level.WARNING, "迁移数据时出现意外", e);
+                    }
+                });
+            } else {
+                Slimefun.getLocalization().sendMessage(sender, "commands.migrate.confirm", true);
+            }
         } else {
             Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
+        }
+    }
+
+    private void sendMigrateStatus(@Nonnull CommandSender sender, MigrateStatus status) {
+        switch (status) {
+            case SUCCESS -> Slimefun.getLocalization().sendMessage(sender, "commands.migrate.success", true);
+            case FAILED -> Slimefun.getLocalization().sendMessage(sender, "commands.migrate.failed", true);
+            case MIGRATING -> Slimefun.getLocalization().sendMessage(sender, "commands.migrate.in-progress", true);
+            case MIGRATED -> Slimefun.getLocalization().sendMessage(sender, "commands.migrate.already-migrated", true);
         }
     }
 }

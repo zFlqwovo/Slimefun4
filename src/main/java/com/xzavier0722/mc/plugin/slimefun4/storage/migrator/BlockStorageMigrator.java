@@ -2,18 +2,20 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.migrator;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.FileUtils;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Map;
+import java.util.logging.Level;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-
-import java.io.File;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.regex.Pattern;
 
 public class BlockStorageMigrator {
     private static final File invFolder = new File("data-storage/Slimefun/stored-inventories/");
@@ -45,7 +47,24 @@ public class BlockStorageMigrator {
         } else {
             Slimefun.logger().log(Level.WARNING, "未检测到区块数据，跳过迁移。");
         }
+
         Bukkit.getWorlds().forEach(BlockStorageMigrator::migrateWorld);
+
+        if (MigratorUtil.createDirBackup(invFolder)) {
+            FileUtils.deleteDir(invFolder);
+        }
+
+        if (MigratorUtil.createDirBackup(blockFolder)) {
+            FileUtils.deleteDir(blockFolder);
+        }
+
+        try {
+            var chunkBak = Files.createFile(Path.of("data-storage/Slimefun/old_data/chunks.sfc"));
+            Files.copy(chunk.toPath(), chunkBak, StandardCopyOption.REPLACE_EXISTING);
+            Files.delete(chunk.toPath());
+        } catch (Exception e) {
+            Slimefun.logger().log(Level.WARNING, "备份旧数据 " + chunk.getName() + " 时出现问题", e);
+        }
 
         migrateLock = false;
         return status;
@@ -86,6 +105,7 @@ public class BlockStorageMigrator {
             }
         }
     }
+
     private static void migrateBlock(World world, String sfId, String locStr, String jsonStr) {
         try {
             var arr = locStr.split(";");
@@ -95,7 +115,8 @@ public class BlockStorageMigrator {
 
             var loc = new Location(world, x, y, z);
             var blockData = Slimefun.getDatabaseManager().getBlockDataController().createBlock(loc, sfId);
-            Map<String, String> data = gson.fromJson(jsonStr, new TypeToken<Map<String, String>>() { }.getType());
+            Map<String, String> data = gson.fromJson(jsonStr, new TypeToken<Map<String, String>>() {
+            }.getType());
             for (var each : data.entrySet()) {
                 var key = each.getKey();
                 if ("id".equals(key)) {
@@ -161,7 +182,8 @@ public class BlockStorageMigrator {
                 }
 
                 var c = w.getChunkAt(Integer.parseInt(arr[2]), Integer.parseInt(arr[3]));
-                Map<String, String> data = gson.fromJson(cfg.getString(key), new TypeToken<Map<String, String>>() { }.getType());
+                Map<String, String> data = gson.fromJson(cfg.getString(key), new TypeToken<Map<String, String>>() {
+                }.getType());
                 var chunkData = Slimefun.getDatabaseManager().getBlockDataController().getChunkData(c);
                 data.entrySet().forEach(each -> chunkData.setData(each.getKey(), each.getValue()));
             } catch (Throwable e) {

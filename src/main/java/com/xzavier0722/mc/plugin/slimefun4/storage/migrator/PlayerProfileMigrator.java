@@ -5,9 +5,6 @@ import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -47,9 +44,6 @@ public class PlayerProfileMigrator {
             return MigrateStatus.MIGRATED;
         }
 
-        var backupFolder = new File("data-storage/Slimefun/Players_Backup");
-        backupFolder.mkdirs();
-
         var migratedCount = 0;
         var total = listFiles.length;
 
@@ -70,31 +64,22 @@ public class PlayerProfileMigrator {
 
                 migratePlayerProfile(p);
 
-                var backupFile = new File(backupFolder, file.getName());
-                backupFile.createNewFile();
-                Files.copy(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                file.delete();
-
                 migratedCount++;
                 Slimefun.logger().log(Level.INFO, "成功迁移玩家数据: " + p.getName() + "(" + migratedCount + "/" + total + ")");
-            } catch (IOException e) {
-                Slimefun.logger().log(Level.WARNING, "迁移玩家数据时出现问题", e);
-                result = MigrateStatus.FAILED;
             } catch (IllegalArgumentException ignored) {
                 Slimefun.logger().log(Level.WARNING, "检测到不合法命名的玩家数据文件: '" + file.getName() + "'");
                 // illegal player name, skip
             }
         }
 
-        Slimefun.logger().log(Level.INFO, "成功迁移 {0} 个玩家数据! 迁移前的数据已储存在 " + backupFolder.getAbsolutePath(), migratedCount);
-        playerFolder.delete();
+        if (MigratorUtil.createDirBackup(playerFolder)) {
+            Slimefun.logger().log(Level.INFO, "成功迁移 {0} 个玩家数据! 迁移前的数据已储存在 ./data-storage/Slimefun/old_data 下", migratedCount);
+            playerFolder.delete();
+        }
+
         migrateLock = false;
 
         return result;
-    }
-
-    public static boolean getMigrateLock() {
-        return migrateLock;
     }
 
     private static void migratePlayerProfile(@Nonnull OfflinePlayer p) {
