@@ -4,7 +4,8 @@ import java.util.Optional;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataConfigWrapper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
-import io.github.bakedlibs.dough.config.Config;
+
+import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import org.bukkit.block.Block;
 
 import io.github.thebusybiscuit.slimefun4.api.exceptions.IncompatibleItemHandlerException;
