@@ -58,6 +58,11 @@ public class StorageCacheUtils {
     }
 
     @ParametersAreNonnullByDefault
+    public static void removeData(Location loc, String key) {
+        getBlock(loc).removeData(key);
+    }
+
+    @ParametersAreNonnullByDefault
     @Nullable
     public static BlockMenu getMenu(Location loc) {
         var blockData = getBlock(loc);
