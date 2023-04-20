@@ -21,8 +21,6 @@ public class BlockStorageMigrator {
     private static final File blockFolder = new File("data-storage/Slimefun/stored-blocks/");
     private static final Gson gson = new Gson();
     private static volatile boolean migrateLock = false;
-    // worldName;x;y;z.sfi
-    private static final Pattern invFilePattern = Pattern.compile("^.+;\\d+;\\d+;\\d+.sfi$");
 
     public static boolean isOldDataExists() {
         return hasBlockData() || chunk.exists();
