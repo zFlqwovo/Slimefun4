@@ -86,9 +86,7 @@ public class StorageCacheUtils {
                     new IAsyncReadCallback<>() {
                         @Override
                         public void onResult(SlimefunBlockData result) {
-                            synchronized (loadingData) {
-                                loadingData.remove(blockData);
-                            }
+                            loadingData.remove(blockData);
                         }
                     }
             );
