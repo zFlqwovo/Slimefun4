@@ -6,7 +6,7 @@ labels:
 body:
 - type: markdown
   attributes:
-  value: |
+    value: |
       感谢你使用 Slimefun 问题反馈系统！
 
       在反馈前, 请确认你已经做了下面这些事情
@@ -18,32 +18,32 @@ body:
 - type: textarea
   id: issue-description
   attributes:
-  label: 汉化问题描述
-  description: 在此详细描述你遇到的问题
+    label: 汉化问题描述
+    description: 在此详细描述你遇到的问题
   validations:
-  required: true
+    required: true
 
 - type: textarea
   id: reproduce
   attributes:
-  label: 汉化错误/缺失的位置
-  description: 在这里简略说明汉化错误/缺失的位置
+    label: 汉化错误/缺失的位置
+    description: 在这里简略说明汉化错误/缺失的位置
   validations:
-  required: true
+    required: true
 
 - type: textarea
   id: slimefun-version
   validations:
   required: true
   attributes:
-  label: Slimefun 版本
-  description: |
+    label: Slimefun 版本
+    description: |
       **"最新版" 不是版本号，请填写一个确切的版本号！**
       如果你不太确定，可以截图 "/sf versions" 的输出内容并截图，记得截全。
-  placeholder: Slimefun 2023.02
+    placeholder: Slimefun 2023.02
 
 - type: textarea
   id: additional
   attributes:
-  label: 补充信息
-  description: 如有必要，你可以在下文继续添加其他信息
+    label: 补充信息
+    description: 如有必要，你可以在下文继续添加其他信息
