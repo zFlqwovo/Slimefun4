@@ -7,7 +7,7 @@ body:
 - type: markdown
   attributes:
   value: |
-  感谢你使用 Slimefun 问题反馈系统！
+      感谢你使用 Slimefun 问题反馈系统！
 
       在反馈前, 请确认你已经做了下面这些事情
       - 查看 [Releases](https://github.com/StarWishsama/Slimefun4/releases) 中最新版是否已修复你所遇到的问题
