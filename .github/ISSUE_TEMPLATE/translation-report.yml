@@ -34,7 +34,7 @@ body:
 - type: textarea
   id: slimefun-version
   validations:
-  required: true
+    required: true
   attributes:
     label: Slimefun 版本
     description: |
