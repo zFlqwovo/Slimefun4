@@ -38,9 +38,9 @@ body:
   attributes:
   label: Slimefun 版本
   description: |
-  **"最新版" 不是版本号，请填写一个确切的版本号！**
-  如果你不太确定，可以截图 "/sf versions" 的输出内容并截图，记得截全。
-  placeholder: Slimefun 2022.05
+      **"最新版" 不是版本号，请填写一个确切的版本号！**
+      如果你不太确定，可以截图 "/sf versions" 的输出内容并截图，记得截全。
+  placeholder: Slimefun 2023.02
 
 - type: textarea
   id: additional
