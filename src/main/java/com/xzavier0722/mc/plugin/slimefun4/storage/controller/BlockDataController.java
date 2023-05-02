@@ -125,7 +125,7 @@ public class BlockDataController extends ADataController {
         var lKey = LocationUtils.getLocKey(l);
         if (chunkData != null) {
             var re = chunkData.getBlockCacheInternal(lKey);
-            if (re != null || chunkData.hasBlockCache(lKey)) {
+            if (re != null || chunkData.hasBlockCache(lKey) || chunkData.isDataLoaded()) {
                 return re;
             }
         }
