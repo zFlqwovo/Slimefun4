@@ -29,7 +29,6 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -130,15 +129,18 @@ public class BlockListener implements Listener {
         if (!e.isCancelled()) {
             var block = e.getBlock();
             var blockData = StorageCacheUtils.getBlock(block.getLocation());
-            if (blockData == null) {
+            if (blockData == null || blockData.isPendingRemove()) {
                 return;
             }
 
+            blockData.setPendingRemove(true);
             if (blockData.isDataLoaded()) {
                 callBlockHandler(e, item, drops);
+                if (e.isCancelled()) {
+                    blockData.setPendingRemove(false);
+                }
                 dropItems(e, drops);
             } else {
-                blockData.setPendingRemove(true);
                 e.setDropItems(false);
                 var type = block.getType();
                 Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
@@ -182,14 +184,6 @@ public class BlockListener implements Listener {
     private void callBlockHandler(BlockBreakEvent e, ItemStack item, List<ItemStack> drops) {
         var loc = e.getBlock().getLocation();
         SlimefunItem sfItem = StorageCacheUtils.getSfItem(loc);
-
-        if (sfItem == null && Slimefun.getBlockDataService().isTileEntity(e.getBlock().getType())) {
-            Optional<String> blockData = Slimefun.getBlockDataService().getBlockData(e.getBlock());
-
-            if (blockData.isPresent()) {
-                sfItem = SlimefunItem.getById(blockData.get());
-            }
-        }
 
         if (sfItem != null && !sfItem.useVanillaBlockBreaking()) {
             sfItem.callItemHandler(BlockBreakHandler.class, handler -> handler.onPlayerBreak(e, item, drops));
