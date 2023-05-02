@@ -73,7 +73,17 @@ public interface EnergyNetComponent extends ItemAttribute {
             return 0;
         }
 
-        return getCharge(l, StorageCacheUtils.getBlock(l));
+        var blockData = StorageCacheUtils.getBlock(l);
+        if (blockData == null || blockData.isPendingRemove()) {
+            return 0;
+        }
+
+        if (!blockData.isDataLoaded()) {
+            StorageCacheUtils.requestLoad(blockData);
+            return 0;
+        }
+
+        return getCharge(l, blockData);
     }
 
     /**
