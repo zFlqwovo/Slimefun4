@@ -94,10 +94,6 @@ public class BlockListener implements Listener {
             if (!sfItem.canUse(e.getPlayer(), true)) {
                 e.setCancelled(true);
             } else {
-                if (Slimefun.getBlockDataService().isTileEntity(e.getBlock().getType())) {
-                    Slimefun.getBlockDataService().setBlockData(e.getBlock(), sfItem.getId());
-                }
-
                 Slimefun.getDatabaseManager().getBlockDataController().createBlock(e.getBlock().getLocation(), sfItem.getId());
                 sfItem.callItemHandler(BlockPlaceHandler.class, handler -> handler.onPlayerPlace(e));
             }
