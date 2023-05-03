@@ -97,11 +97,17 @@ public class CrafterSmartPort extends SlimefunItem {
 
                 ItemStackWrapper wrapper = ItemStackWrapper.wrap(item);
                 var im = menu.getItemInSlot(6).getItemMeta();
-                int count = 0;
+                int count = 1;
 
                 if (im != null) {
-                    var pdc = menu.getItemInSlot(6).getItemMeta().getPersistentDataContainer();
-                    count = pdc.get(countKey, PersistentDataType.INTEGER);
+                    var pdcCount = menu.getItemInSlot(6).getItemMeta().getPersistentDataContainer().get(
+                            countKey,
+                            PersistentDataType.INTEGER
+                    );
+
+                    if (pdcCount != null) {
+                        count = pdcCount;
+                    }
                 }
 
                 int amountLimit = INPUT_SLOTS.length / count * wrapper.getMaxStackSize();
