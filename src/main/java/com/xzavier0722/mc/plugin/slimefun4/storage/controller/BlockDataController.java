@@ -212,9 +212,15 @@ public class BlockDataController extends ADataController {
         return chunkData == null ? null : chunkData.getBlockCacheInternal(lKey);
     }
 
-    public void loadChunk(Chunk chunk) {
+    public void loadChunk(Chunk chunk, boolean isNewChunk) {
         checkDestroy();
         var chunkData = getChunkDataCache(chunk, true);
+
+        if (isNewChunk) {
+            chunkData.setIsDataLoaded(true);
+            return;
+        }
+
         if (chunkData.isDataLoaded()) {
             return;
         }
@@ -315,7 +321,7 @@ public class BlockDataController extends ADataController {
 
     public SlimefunChunkData getChunkData(Chunk chunk) {
         checkDestroy();
-        loadChunk(chunk);
+        loadChunk(chunk, false);
         return getChunkDataCache(chunk, false);
     }
 

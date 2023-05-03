@@ -9,10 +9,7 @@ public class ChunkListener implements Listener {
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent e) {
-        if (e.isNewChunk()) {
-            return;
-        }
-        Slimefun.getDatabaseManager().getBlockDataController().loadChunk(e.getChunk());
+        Slimefun.getDatabaseManager().getBlockDataController().loadChunk(e.getChunk(), e.isNewChunk());
     }
 
 }
