@@ -1,5 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.controller;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
@@ -48,6 +49,20 @@ public class BlockDataController extends ADataController {
         loadedChunk = new ConcurrentHashMap<>();
         invSnapshots = new ConcurrentHashMap<>();
         lock = new ScopedLock();
+    }
+
+    @Override
+    public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
+        super.init(dataAdapter, maxReadThread, maxWriteThread);
+        loadLoadedChunks();
+    }
+
+    private void loadLoadedChunks() {
+        for (var world : Bukkit.getWorlds()) {
+            for (var chunk : world.getLoadedChunks()) {
+                loadChunk(chunk, false);
+            }
+        }
     }
 
     public void initDelayedSaving(Plugin p, int delayedSecond, int forceSavePeriod) {
