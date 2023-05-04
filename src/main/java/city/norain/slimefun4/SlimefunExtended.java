@@ -14,6 +14,10 @@ public final class SlimefunExtended {
 
     public static void register(@Nonnull Slimefun sf) {
         logger = sf.getLogger();
+        if (checkHybridServer(sf)) {
+            return;
+        }
+
         scheduleSlimeGlueCheck(sf);
         VaultHelper.register(sf);
 
@@ -29,6 +33,18 @@ public final class SlimefunExtended {
 
     public static Logger getLogger() {
         return logger;
+    }
+
+    private static boolean checkHybridServer(@Nonnull Slimefun sf) {
+        try {
+            Class.forName("net/minecraftforge/common/MinecraftForge");
+            logger.log(Level.WARNING, "检测到正在使用混合端, Slimefun 将会被禁用!");
+            Bukkit.getPluginManager().disablePlugin(sf);
+
+            return true;
+        } catch (ClassNotFoundException ignored) {
+            return false;
+        }
     }
 
     private static void scheduleSlimeGlueCheck(Slimefun sf) {
