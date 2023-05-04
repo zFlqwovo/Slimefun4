@@ -239,9 +239,15 @@ public class EnergyNet extends Network implements HologramOwner {
 
             try {
                 var data = StorageCacheUtils.getBlock(loc);
-                if (data == null || !data.isDataLoaded() || data.isPendingRemove()) {
+                if (data == null || data.isPendingRemove()) {
                     continue;
                 }
+
+                if (!data.isDataLoaded()) {
+                    StorageCacheUtils.requestLoad(data);
+                    continue;
+                }
+
                 int energy = provider.getGeneratedOutput(loc, data);
 
                 if (provider.isChargeable()) {
