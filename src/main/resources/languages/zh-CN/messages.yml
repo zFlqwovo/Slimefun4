@@ -43,6 +43,8 @@ commands:
     failed: "&c重载配置文件失败! 你可能需要重启服务器以应用更改, 查看后台输出信息了解更多."
   migrate:
     description: "迁移旧数据"
+    confirm: "&c你确定要进行数据迁移吗? 确认请输入 /sf migrate confirm 开始迁移\n迁移过程中请不要让玩家进入服务器操作 Slimefun 相关机器及物品!"
+    started: "&a正在迁移旧数据..."
     success: "&a迁移旧数据至数据库成功."
     failed: "&c迁移数据过程中出现了问题, 请查看后台."
     already-migrated: "&a暂无可迁移数据."
@@ -308,6 +310,8 @@ machines:
     full-chest: '&c你的工业矿机的箱子已经满了!'
     no-permission: '&4你没有权限操作这台工业矿机!'
     finished: '&e你的工业矿机采矿已完成! 总共开采了 %ores% 个矿石!'
+  TABLE_SAW:
+    no-slimefun-item: '&c你不能在台锯 (Table Saw) 上使用 Slimefun 物品!'
 anvil:
   not-working: '&4你不能在铁砧里使用 Slimefun 的物品'
   mcmmo-salvaging: '&4你不能分解 Slimefun 物品!'

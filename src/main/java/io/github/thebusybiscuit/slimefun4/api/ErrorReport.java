@@ -27,7 +27,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.papermc.lib.PaperLib;
 
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 
 /**
  * This class represents an {@link ErrorReport}.
@@ -110,8 +109,15 @@ public class ErrorReport<T extends Throwable> {
 
             stream.println("Slimefun Data:");
             stream.println("  ID: " + item.getId());
-            stream.println("  Inventory: " + BlockStorage.getStorage(l.getWorld()).hasInventory(l));
-            stream.println("  Data: " + BlockStorage.getBlockInfoAsJson(l));
+            var blockData = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(l);
+            if (blockData == null) {
+                stream.println("Block data is not presented.");
+            } else {
+                stream.println("  Is data loaded: " + blockData.isDataLoaded());
+                stream.println("  Inventory: " + (blockData.getBlockMenu() != null));
+                stream.println("  Data: ");
+                blockData.getAllData().forEach((k, v) -> stream.println("    " + k + ": " + v));
+            }
             stream.println();
         });
     }

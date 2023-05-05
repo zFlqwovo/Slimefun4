@@ -1,5 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines.entities;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.BlockPlacerPlaceEvent;
@@ -16,9 +18,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunIte
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.inventory.DirtyChestMenu;
@@ -130,8 +130,9 @@ public abstract class AbstractEntityAssembler<T extends Entity> extends SimpleSl
             }
 
             private void onPlace(BlockEvent e) {
-                BlockStorage.addBlockInfo(e.getBlock(), KEY_OFFSET, "3.0");
-                BlockStorage.addBlockInfo(e.getBlock(), KEY_ENABLED, String.valueOf(false));
+                var blockData = StorageCacheUtils.getBlock(e.getBlock().getLocation());
+                blockData.setData(KEY_OFFSET, "3.0");
+                blockData.setData(KEY_ENABLED, String.valueOf(false));
             }
         };
     }
@@ -143,7 +144,7 @@ public abstract class AbstractEntityAssembler<T extends Entity> extends SimpleSl
             @Override
             public void onPlayerBreak(BlockBreakEvent e, ItemStack item, List<ItemStack> drops) {
                 Block b = e.getBlock();
-                BlockMenu inv = BlockStorage.getInventory(b);
+                BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
 
                 if (inv != null) {
                     inv.dropItems(b.getLocation(), headSlots);
@@ -154,28 +155,31 @@ public abstract class AbstractEntityAssembler<T extends Entity> extends SimpleSl
     }
 
     private void updateBlockInventory(BlockMenu menu, Block b) {
-        if (!BlockStorage.hasBlockInfo(b) || BlockStorage.getLocationInfo(b.getLocation(), KEY_ENABLED) == null || BlockStorage.getLocationInfo(b.getLocation(), KEY_ENABLED).equals(String.valueOf(false))) {
+        var blockData = StorageCacheUtils.getBlock(b.getLocation());
+        String val;
+        if (blockData == null || (val = blockData.getData(KEY_ENABLED)) == null || val.equals(String.valueOf(false))) {
             menu.replaceExistingItem(22, new CustomItemStack(Material.GUNPOWDER, "&7是否可用: &4\u2718", "", "&e> 单击开启机器"));
             menu.addMenuClickHandler(22, (p, slot, item, action) -> {
-                BlockStorage.addBlockInfo(b, KEY_ENABLED, String.valueOf(true));
+                StorageCacheUtils.setData(b.getLocation(), KEY_ENABLED, String.valueOf(true));
                 updateBlockInventory(menu, b);
                 return false;
             });
         } else {
             menu.replaceExistingItem(22, new CustomItemStack(Material.REDSTONE, "&7是否可用: &2\u2714", "", "&e> 单击关闭机器"));
             menu.addMenuClickHandler(22, (p, slot, item, action) -> {
-                BlockStorage.addBlockInfo(b, KEY_ENABLED, String.valueOf(false));
+                StorageCacheUtils.setData(b.getLocation(), KEY_ENABLED, String.valueOf(false));
                 updateBlockInventory(menu, b);
                 return false;
             });
         }
 
-        double offset = (!BlockStorage.hasBlockInfo(b) || BlockStorage.getLocationInfo(b.getLocation(), KEY_OFFSET) == null) ? 3.0F : Double.valueOf(BlockStorage.getLocationInfo(b.getLocation(), KEY_OFFSET));
+        val = null;
+        double offset = (blockData == null || (val = blockData.getData(KEY_OFFSET)) == null) ? 3.0F : Double.parseDouble(val);
 
         menu.replaceExistingItem(31, new CustomItemStack(Material.PISTON, "&7生成高度: &3" + offset + " 格方块高", "", "&f左键: &7+0.1", "&f右键: &7-0.1"));
         menu.addMenuClickHandler(31, (p, slot, item, action) -> {
-            double offsetv = NumberUtils.reparseDouble(Double.valueOf(BlockStorage.getLocationInfo(b.getLocation(), KEY_OFFSET)) + (action.isRightClicked() ? -0.1F : 0.1F));
-            BlockStorage.addBlockInfo(b, KEY_OFFSET, String.valueOf(offsetv));
+            double offsetv = NumberUtils.reparseDouble(Double.parseDouble(StorageCacheUtils.getData(b.getLocation(), KEY_OFFSET)) + (action.isRightClicked() ? -0.1F : 0.1F));
+            StorageCacheUtils.setData(b.getLocation(), KEY_OFFSET, String.valueOf(offsetv));
             updateBlockInventory(menu, b);
             return false;
         });
@@ -186,13 +190,13 @@ public abstract class AbstractEntityAssembler<T extends Entity> extends SimpleSl
         return new BlockTicker() {
 
             @Override
-            public void tick(Block b, SlimefunItem sf, Config data) {
-                if ("false".equals(BlockStorage.getLocationInfo(b.getLocation(), KEY_ENABLED))) {
+            public void tick(Block b, SlimefunItem sf, SlimefunBlockData data) {
+                if ("false".equals(data.getData(KEY_ENABLED))) {
                     return;
                 }
 
                 if (lifetime % 60 == 0 && getCharge(b.getLocation(), data) >= getEnergyConsumption()) {
-                    BlockMenu menu = BlockStorage.getInventory(b);
+                    BlockMenu menu = data.getBlockMenu();
 
                     boolean hasBody = findResource(menu, getBody(), bodySlots);
                     boolean hasHead = findResource(menu, getHead(), headSlots);
@@ -201,7 +205,7 @@ public abstract class AbstractEntityAssembler<T extends Entity> extends SimpleSl
                         consumeResources(menu);
 
                         removeCharge(b.getLocation(), getEnergyConsumption());
-                        double offset = Double.parseDouble(BlockStorage.getLocationInfo(b.getLocation(), KEY_OFFSET));
+                        double offset = Double.parseDouble(data.getData(KEY_OFFSET));
 
                         Slimefun.runSync(() -> {
                             Location loc = new Location(b.getWorld(), b.getX() + 0.5D, b.getY() + offset, b.getZ() + 0.5D);

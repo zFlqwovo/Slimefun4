@@ -20,6 +20,8 @@ import org.bukkit.inventory.ItemStack;
 
 import io.github.bakedlibs.dough.items.ItemUtils;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemSetting;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlockMachine;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -41,6 +43,8 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.OutputChes
 public class TableSaw extends MultiBlockMachine {
 
     private final List<ItemStack> displayedRecipes = new ArrayList<>();
+
+    private final ItemSetting<Boolean> canUseSlimefunItems = new ItemSetting<>(this, "can-use-slimefun-items", true);
 
     @ParametersAreNonnullByDefault
     public TableSaw(ItemGroup group, SlimefunItemStack item) {
@@ -65,6 +69,8 @@ public class TableSaw extends MultiBlockMachine {
             displayedRecipes.add(new ItemStack(plank));
             displayedRecipes.add(new ItemStack(Material.STICK, 4));
         }
+
+        addItemSetting(canUseSlimefunItems);
     }
 
     /**
@@ -101,6 +107,11 @@ public class TableSaw extends MultiBlockMachine {
     public void onInteract(@Nonnull Player p, @Nonnull Block b) {
         ItemStack item = p.getInventory().getItemInMainHand();
         ItemStack output = getOutputFromMaterial(item.getType());
+
+        if (!canUseSlimefunItems.getValue() && SlimefunItem.getByItem(item) != null) {
+            Slimefun.getLocalization().sendMessage(p, "machines.TABLE_SAW.no-slimefun-item", true);
+            return;
+        }
 
         if (output == null) {
             Slimefun.getLocalization().sendMessage(p, "machines.wrong-item", true);

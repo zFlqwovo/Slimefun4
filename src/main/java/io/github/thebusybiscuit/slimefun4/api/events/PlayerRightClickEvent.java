@@ -1,9 +1,8 @@
 package io.github.thebusybiscuit.slimefun4.api.events;
 
-import java.util.Optional;
-
-import javax.annotation.Nonnull;
-
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.bakedlibs.dough.data.TriStateOptional;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -16,10 +15,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.bakedlibs.dough.data.TriStateOptional;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import javax.annotation.Nonnull;
+import java.util.Optional;
 
 /**
  * The {@link PlayerRightClickEvent} is our custom version of the {@link PlayerInteractEvent}.
@@ -139,7 +136,7 @@ public class PlayerRightClickEvent extends PlayerEvent {
     public Optional<SlimefunItem> getSlimefunBlock() {
         if (!slimefunBlock.isComputed()) {
             if (clickedBlock.isPresent()) {
-                slimefunBlock.compute(BlockStorage.check(clickedBlock.get()));
+                slimefunBlock.compute(StorageCacheUtils.getSfItem(clickedBlock.get().getLocation()));
             } else {
                 slimefunBlock = TriStateOptional.empty();
             }

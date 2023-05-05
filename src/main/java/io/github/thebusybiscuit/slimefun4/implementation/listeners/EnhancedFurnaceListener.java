@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Furnace;
@@ -20,8 +21,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.EnhancedFurnace;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
 import io.papermc.lib.PaperLib;
-
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 
 /**
  * This {@link Listener} is responsible for enforcing the "fuel efficiency" and "fortune" policies
@@ -45,7 +44,7 @@ public class EnhancedFurnaceListener implements Listener {
             return;
         }
 
-        SlimefunItem furnace = BlockStorage.check(e.getBlock());
+        SlimefunItem furnace = StorageCacheUtils.getSfItem(e.getBlock().getLocation());
 
         if (furnace instanceof EnhancedFurnace enhancedFurnace && enhancedFurnace.getFuelEfficiency() > 0) {
             int burnTime = e.getBurnTime();
@@ -62,7 +61,7 @@ public class EnhancedFurnaceListener implements Listener {
             return;
         }
 
-        SlimefunItem sfItem = BlockStorage.check(e.getBlock());
+        SlimefunItem sfItem = StorageCacheUtils.getSfItem(e.getBlock().getLocation());
 
         if (sfItem instanceof EnhancedFurnace enhancedFurnace) {
             BlockState state = PaperLib.getBlockState(e.getBlock(), false).getState();

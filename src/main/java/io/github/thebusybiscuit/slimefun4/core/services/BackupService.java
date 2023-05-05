@@ -1,5 +1,9 @@
 package io.github.thebusybiscuit.slimefun4.core.services;
 
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import org.apache.commons.lang.Validate;
+
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,12 +18,6 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang.Validate;
-
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 
 /**
  * This Service creates a Backup of your Slimefun world data on every server shutdown.
@@ -81,48 +79,28 @@ public class BackupService implements Runnable {
     private void createBackup(@Nonnull ZipOutputStream output) throws IOException {
         Validate.notNull(output, "The Output Stream cannot be null!");
 
-        for (File folder : new File("data-storage/Slimefun/stored-blocks/").listFiles()) {
-            addDirectory(output, folder, "stored-blocks/" + folder.getName());
-        }
+        addFile(output, new File("data-storage/Slimefun", "profile.db"), "");
+        addFile(output, new File("data-storage/Slimefun", "block-storage.db"), "");
+    }
 
-        addDirectory(output, new File("data-storage/Slimefun/universal-inventories/"), "universal-inventories");
-        addDirectory(output, new File("data-storage/Slimefun/stored-inventories/"), "stored-inventories");
+    private void addFile(ZipOutputStream output, File file, String path) throws IOException {
+        var entry = new ZipEntry(path + "/" + file.getName());
+        output.putNextEntry(entry);
 
-        File chunks = new File("data-storage/Slimefun/stored-chunks/chunks.sfc");
+        byte[] buffer = new byte[4096];
+        try (var input = new FileInputStream(file)) {
+            int length;
 
-        if (chunks.exists()) {
-            byte[] buffer = new byte[1024];
-            ZipEntry entry = new ZipEntry("stored-chunks/chunks.sfc");
-            output.putNextEntry(entry);
-
-            try (FileInputStream input = new FileInputStream(chunks)) {
-                int length;
-
-                while ((length = input.read(buffer)) > 0) {
-                    output.write(buffer, 0, length);
-                }
+            while ((length = input.read(buffer)) > 0) {
+                output.write(buffer, 0, length);
             }
-
-            output.closeEntry();
         }
+        output.closeEntry();
     }
 
     private void addDirectory(@Nonnull ZipOutputStream output, @Nonnull File directory, @Nonnull String zipPath) throws IOException {
-        byte[] buffer = new byte[1024];
-
         for (File file : directory.listFiles()) {
-            ZipEntry entry = new ZipEntry(zipPath + '/' + file.getName());
-            output.putNextEntry(entry);
-
-            try (FileInputStream input = new FileInputStream(file)) {
-                int length;
-
-                while ((length = input.read(buffer)) > 0) {
-                    output.write(buffer, 0, length);
-                }
-            }
-
-            output.closeEntry();
+            addFile(output, file, zipPath);
         }
     }
 

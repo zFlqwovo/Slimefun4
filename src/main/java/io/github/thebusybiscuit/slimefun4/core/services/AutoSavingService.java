@@ -1,21 +1,13 @@
 package io.github.thebusybiscuit.slimefun4.core.services;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.logging.Level;
-
-import javax.annotation.Nonnull;
-
-import org.bukkit.Bukkit;
-import org.bukkit.World;
+import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import javax.annotation.Nonnull;
+import java.util.Iterator;
+import java.util.logging.Level;
 
 /**
  * This Service is responsible for automatically saving {@link Player} and {@link Block}
@@ -40,8 +32,12 @@ public class AutoSavingService {
         this.interval = interval;
 
         plugin.getServer().getScheduler().runTaskTimer(plugin, this::saveAllPlayers, 2000L, interval * 60L * 20L);
-        plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this::saveAllBlocks, 2000L, interval * 60L * 20L);
-
+        plugin.getServer().getScheduler().runTaskTimerAsynchronously(
+                plugin,
+                () -> Slimefun.getDatabaseManager().getBlockDataController().saveAllBlockInventories(),
+                2000L,
+                interval * 60L * 20L
+        );
     }
 
     /**
@@ -69,34 +65,4 @@ public class AutoSavingService {
             Slimefun.logger().log(Level.INFO, "成功保存了 {0} 个玩家的数据!", players);
         }
     }
-
-    /**
-     * This method saves the data of every {@link Block} marked dirty by {@link BlockStorage}.
-     */
-    private void saveAllBlocks() {
-        Set<BlockStorage> worlds = new HashSet<>();
-
-        for (World world : Bukkit.getWorlds()) {
-            BlockStorage storage = BlockStorage.getStorage(world);
-
-            if (storage != null) {
-                storage.computeChanges();
-
-                if (storage.getChanges() > 0) {
-                    worlds.add(storage);
-                }
-            }
-        }
-
-        if (!worlds.isEmpty()) {
-            Slimefun.logger().log(Level.INFO, "正在自动保存方块数据... (下一次保存在 {0} 分钟后)", interval);
-
-            for (BlockStorage storage : worlds) {
-                storage.save();
-            }
-        }
-
-        BlockStorage.saveChunks();
-    }
-
 }

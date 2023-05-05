@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.cargo;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -13,7 +14,6 @@ import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ColoredMaterial;
 import io.github.thebusybiscuit.slimefun4.utils.HeadTexture;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
@@ -75,11 +75,10 @@ abstract class AbstractCargoNode extends SimpleSlimefunItem<BlockPlaceHandler> i
 
             @Override
             public void onPlayerPlace(BlockPlaceEvent e) {
-                Block b = e.getBlock();
-
                 // The owner and frequency are required by every node
-                BlockStorage.addBlockInfo(b, "owner", e.getPlayer().getUniqueId().toString());
-                BlockStorage.addBlockInfo(b, FREQUENCY, "0");
+                var blockData = StorageCacheUtils.getBlock(e.getBlock().getLocation());
+                blockData.setData("owner", e.getPlayer().getUniqueId().toString());
+                blockData.setData(FREQUENCY, "0");
 
                 onPlace(e);
             }
@@ -99,7 +98,7 @@ abstract class AbstractCargoNode extends SimpleSlimefunItem<BlockPlaceHandler> i
                 newChannel = 15;
             }
 
-            BlockStorage.addBlockInfo(b, FREQUENCY, String.valueOf(newChannel));
+            StorageCacheUtils.setData(b.getLocation(), FREQUENCY, String.valueOf(newChannel));
             updateBlockMenu(menu, b);
             return false;
         });
@@ -120,7 +119,7 @@ abstract class AbstractCargoNode extends SimpleSlimefunItem<BlockPlaceHandler> i
                 newChannel = 0;
             }
 
-            BlockStorage.addBlockInfo(b, FREQUENCY, String.valueOf(newChannel));
+            StorageCacheUtils.setData(b.getLocation(), FREQUENCY, String.valueOf(newChannel));
             updateBlockMenu(menu, b);
             return false;
         });
@@ -130,17 +129,13 @@ abstract class AbstractCargoNode extends SimpleSlimefunItem<BlockPlaceHandler> i
     public int getSelectedChannel(@Nonnull Block b) {
         Validate.notNull(b, "Block must not be null");
 
-        if (!BlockStorage.hasBlockInfo(b)) {
+        String frequency = StorageCacheUtils.getData(b.getLocation(), FREQUENCY);
+
+        if (frequency == null) {
             return 0;
         } else {
-            String frequency = BlockStorage.getLocationInfo(b.getLocation(), FREQUENCY);
-
-            if (frequency == null) {
-                return 0;
-            } else {
-                int channel = Integer.parseInt(frequency);
-                return NumberUtils.clamp(0, channel, 16);
-            }
+            int channel = Integer.parseInt(frequency);
+            return NumberUtils.clamp(0, channel, 16);
         }
     }
 

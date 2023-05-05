@@ -14,6 +14,17 @@ import io.github.thebusybiscuit.slimefun4.core.multiblocks.MultiBlock;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.guide.CheatSheetSlimefunGuide;
 import io.github.thebusybiscuit.slimefun4.implementation.guide.SurvivalSlimefunGuide;
+import me.mrCookieSlime.Slimefun.api.BlockInfoConfig;
+import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.apache.commons.lang.Validate;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Piglin;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -25,18 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nonnull;
-import me.mrCookieSlime.Slimefun.api.BlockInfoConfig;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
-import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.inventory.UniversalBlockMenu;
-import org.apache.commons.lang.Validate;
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Piglin;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * This class houses a lot of instances of {@link Map} and {@link List} that hold
@@ -69,13 +68,12 @@ public final class SlimefunRegistry {
     private final KeyMap<GEOResource> geoResources = new KeyMap<>();
 
     private final Map<UUID, PlayerProfile> profiles = new ConcurrentHashMap<>();
-    private final Map<String, BlockStorage> worlds = new ConcurrentHashMap<>();
     private final Map<String, BlockInfoConfig> chunks = new HashMap<>();
     private final Map<SlimefunGuideMode, SlimefunGuideImplementation> guides = new EnumMap<>(SlimefunGuideMode.class);
     private final Map<EntityType, Set<ItemStack>> mobDrops = new EnumMap<>(EntityType.class);
 
     private final Map<String, BlockMenuPreset> blockMenuPresets = new HashMap<>();
-    private final Map<String, UniversalBlockMenu> universalInventories = new HashMap<>();
+
     private final Map<Class<? extends ItemHandler>, Set<ItemHandler>> globalItemHandlers = new HashMap<>();
 
     public void load(@Nonnull Slimefun plugin) {
@@ -227,11 +225,6 @@ public final class SlimefunRegistry {
     }
 
     @Nonnull
-    public Map<String, UniversalBlockMenu> getUniversalInventories() {
-        return universalInventories;
-    }
-
-    @Nonnull
     public Map<UUID, PlayerProfile> getPlayerProfiles() {
         return profiles;
     }
@@ -246,11 +239,6 @@ public final class SlimefunRegistry {
         Validate.notNull(identifier, "The identifier for an ItemHandler cannot be null!");
 
         return globalItemHandlers.computeIfAbsent(identifier, c -> new HashSet<>());
-    }
-
-    @Nonnull
-    public Map<String, BlockStorage> getWorlds() {
-        return worlds;
     }
 
     @Nonnull

@@ -1,24 +1,21 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.cargo;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
-
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * The {@link TrashCan} is a simple container which simply voids all
@@ -60,8 +57,8 @@ public class TrashCan extends SlimefunItem implements InventoryBlock {
         addItemHandler(new BlockTicker() {
 
             @Override
-            public void tick(Block b, SlimefunItem item, Config data) {
-                BlockMenu menu = BlockStorage.getInventory(b);
+            public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
+                BlockMenu menu = data.getBlockMenu();
 
                 for (int slot : getInputSlots()) {
                     menu.replaceExistingItem(slot, null);

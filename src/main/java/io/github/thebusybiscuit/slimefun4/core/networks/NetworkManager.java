@@ -1,19 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.core.networks;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang.Validate;
-import org.bukkit.Location;
-import org.bukkit.Server;
-
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
@@ -21,8 +8,18 @@ import io.github.thebusybiscuit.slimefun4.api.network.Network;
 import io.github.thebusybiscuit.slimefun4.core.networks.cargo.CargoNet;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.NetworkListener;
+import org.apache.commons.lang.Validate;
+import org.bukkit.Location;
+import org.bukkit.Server;
 
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
 
 /**
  * The {@link NetworkManager} is responsible for holding all instances of {@link Network}
@@ -202,7 +199,7 @@ public class NetworkManager {
              * 
              * (Skip for Unit Tests as they don't support block info yet)
              */
-            if (!BlockStorage.hasBlockInfo(l) && Slimefun.getMinecraftVersion() != MinecraftVersion.UNIT_TEST) {
+            if (!StorageCacheUtils.hasBlock(l) && Slimefun.getMinecraftVersion() != MinecraftVersion.UNIT_TEST) {
                 return;
             }
 

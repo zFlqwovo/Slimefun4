@@ -5,6 +5,8 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.MysqlAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.MysqlConfig;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteConfig;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ControllerHolder;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ProfileDataController;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.StorageType;
@@ -17,46 +19,73 @@ import javax.annotation.Nullable;
 
 public class SlimefunDatabaseManager {
     private static final String PROFILE_CONFIG_FILE_NAME = "profile-storage.yml";
+    private static final String BLOCK_STORAGE_FILE_NAME = "block-storage.yml";
     private final Slimefun plugin;
-    private final Config databaseConfig;
-
-    private int readExecutorThread;
-    private int writeExecutorThread;
-    private StorageType storageType;
-    private IDataSourceAdapter<?> adapter;
+    private final Config profileConfig;
+    private final Config blockStorageConfig;
+    private StorageType profileStorageType;
+    private StorageType blockDataStorageType;
+    private IDataSourceAdapter<?> profileAdapter;
+    private IDataSourceAdapter<?> blockStorageAdapter;
 
 
     public SlimefunDatabaseManager(Slimefun plugin) {
         this.plugin = plugin;
+
         if (!new File(plugin.getDataFolder(), PROFILE_CONFIG_FILE_NAME).exists()) {
             plugin.saveResource(PROFILE_CONFIG_FILE_NAME, false);
         }
 
-        databaseConfig = new Config(plugin, PROFILE_CONFIG_FILE_NAME);
+        if (!new File(plugin.getDataFolder(), BLOCK_STORAGE_FILE_NAME).exists()) {
+            plugin.saveResource(BLOCK_STORAGE_FILE_NAME, false);
+        }
+
+        profileConfig = new Config(plugin, PROFILE_CONFIG_FILE_NAME);
+        blockStorageConfig = new Config(plugin, BLOCK_STORAGE_FILE_NAME);
     }
 
     public void init() {
-        storageType = StorageType.valueOf(databaseConfig.getString("storageType"));
-        readExecutorThread = databaseConfig.getInt("readExecutorThread");
-        writeExecutorThread = storageType == StorageType.SQLITE ? 1 : databaseConfig.getInt("writeExecutorThread");
-
         try {
-            initAdapter();
+            blockDataStorageType = StorageType.valueOf(blockStorageConfig.getString("storageType"));
+            var readExecutorThread = blockStorageConfig.getInt("readExecutorThread");
+            var writeExecutorThread = blockDataStorageType == StorageType.SQLITE ? 1 : blockStorageConfig.getInt("writeExecutorThread");
+
+            initAdapter(blockDataStorageType, DataType.BLOCK_STORAGE, blockStorageConfig);
+
+            var blockDataController = ControllerHolder.createController(BlockDataController.class, blockDataStorageType);
+            blockDataController.init(blockStorageAdapter, readExecutorThread, writeExecutorThread);
+
+            if (blockStorageConfig.getBoolean("delayedWriting.enable")) {
+                blockDataController.initDelayedSaving(
+                        plugin,
+                        blockStorageConfig.getInt("delayedWriting.delayedSecond"),
+                        blockStorageConfig.getInt("delayedWriting.forceSavePeriod")
+                );
+            }
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "加载数据库适配器失败", e);
+            plugin.getLogger().log(Level.SEVERE, "加载 Slimefun 方块存储适配器失败", e);
             return;
         }
 
-        var profileController = ControllerHolder.createController(ProfileDataController.class, storageType);
-        profileController.init(adapter, readExecutorThread, writeExecutorThread);
+        try {
+            profileStorageType = StorageType.valueOf(profileConfig.getString("storageType"));
+            var readExecutorThread = profileConfig.getInt("readExecutorThread");
+            var writeExecutorThread = profileStorageType == StorageType.SQLITE ? 1 : profileConfig.getInt("writeExecutorThread");
+
+            initAdapter(profileStorageType, DataType.PLAYER_PROFILE, profileConfig);
+            var profileController = ControllerHolder.createController(ProfileDataController.class, profileStorageType);
+            profileController.init(profileAdapter, readExecutorThread, writeExecutorThread);
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "加载玩家档案适配器失败", e);
+        }
     }
 
-    private void initAdapter() throws IOException {
+    private void initAdapter(StorageType storageType, DataType dataType, Config databaseConfig) throws IOException {
         switch (storageType) {
             case MYSQL -> {
-                adapter = new MysqlAdapter();
+                var adapter = new MysqlAdapter();
 
-                ((IDataSourceAdapter<MysqlConfig>) adapter).prepare(
+                adapter.prepare(
                         new MysqlConfig(
                                 databaseConfig.getString("mysql.host"),
                                 databaseConfig.getInt("mysql.port"),
@@ -67,25 +96,47 @@ public class SlimefunDatabaseManager {
                                 databaseConfig.getBoolean("mysql.useSSL"),
                                 databaseConfig.getInt("mysql.maxConnection")
                         ));
+
+                switch (dataType) {
+                    case BLOCK_STORAGE -> blockStorageAdapter = adapter;
+                    case PLAYER_PROFILE -> profileAdapter = adapter;
+                }
             }
             case SQLITE -> {
-                adapter = new SqliteAdapter();
-                var profilePath = new File("data-storage/Slimefun", "profile.db");
-                profilePath.createNewFile();
+                var adapter = new SqliteAdapter();
 
-                ((IDataSourceAdapter<SqliteConfig>) adapter).prepare(new SqliteConfig(profilePath.getAbsolutePath()));
+                File databasePath = null;
+
+                switch (dataType) {
+                    case PLAYER_PROFILE -> {
+                        databasePath = new File("data-storage/Slimefun", "profile.db");
+                        profileAdapter = adapter;
+                    }
+                    case BLOCK_STORAGE -> {
+                        databasePath = new File("data-storage/Slimefun", "block-storage.db");
+                        blockStorageAdapter = adapter;
+                    }
+                }
+
+                adapter.prepare(new SqliteConfig(databasePath.getAbsolutePath()));
             }
         }
     }
 
     @Nullable
     public ProfileDataController getProfileDataController() {
-        return ControllerHolder.getController(ProfileDataController.class, storageType);
+        return ControllerHolder.getController(ProfileDataController.class, profileStorageType);
+    }
+
+    public BlockDataController getBlockDataController() {
+        return ControllerHolder.getController(BlockDataController.class, blockDataStorageType);
     }
 
     public void shutdown() {
         getProfileDataController().shutdown();
-        adapter.shutdown();
+        getBlockDataController().shutdown();
+        blockStorageAdapter.shutdown();
+        profileAdapter.shutdown();
         ControllerHolder.clearControllers();
     }
 }

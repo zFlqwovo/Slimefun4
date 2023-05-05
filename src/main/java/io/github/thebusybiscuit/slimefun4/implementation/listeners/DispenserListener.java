@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
 import javax.annotation.Nonnull;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -16,8 +17,6 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockDispenseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.papermc.lib.PaperLib;
-
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 
 /**
  * This {@link Listener} listens to the {@link BlockDispenseEvent} and calls the
@@ -40,7 +39,8 @@ public class DispenserListener implements Listener {
         Block b = e.getBlock();
 
         if (b.getType() == Material.DISPENSER && b.getRelative(BlockFace.DOWN).getType() != Material.HOPPER) {
-            SlimefunItem machine = BlockStorage.check(b);
+            var blockData = StorageCacheUtils.getBlock(b.getLocation());
+            SlimefunItem machine = blockData == null ? null : SlimefunItem.getById(blockData.getSfId());
 
             if (machine != null) {
                 machine.callItemHandler(BlockDispenseHandler.class, handler -> {

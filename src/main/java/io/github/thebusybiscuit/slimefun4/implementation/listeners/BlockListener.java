@@ -1,5 +1,8 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
@@ -8,7 +11,6 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ToolUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -27,7 +29,6 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -53,26 +54,32 @@ public class BlockListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onBlockPlaceExisting(BlockPlaceEvent e) {
         Block block = e.getBlock();
+        var loc = block.getLocation();
 
         // Fixes #2636 - This will solve the "ghost blocks" issue
         if (e.getBlockReplacedState().getType().isAir()) {
-            SlimefunItem sfItem = BlockStorage.check(block);
+            var blockData = StorageCacheUtils.getBlock(loc);
+            if (blockData != null && blockData.isPendingRemove()) {
+                e.setCancelled(true);
+                return;
+            }
 
-            if (sfItem != null && !Slimefun.getTickerTask().isDeletedSoon(block.getLocation())) {
+            SlimefunItem sfItem = StorageCacheUtils.getSfItem(loc);
+            if (sfItem != null) {
                 for (ItemStack item : sfItem.getDrops()) {
                     if (item != null && !item.getType().isAir()) {
                         block.getWorld().dropItemNaturally(block.getLocation(), item);
                     }
                 }
 
-                BlockStorage.clearBlockInfo(block);
+                Slimefun.getDatabaseManager().getBlockDataController().removeBlock(loc);
 
                 if (SlimefunItem.getByItem(e.getItemInHand()) != null) {
                     // Due to the delay of #clearBlockInfo, new sf block info will also be cleared. Set cancelled.
                     e.setCancelled(true);
                 }
             }
-        } else if (BlockStorage.hasBlockInfo(e.getBlock())) {
+        } else if (StorageCacheUtils.hasBlock(loc)) {
             // If there is no air (e.g. grass) then don't let the block be placed
             e.setCancelled(true);
         }
@@ -87,11 +94,7 @@ public class BlockListener implements Listener {
             if (!sfItem.canUse(e.getPlayer(), true)) {
                 e.setCancelled(true);
             } else {
-                if (Slimefun.getBlockDataService().isTileEntity(e.getBlock().getType())) {
-                    Slimefun.getBlockDataService().setBlockData(e.getBlock(), sfItem.getId());
-                }
-
-                BlockStorage.addBlockInfo(e.getBlock(), "id", sfItem.getId(), true);
+                Slimefun.getDatabaseManager().getBlockDataController().createBlock(e.getBlock().getLocation(), sfItem.getId());
                 sfItem.callItemHandler(BlockPlaceHandler.class, handler -> handler.onPlayerPlace(e));
             }
         }
@@ -109,11 +112,6 @@ public class BlockListener implements Listener {
             return;
         }
 
-        // Ignore blocks which we have marked as deleted (Fixes #2771)
-        if (Slimefun.getTickerTask().isDeletedSoon(e.getBlock().getLocation())) {
-            return;
-        }
-
         ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
         checkForSensitiveBlockAbove(e, item);
 
@@ -125,10 +123,44 @@ public class BlockListener implements Listener {
         }
 
         if (!e.isCancelled()) {
-            callBlockHandler(e, item, drops);
-        }
+            var block = e.getBlock();
+            var blockData = StorageCacheUtils.getBlock(block.getLocation());
+            if (blockData == null || blockData.isPendingRemove()) {
+                return;
+            }
 
-        dropItems(e, drops);
+            blockData.setPendingRemove(true);
+            if (blockData.isDataLoaded()) {
+                callBlockHandler(e, item, drops);
+                if (e.isCancelled()) {
+                    blockData.setPendingRemove(false);
+                }
+                dropItems(e, drops);
+            } else {
+                e.setDropItems(false);
+                var type = block.getType();
+                Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
+                        blockData,
+                        new IAsyncReadCallback<>() {
+                            @Override
+                            public boolean runOnMainThread() {
+                                return true;
+                            }
+
+                            @Override
+                            public void onResult(SlimefunBlockData result) {
+                                callBlockHandler(e, item, drops);
+                                if (e.isCancelled()) {
+                                    block.setType(type);
+                                    blockData.setPendingRemove(false);
+                                    return;
+                                }
+                                e.setDropItems(true);
+                                dropItems(e, drops);
+                            }
+                        });
+            }
+        }
     }
 
     @ParametersAreNonnullByDefault
@@ -146,15 +178,8 @@ public class BlockListener implements Listener {
 
     @ParametersAreNonnullByDefault
     private void callBlockHandler(BlockBreakEvent e, ItemStack item, List<ItemStack> drops) {
-        SlimefunItem sfItem = BlockStorage.check(e.getBlock());
-
-        if (sfItem == null && Slimefun.getBlockDataService().isTileEntity(e.getBlock().getType())) {
-            Optional<String> blockData = Slimefun.getBlockDataService().getBlockData(e.getBlock());
-
-            if (blockData.isPresent()) {
-                sfItem = SlimefunItem.getById(blockData.get());
-            }
-        }
+        var loc = e.getBlock().getLocation();
+        SlimefunItem sfItem = StorageCacheUtils.getSfItem(loc);
 
         if (sfItem != null && !sfItem.useVanillaBlockBreaking()) {
             sfItem.callItemHandler(BlockBreakHandler.class, handler -> handler.onPlayerBreak(e, item, drops));
@@ -164,7 +189,7 @@ public class BlockListener implements Listener {
             }
 
             drops.addAll(sfItem.getDrops());
-            BlockStorage.clearBlockInfo(e.getBlock());
+            Slimefun.getDatabaseManager().getBlockDataController().removeBlock(loc);
         }
     }
 
@@ -204,7 +229,9 @@ public class BlockListener implements Listener {
         Block blockAbove = e.getBlock().getRelative(BlockFace.UP);
 
         if (SlimefunTag.SENSITIVE_MATERIALS.isTagged(blockAbove.getType())) {
-            SlimefunItem sfItem = BlockStorage.check(blockAbove);
+            var loc = blockAbove.getLocation();
+            var blockData = StorageCacheUtils.getBlock(loc);
+            SlimefunItem sfItem = StorageCacheUtils.getSfItem(loc);
 
             if (sfItem != null && !sfItem.useVanillaBlockBreaking()) {
                 /*
@@ -215,19 +242,28 @@ public class BlockListener implements Listener {
                 List<ItemStack> drops = new ArrayList<>();
                 drops.addAll(sfItem.getDrops(e.getPlayer()));
 
-                sfItem.callItemHandler(BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
-                blockAbove.setType(Material.AIR);
-
-                if (!dummyEvent.isCancelled() && dummyEvent.isDropItems()) {
-                    for (ItemStack drop : drops) {
-                        if (drop != null && !drop.getType().isAir()) {
-                            blockAbove.getWorld().dropItemNaturally(blockAbove.getLocation(), drop);
+                var controller = Slimefun.getDatabaseManager().getBlockDataController();
+                if (blockData.isDataLoaded()) {
+                    sfItem.callItemHandler(BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
+                    controller.removeBlock(loc);
+                    dropItems(dummyEvent, drops);
+                } else {
+                    blockData.setPendingRemove(true);
+                    controller.loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
+                        @Override
+                        public boolean runOnMainThread() {
+                            return true;
                         }
-                    }
-                }
 
-                // Fixes #2944 - Don't forget to clear the Block Data
-                BlockStorage.clearBlockInfo(blockAbove);
+                        @Override
+                        public void onResult(SlimefunBlockData result) {
+                            sfItem.callItemHandler(BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
+                            controller.removeBlock(loc);
+                            dropItems(dummyEvent, drops);
+                        }
+                    });
+                }
+                blockAbove.setType(Material.AIR);
             }
         }
     }

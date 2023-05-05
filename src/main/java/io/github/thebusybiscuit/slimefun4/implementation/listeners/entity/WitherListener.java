@@ -1,9 +1,10 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners.entity;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.attributes.WitherProof;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Wither;
@@ -31,8 +32,10 @@ public class WitherListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onWitherDestroy(EntityChangeBlockEvent e) {
         if (e.getEntity().getType() == EntityType.WITHER) {
+            var controller = Slimefun.getDatabaseManager().getBlockDataController();
             var block = e.getBlock();
-            var item = BlockStorage.check(block);
+            var blockData = controller.getBlockDataFromCache(block.getLocation());
+            var item = blockData == null ? null : SlimefunItem.getById(blockData.getSfId());
 
             // Hardened Glass is excluded from here
             if (item instanceof WitherProof witherProofBlock && !item.getId().equals(SlimefunItems.HARDENED_GLASS.getItemId())) {
@@ -41,8 +44,8 @@ public class WitherListener implements Listener {
                 return;
             }
 
-            if (item != null && BlockStorage.hasBlockInfo(block)) {
-                BlockStorage.clearBlockInfo(block);
+            if (item != null) {
+                controller.removeBlock(blockData.getLocation());
                 block.setType(Material.AIR);
 
                 for (var drop : item.getDrops()) {

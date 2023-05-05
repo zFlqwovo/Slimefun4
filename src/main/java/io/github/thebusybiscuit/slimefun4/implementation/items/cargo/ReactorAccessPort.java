@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.cargo;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -14,7 +15,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBre
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.reactors.Reactor;
 import io.github.thebusybiscuit.slimefun4.implementation.items.misc.CoolantCell;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.inventory.DirtyChestMenu;
@@ -119,7 +119,7 @@ public class ReactorAccessPort extends SlimefunItem {
 
             @Override
             public void onBlockBreak(@Nonnull Block b) {
-                BlockMenu inv = BlockStorage.getInventory(b);
+                BlockMenu inv = StorageCacheUtils.getMenu(b.getLocation());
 
                 if (inv != null) {
                     inv.dropItems(b.getLocation(), getFuelSlots());
@@ -165,10 +165,10 @@ public class ReactorAccessPort extends SlimefunItem {
     @Nullable
     private BlockMenu getReactor(@Nonnull Location l) {
         Location location = new Location(l.getWorld(), l.getX(), l.getY() - 3, l.getZ());
-        SlimefunItem item = BlockStorage.check(location.getBlock());
+        SlimefunItem item = StorageCacheUtils.getSfItem(location);
 
         if (item instanceof Reactor) {
-            return BlockStorage.getInventory(location);
+            return StorageCacheUtils.getMenu(location);
         }
 
         return null;

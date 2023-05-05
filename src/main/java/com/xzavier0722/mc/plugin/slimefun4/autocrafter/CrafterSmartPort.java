@@ -1,5 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.autocrafter;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -10,10 +11,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
-import java.util.List;
-import javax.annotation.Nonnull;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.inventory.DirtyChestMenu;
@@ -27,6 +25,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+
 import static com.xzavier0722.mc.plugin.slimefun4.autocrafter.SmartNamespacedKey.countKey;
 
 public class CrafterSmartPort extends SlimefunItem {
@@ -69,19 +71,16 @@ public class CrafterSmartPort extends SlimefunItem {
 
             @Override
             public void newInstance(@Nonnull BlockMenu menu, @Nonnull Block b) {
-                // Check if it has inventory
-                if (BlockStorage.hasInventory(b)) {
-                    // Resume the ingredient count
-                    String countStr = BlockStorage.getLocationInfo(b.getLocation(), "ingredientCount");
-                    if (countStr != null) {
-                        var im = menu.getItemInSlot(6).getItemMeta();
+                // Resume the ingredient count
+                String countStr = StorageCacheUtils.getData(b.getLocation(), "ingredientCount");
+                if (countStr != null) {
+                    var im = menu.getItemInSlot(6).getItemMeta();
 
-                        if (im != null) {
-                            im.setLore(List.of("数量: " + countStr));
+                    if (im != null) {
+                        im.setLore(List.of("数量: " + countStr));
 
-                            var pdc = im.getPersistentDataContainer();
-                            pdc.set(countKey, PersistentDataType.INTEGER, Integer.parseInt(countStr));
-                        }
+                        var pdc = im.getPersistentDataContainer();
+                        pdc.set(countKey, PersistentDataType.INTEGER, Integer.parseInt(countStr));
                     }
                 }
             }
@@ -134,8 +133,7 @@ public class CrafterSmartPort extends SlimefunItem {
         addItemHandler(new BlockBreakHandler(false, true) {
             @Override
             public void onPlayerBreak(@Nonnull BlockBreakEvent e, @Nonnull ItemStack item, @Nonnull List<ItemStack> drops) {
-                Block b = e.getBlock();
-                BlockMenu inv = BlockStorage.getInventory(b);
+                BlockMenu inv = StorageCacheUtils.getMenu(e.getBlock().getLocation());
                 if (inv != null) {
                     for (int slot : INPUT_SLOTS) {
                         ItemStack itemInSlot = inv.getItemInSlot(slot);

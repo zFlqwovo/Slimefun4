@@ -7,7 +7,8 @@ import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.util.eventbus.Subscribe;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -46,8 +47,8 @@ class WorldEditIntegration {
                     if (world != null) {
                         Location l = new Location(world, pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
 
-                        if (BlockStorage.hasBlockInfo(l)) {
-                            BlockStorage.clearBlockInfo(l);
+                        if (StorageCacheUtils.hasBlock(l)) {
+                            Slimefun.getDatabaseManager().getBlockDataController().removeBlock(l);
                         }
                     }
                 }

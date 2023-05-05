@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.androids;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.AndroidMineEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -9,7 +10,6 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.InfiniteBlockGenerator;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
@@ -74,7 +74,7 @@ public class MinerAndroid extends ProgrammableAndroid {
         Collection<ItemStack> drops = block.getDrops(effectivePickaxe);
 
         if (!SlimefunTag.UNBREAKABLE_MATERIALS.isTagged(block.getType()) && !drops.isEmpty()) {
-            OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(BlockStorage.getLocationInfo(b.getLocation(), "owner")));
+            OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(StorageCacheUtils.getData(b.getLocation(), "owner")));
 
             if (Slimefun.getProtectionManager().hasPermission(owner, block.getLocation(), Interaction.BREAK_BLOCK)) {
                 AndroidMineEvent event = new AndroidMineEvent(block, new AndroidInstance(this, b));
@@ -85,7 +85,7 @@ public class MinerAndroid extends ProgrammableAndroid {
                 }
 
                 // We only want to break non-Slimefun blocks
-                if (!BlockStorage.hasBlockInfo(block)) {
+                if (!StorageCacheUtils.hasBlock(block.getLocation())) {
                     breakBlock(menu, drops, block);
                 }
             }
@@ -98,7 +98,7 @@ public class MinerAndroid extends ProgrammableAndroid {
         Collection<ItemStack> drops = block.getDrops(effectivePickaxe);
 
         if (!SlimefunTag.UNBREAKABLE_MATERIALS.isTagged(block.getType()) && !drops.isEmpty()) {
-            OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(BlockStorage.getLocationInfo(b.getLocation(), "owner")));
+            OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(StorageCacheUtils.getData(b.getLocation(), "owner")));
 
             if (Slimefun.getProtectionManager().hasPermission(owner, block.getLocation(), Interaction.BREAK_BLOCK)) {
                 AndroidMineEvent event = new AndroidMineEvent(block, new AndroidInstance(this, b));
@@ -109,7 +109,7 @@ public class MinerAndroid extends ProgrammableAndroid {
                 }
 
                 // We only want to break non-Slimefun blocks
-                if (!BlockStorage.hasBlockInfo(block)) {
+                if (!StorageCacheUtils.hasBlock(block.getLocation())) {
                     breakBlock(menu, drops, block);
                     move(b, face, block);
                 }

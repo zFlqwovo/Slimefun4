@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
 import city.norain.slimefun4.holder.SlimefunBackpackHolder;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
@@ -71,7 +72,7 @@ public class BackpackListener implements Listener {
             return;
         }
 
-        var changed = getChangedSlots(snapshot, bp.getInventory().getContents());
+        var changed = InvStorageUtils.getChangedSlots(snapshot, bp.getInventory().getContents());
         if (changed.isEmpty()) {
             return;
         }
@@ -187,7 +188,7 @@ public class BackpackListener implements Listener {
                     item,
                     backpack -> {
                         backpacks.put(p.getUniqueId(), item);
-                        invSnapshot.put(backpack.getUniqueId(), getInvSnapshot(backpack.getInventory().getContents()));
+                        invSnapshot.put(backpack.getUniqueId(), InvStorageUtils.getInvSnapshot(backpack.getInventory().getContents()));
                         backpack.open(p);
                     },
                     true
@@ -195,34 +196,5 @@ public class BackpackListener implements Listener {
         } else {
             Slimefun.getLocalization().sendMessage(p, "backpack.already-open", true);
         }
-    }
-
-    private List<Pair<ItemStack, Integer>> getInvSnapshot(ItemStack[] invContents) {
-        var re = new ArrayList<Pair<ItemStack, Integer>>();
-        for (var each : invContents) {
-            re.add(new Pair<>(each, each == null ? 0 : each.getAmount()));
-        }
-
-        return re;
-    }
-
-    private Set<Integer> getChangedSlots(List<Pair<ItemStack, Integer>> snapshot, ItemStack[] currContent) {
-        var re = new HashSet<Integer>();
-        for (var i = 0; i < currContent.length; i++) {
-            var each = snapshot.get(i);
-            var curr = currContent[i];
-            if (curr == null) {
-                if (each.getFirstValue() != null) {
-                    re.add(i);
-                }
-                continue;
-            }
-
-            if (!curr.equals(each.getFirstValue()) || curr.getAmount() != each.getSecondValue()) {
-                re.add(i);
-            }
-        }
-
-        return re;
     }
 }

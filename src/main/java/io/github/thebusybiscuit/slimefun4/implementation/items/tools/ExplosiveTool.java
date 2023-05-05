@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.tools;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
@@ -14,7 +15,6 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.ToolUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Material;
@@ -144,7 +144,8 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
         Material material = b.getType();
 
         b.getWorld().playEffect(b.getLocation(), Effect.STEP_SOUND, material);
-        SlimefunItem sfItem = BlockStorage.check(b);
+        var loc = b.getLocation();
+        SlimefunItem sfItem = StorageCacheUtils.getSfItem(loc);
 
         if (sfItem != null && !sfItem.useVanillaBlockBreaking()) {
             /*
@@ -157,7 +158,7 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
             if (sfItem.callItemHandler(BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops)) && !dummyEvent.isCancelled()) {
                 drops.addAll(sfItem.getDrops(p));
                 b.setType(Material.AIR);
-                BlockStorage.clearBlockInfo(b);
+                Slimefun.getDatabaseManager().getBlockDataController().removeBlock(loc);
             }
         } else {
             b.breakNaturally(item);

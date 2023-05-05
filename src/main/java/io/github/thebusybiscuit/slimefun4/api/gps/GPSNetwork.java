@@ -1,26 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.api.gps;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.World.Environment;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.chat.ChatInput;
 import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.items.CustomItemStack;
@@ -36,9 +16,26 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.teleporter.Telepo
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.thebusybiscuit.slimefun4.utils.HeadTexture;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
-
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Server;
+import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.World.Environment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * The {@link GPSNetwork} is a manager class for all {@link GPSTransmitter Transmitters} and waypoints.
@@ -111,7 +108,7 @@ public class GPSNetwork {
 
         int level = 0;
         for (Location l : locations) {
-            SlimefunItem item = BlockStorage.check(l);
+            SlimefunItem item = StorageCacheUtils.getSfItem(l);
 
             if (item instanceof GPSTransmitter transmitter) {
                 level += transmitter.getMultiplier(Math.max(l.getBlockY(), 0));
@@ -172,7 +169,7 @@ public class GPSNetwork {
                 break;
             }
 
-            SlimefunItem sfi = BlockStorage.check(l);
+            SlimefunItem sfi = StorageCacheUtils.getSfItem(l);
 
             if (sfi instanceof GPSTransmitter transmitter) {
                 int slot = inventory[index];

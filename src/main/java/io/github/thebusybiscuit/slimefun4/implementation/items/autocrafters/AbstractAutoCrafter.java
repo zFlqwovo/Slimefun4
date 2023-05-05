@@ -3,6 +3,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.items.autocrafters;
 import com.xzavier0722.mc.plugin.slimefun4.autocrafter.ChestInventoryParser;
 import com.xzavier0722.mc.plugin.slimefun4.autocrafter.CrafterInteractable;
 import com.xzavier0722.mc.plugin.slimefun4.autocrafter.CrafterInteractorManager;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.bakedlibs.dough.data.persistent.PersistentDataAPI;
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.bakedlibs.dough.protection.Interaction;
@@ -25,7 +26,6 @@ import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
 import io.papermc.lib.PaperLib;
 import io.papermc.lib.features.blockstatesnapshot.BlockStateSnapshotResult;
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.AContainer;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
@@ -118,7 +118,7 @@ public abstract class AbstractAutoCrafter extends SlimefunItem implements Energy
         addItemHandler(new BlockTicker() {
 
             @Override
-            public void tick(Block b, SlimefunItem item, Config data) {
+            public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
                 AbstractAutoCrafter.this.tick(b, data);
             }
 
@@ -194,7 +194,7 @@ public abstract class AbstractAutoCrafter extends SlimefunItem implements Energy
      * @param data
      *            The data stored on this block
      */
-    protected void tick(@Nonnull Block b, @Nonnull Config data) {
+    protected void tick(@Nonnull Block b, @Nonnull SlimefunBlockData data) {
         AbstractRecipe recipe = getSelectedRecipe(b);
 
         // If no recipe, return

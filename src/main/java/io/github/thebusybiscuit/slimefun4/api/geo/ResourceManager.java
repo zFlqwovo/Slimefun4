@@ -1,14 +1,18 @@
 package io.github.thebusybiscuit.slimefun4.api.geo;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.OptionalInt;
-import java.util.concurrent.ThreadLocalRandom;
-
-import javax.annotation.Nonnull;
-
+import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunChunkData;
+import io.github.bakedlibs.dough.blocks.BlockPosition;
+import io.github.bakedlibs.dough.config.Config;
+import io.github.bakedlibs.dough.items.CustomItemStack;
+import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
+import io.github.thebusybiscuit.slimefun4.api.events.GEOResourceGenerationEvent;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.items.geo.GEOMiner;
+import io.github.thebusybiscuit.slimefun4.implementation.items.geo.GEOScanner;
+import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
+import io.github.thebusybiscuit.slimefun4.utils.HeadTexture;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,19 +24,13 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import io.github.bakedlibs.dough.blocks.BlockPosition;
-import io.github.bakedlibs.dough.config.Config;
-import io.github.bakedlibs.dough.items.CustomItemStack;
-import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
-import io.github.thebusybiscuit.slimefun4.api.events.GEOResourceGenerationEvent;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.items.geo.GEOMiner;
-import io.github.thebusybiscuit.slimefun4.implementation.items.geo.GEOScanner;
-import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import io.github.thebusybiscuit.slimefun4.utils.HeadTexture;
-
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.OptionalInt;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The {@link ResourceManager} is responsible for registering and managing a {@link GEOResource}.
@@ -109,13 +107,41 @@ public class ResourceManager {
         Validate.notNull(world, "World must not be null");
 
         String key = resource.getKey().toString().replace(':', '-');
-        String value = BlockStorage.getChunkInfo(world, x, z, key);
+        var chunkData = Slimefun.getDatabaseManager().getBlockDataController().getChunkData(world.getChunkAt(x, z));
+        if (chunkData == null) {
+            return OptionalInt.empty();
+        }
+        String value = chunkData.getData(key);
 
         if (value != null) {
             return OptionalInt.of(Integer.parseInt(value));
         } else {
             return OptionalInt.empty();
         }
+    }
+
+    public void getSuppliesAsync(GEOResource resource, Chunk chunk, IAsyncReadCallback<Integer> callback) {
+        Slimefun.getDatabaseManager().getBlockDataController().getChunkDataAsync(chunk, new IAsyncReadCallback<>() {
+            @Override
+            public boolean runOnMainThread() {
+                return callback.runOnMainThread();
+            }
+
+            @Override
+            public void onResult(SlimefunChunkData result) {
+                String value = result.getData(resource.getKey().toString().replace(':', '-'));
+                if (value == null) {
+                    callback.onResultNotFound();
+                } else {
+                    callback.onResult(Integer.parseInt(value));
+                }
+            }
+
+            @Override
+            public void onResultNotFound() {
+                callback.onResultNotFound();
+            }
+        });
     }
 
     /**
@@ -137,7 +163,12 @@ public class ResourceManager {
         Validate.notNull(world, "World cannot be null");
 
         String key = resource.getKey().toString().replace(':', '-');
-        BlockStorage.setChunkInfo(world, x, z, key, String.valueOf(value));
+        Slimefun.getDatabaseManager().getBlockDataController().getChunkDataAsync(world.getChunkAt(x, z), new IAsyncReadCallback<>() {
+            @Override
+            public void onResult(SlimefunChunkData result) {
+                result.setData(key, String.valueOf(value));
+            }
+        });
     }
 
     /**

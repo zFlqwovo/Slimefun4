@@ -9,10 +9,10 @@ public record MysqlConfig(
         String passwd,
         boolean useSsl,
         int maxConnection
-    ) {
+) {
     public String jdbcUrl() {
         return "jdbc:mysql://"
                 + host + ":" + port + "/" + database
-                + "?characterEncoding=utf8&useSSL="+ useSsl;
+                + "?characterEncoding=utf8&useSSL=" + useSsl;
     }
 }

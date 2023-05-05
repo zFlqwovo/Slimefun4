@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.core.networks.cargo;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import com.xzavier0722.mc.plugin.slimefuncomplib.event.cargo.CargoInsertEvent;
 import com.xzavier0722.mc.plugin.slimefuncomplib.event.cargo.CargoWithdrawEvent;
 import io.github.bakedlibs.dough.inventory.InvUtils;
@@ -10,7 +11,6 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
 import io.papermc.lib.PaperLib;
-import me.mrCookieSlime.Slimefun.api.BlockStorage;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.DirtyChestMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
@@ -388,11 +388,7 @@ final class CargoUtils {
 
     @Nullable
     static DirtyChestMenu getChestMenu(@Nonnull Block block) {
-        if (BlockStorage.hasInventory(block)) {
-            return BlockStorage.getInventory(block);
-        } else {
-            return BlockStorage.getUniversalInventory(block);
-        }
+        return StorageCacheUtils.getMenu(block.getLocation());
     }
 
     static boolean matchesFilter(@Nonnull AbstractItemNetwork network, @Nonnull Block node, @Nullable ItemStack item) {
