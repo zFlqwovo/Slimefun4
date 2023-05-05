@@ -91,11 +91,15 @@ public class BlockStorageMigrator {
         var count = 0;
         var total = fList.length;
         for (var f : fList) {
-            Slimefun.logger().log(Level.FINE, "正在迁移方块数据: " + ++count + "/" + total);
+            count++;
+            if (count % 10 == 0 || count == total) {
+                Slimefun.logger().log(Level.FINE, "正在迁移方块数据: " + count + "/" + total);
+            }
+
             var id = f.getName();
             id = id.substring(0, id.length() - 4);
             if (SlimefunItem.getById(id) == null) {
-                Slimefun.logger().log(Level.WARNING, "检测到不存在的方块ID，跳过迁移: " + id);
+                Slimefun.logger().log(Level.WARNING, "检测到不存在的方块 ID (" + id + "), 已跳过迁移.");
                 continue;
             }
 
