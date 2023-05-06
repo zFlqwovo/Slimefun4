@@ -82,7 +82,7 @@ public class BlockStorageMigrator {
     }
 
     private static void migrateWorld(World w) {
-        Slimefun.logger().log(Level.FINE, "开始迁移方块数据: " + w.getName());
+        Slimefun.logger().log(Level.INFO, "开始迁移方块数据: " + w.getName());
         var fList = new File(blockFolder, w.getName()).listFiles();
         if (fList == null) {
             return;
@@ -93,7 +93,7 @@ public class BlockStorageMigrator {
         for (var f : fList) {
             count++;
             if (count % 10 == 0 || count == total) {
-                Slimefun.logger().log(Level.FINE, "正在迁移方块数据: " + count + "/" + total);
+                Slimefun.logger().log(Level.INFO, "正在迁移方块数据: " + count + "/" + total);
             }
 
             var id = f.getName();
@@ -176,7 +176,7 @@ public class BlockStorageMigrator {
         var total = keys.size();
         var count = 0;
         for (var key : keys) {
-            Slimefun.logger().log(Level.FINE, "正在迁移区块数据: " + ++count + "/" + total);
+            Slimefun.logger().log(Level.INFO, "正在迁移区块数据: " + ++count + "/" + total);
             var arr = key.split(";");
             try {
                 var w = Bukkit.getWorld(arr[0]);
