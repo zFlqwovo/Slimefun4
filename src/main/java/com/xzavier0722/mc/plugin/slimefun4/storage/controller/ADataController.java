@@ -76,20 +76,21 @@ public abstract class ADataController {
     protected void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, Runnable task, boolean forceScopeKey) {
         lock.lock(scopeKey);
         try {
+            var scopeToUse = forceScopeKey ? scopeKey : key;
             var queuedTask = scheduledWriteTasks.get(scopeKey);
+            if (queuedTask == null && scopeKey != scopeToUse) {
+                queuedTask = scheduledWriteTasks.get(scopeToUse);
+            }
+
             if (queuedTask != null && queuedTask.queue(key, task)) {
                 return;
             }
 
-            var scopeToUse = forceScopeKey ? scopeKey : key;
             queuedTask = new QueuedWriteTask() {
                 @Override
                 protected void onSuccess() {
                     lock.lock(scopeKey);
-                    var last = scheduledWriteTasks.remove(scopeToUse);
-                    if (this != last) {
-                        scheduledWriteTasks.put(scopeToUse, last);
-                    }
+                    scheduledWriteTasks.remove(scopeToUse);
                     lock.unlock(scopeKey);
                 }
 
