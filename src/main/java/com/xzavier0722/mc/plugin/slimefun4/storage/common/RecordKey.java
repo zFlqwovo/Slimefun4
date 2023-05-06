@@ -13,6 +13,8 @@ import java.util.Set;
 public class RecordKey extends ScopeKey {
     private final Set<FieldKey> fields;
     private final List<Pair<FieldKey, String>> conditions;
+    private volatile String strKey = "";
+    private volatile boolean changed = true;
 
     @ParametersAreNonnullByDefault
     public RecordKey(DataScope scope) {
@@ -34,6 +36,7 @@ public class RecordKey extends ScopeKey {
     @ParametersAreNonnullByDefault
     public void addField(FieldKey field) {
         fields.add(field);
+        changed = true;
     }
 
     @Nonnull
@@ -44,6 +47,7 @@ public class RecordKey extends ScopeKey {
     @ParametersAreNonnullByDefault
     public void addCondition(FieldKey key, String val) {
         conditions.add(new Pair<>(key, val));
+        changed = true;
     }
 
     @ParametersAreNonnullByDefault
@@ -58,11 +62,16 @@ public class RecordKey extends ScopeKey {
 
     @Override
     protected String getKeyStr() {
-        var re = new StringBuilder();
-        re.append(scope).append("/");
-        conditions.forEach(c -> re.append(c.getFirstValue()).append("=").append(c.getSecondValue()).append("/"));
-        fields.forEach(f -> re.append(f).append("/"));
-        return re.toString();
+        if (changed) {
+            var re = new StringBuilder();
+            re.append(scope).append("/");
+            conditions.forEach(c -> re.append(c.getFirstValue()).append("=").append(c.getSecondValue()).append("/"));
+            fields.forEach(f -> re.append(f).append("/"));
+            strKey = re.toString();
+            changed = false;
+        }
+
+        return strKey;
     }
 
     @Override

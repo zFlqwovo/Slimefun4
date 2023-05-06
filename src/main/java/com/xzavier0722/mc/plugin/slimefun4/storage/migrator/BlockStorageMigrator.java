@@ -35,6 +35,14 @@ public class BlockStorageMigrator {
     }
 
     public static MigrateStatus migrateData() {
+        Slimefun.getTickerTask().setPaused(true);
+
+        var controller = Slimefun.getDatabaseManager().getBlockDataController();
+        var isDelayedSavingEnabled = controller.isDelayedSavingEnabled();
+        if (isDelayedSavingEnabled) {
+            controller.setDelayedSavingEnable(false);
+        }
+
         if (migrateLock) {
             return MigrateStatus.MIGRATING;
         }
@@ -67,6 +75,11 @@ public class BlockStorageMigrator {
         }
 
         migrateLock = false;
+
+        if (isDelayedSavingEnabled) {
+            controller.setDelayedSavingEnable(true);
+        }
+        Slimefun.getTickerTask().setPaused(false);
         return status;
     }
 
@@ -91,13 +104,10 @@ public class BlockStorageMigrator {
         var count = 0;
         var total = fList.length;
         for (var f : fList) {
-            count++;
-            if (count % 10 == 0 || count == total) {
-                Slimefun.logger().log(Level.INFO, "正在迁移方块数据: " + count + "/" + total);
-            }
-
             var id = f.getName();
             id = id.substring(0, id.length() - 4);
+            Slimefun.logger().log(Level.INFO, "正在迁移方块数据: " + id + "(" + ++count + "/" + total + ")");
+
             if (SlimefunItem.getById(id) == null) {
                 Slimefun.logger().log(Level.WARNING, "检测到不存在的方块 ID (" + id + "), 已跳过迁移.");
                 continue;

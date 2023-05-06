@@ -61,7 +61,7 @@ public abstract class ADataController {
             System.err.println("Exception thrown while saving data: ");
             e.printStackTrace();
         }
-        writeExecutor.shutdown();
+        writeExecutor.shutdownNow();
         dataAdapter = null;
     }
 

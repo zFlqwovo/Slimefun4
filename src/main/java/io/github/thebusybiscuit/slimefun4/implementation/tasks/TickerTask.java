@@ -52,6 +52,8 @@ public class TickerTask implements Runnable {
     private boolean halted = false;
     private boolean running = false;
 
+    private volatile boolean paused = false;
+
     /**
      * This method starts the {@link TickerTask} on an asynchronous schedule.
      * 
@@ -74,6 +76,10 @@ public class TickerTask implements Runnable {
 
     @Override
     public void run() {
+        if (paused) {
+            return;
+        }
+
         try {
             // If this method is actually still running... DON'T
             if (running) {
@@ -86,7 +92,11 @@ public class TickerTask implements Runnable {
 
             // Run our ticker code
             if (!halted) {
-                for (Map.Entry<ChunkPosition, Set<Location>> entry : new HashSet<>(tickingLocations.entrySet())) {
+                HashSet<Map.Entry<ChunkPosition, Set<Location>>> loc;
+                synchronized (tickingLocations) {
+                    loc = new HashSet<>(tickingLocations.entrySet());
+                }
+                for (Map.Entry<ChunkPosition, Set<Location>> entry : loc) {
                     tickChunk(entry.getKey(), tickers, new HashSet<>(entry.getValue()));
                 }
             }
@@ -276,6 +286,10 @@ public class TickerTask implements Runnable {
                 }
             }
         }
+    }
+
+    public void setPaused(boolean isPaused) {
+        paused = isPaused;
     }
 
 }

@@ -87,6 +87,14 @@ public class BlockDataController extends ADataController {
         ), 20, 20);
     }
 
+    public boolean isDelayedSavingEnabled() {
+        return enableDelayedSaving;
+    }
+
+    public void setDelayedSavingEnable(boolean isEnable) {
+        enableDelayedSaving = isEnable;
+    }
+
     @Nonnull
     public SlimefunBlockData createBlock(Location l, String sfId) {
         checkDestroy();
