@@ -73,7 +73,11 @@ public class BlockDataController extends ADataController {
         this.delayedSecond = delayedSecond;
         looperTask = Bukkit.getScheduler().runTaskTimerAsynchronously(p, new DelayedSavingLooperTask(
                 forceSavePeriod,
-                () -> new HashMap<>(delayedWriteTasks),
+                () -> {
+                    synchronized (delayedWriteTasks) {
+                        return new HashMap<>(delayedWriteTasks);
+                    }
+                },
                 key -> {
                     synchronized (delayedWriteTasks) {
                         delayedWriteTasks.keySet().remove(key);
@@ -496,7 +500,9 @@ public class BlockDataController extends ADataController {
     }
 
     private void executeAllDelayedTasks() {
-        delayedWriteTasks.values().forEach(DelayedTask::runUnsafely);
+        synchronized (delayedWriteTasks) {
+            delayedWriteTasks.values().forEach(DelayedTask::runUnsafely);
+        }
     }
 
     private SlimefunChunkData getChunkDataCache(Chunk chunk, boolean createOnNotExists) {
