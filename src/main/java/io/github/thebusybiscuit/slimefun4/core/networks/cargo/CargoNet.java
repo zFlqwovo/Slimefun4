@@ -223,7 +223,17 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
      * @return The frequency of the given node
      */
     private static int getFrequency(@Nonnull Location node) {
-        String frequency = StorageCacheUtils.getData(node, "frequency");
+        var data = StorageCacheUtils.getBlock(node);
+        if (data == null) {
+            return 0;
+        }
+
+        if (!data.isDataLoaded()) {
+            StorageCacheUtils.requestLoad(data);
+            return 0;
+        }
+
+        String frequency = data.getData("frequency");
 
         if (frequency == null) {
             return 0;
