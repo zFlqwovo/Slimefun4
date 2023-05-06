@@ -98,9 +98,6 @@ public abstract class ADataController {
                 protected void onError(Throwable e) {
                     Slimefun.logger().log(Level.SEVERE, "Exception thrown while executing write task: ");
                     e.printStackTrace();
-                    lock.lock(scopeKey);
-                    scheduledWriteTasks.remove(scopeToUse);
-                    lock.unlock(scopeKey);
                 }
             };
             queuedTask.queue(key, task);
