@@ -139,4 +139,16 @@ public class SlimefunDatabaseManager {
         profileAdapter.shutdown();
         ControllerHolder.clearControllers();
     }
+
+    public boolean isBase64Enabled() {
+        return blockStorageConfig.getBoolean("base64EncodeVal");
+    }
+
+    public StorageType getBlockDataStorageType() {
+        return blockDataStorageType;
+    }
+
+    public StorageType getProfileStorageType() {
+        return profileStorageType;
+    }
 }

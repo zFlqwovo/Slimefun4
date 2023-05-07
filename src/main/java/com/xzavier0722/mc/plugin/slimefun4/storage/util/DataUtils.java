@@ -1,5 +1,6 @@
-package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon;
+package com.xzavier0722.mc.plugin.slimefun4.storage.util;
 
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -33,5 +34,13 @@ public class DataUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static String base64(String text) {
+        return Slimefun.getDatabaseManager().isBase64Enabled() ? Base64Coder.encodeString(text) : text;
+    }
+
+    public static String debase64(String base64Str) {
+        return Slimefun.getDatabaseManager().isBase64Enabled() ? Base64Coder.decodeString(base64Str) : base64Str;
     }
 }

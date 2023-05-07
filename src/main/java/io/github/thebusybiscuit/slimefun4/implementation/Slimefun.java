@@ -435,6 +435,8 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
             }
         });
 
+        databaseManager.shutdown();
+
         // Create a new backup zip
         if (cfgManager.getPluginConfig().getBoolean("options.backup-data")) {
             backupService.run();
@@ -453,8 +455,6 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.closeInventory();
         }
-
-        databaseManager.shutdown();
     }
 
     /**

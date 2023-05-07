@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.core.services;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.StorageType;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import org.apache.commons.lang.Validate;
 
@@ -44,6 +45,11 @@ public class BackupService implements Runnable {
 
     @Override
     public void run() {
+        var dbManager = Slimefun.getDatabaseManager();
+        if (dbManager.getProfileStorageType() != StorageType.SQLITE
+                && dbManager.getBlockDataStorageType() != StorageType.SQLITE) {
+            return;
+        }
         // Make sure that the directory exists.
         if (directory.exists()) {
             List<File> backups = Arrays.asList(directory.listFiles());
@@ -79,8 +85,13 @@ public class BackupService implements Runnable {
     private void createBackup(@Nonnull ZipOutputStream output) throws IOException {
         Validate.notNull(output, "The Output Stream cannot be null!");
 
-        addFile(output, new File("data-storage/Slimefun", "profile.db"), "");
-        addFile(output, new File("data-storage/Slimefun", "block-storage.db"), "");
+        if (Slimefun.getDatabaseManager().getProfileStorageType() == StorageType.SQLITE) {
+            addFile(output, new File("data-storage/Slimefun", "profile.db"), "");
+        }
+
+        if (Slimefun.getDatabaseManager().getBlockDataStorageType() == StorageType.SQLITE) {
+            addFile(output, new File("data-storage/Slimefun", "block-storage.db"), "");
+        }
     }
 
     private void addFile(ZipOutputStream output, File file, String path) throws IOException {
