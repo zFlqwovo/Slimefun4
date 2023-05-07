@@ -1,9 +1,11 @@
 package me.mrCookieSlime.Slimefun.api;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataConfigWrapper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunChunkData;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -21,6 +23,8 @@ import javax.annotation.Nullable;
  */
 @Deprecated
 public class BlockStorage {
+
+    private static final Config emptyData = new EmptyBlockData();
 
     @Nullable
     public static BlockStorage getStorage(@Nonnull World world) {
@@ -193,5 +197,10 @@ public class BlockStorage {
 
     public static String getChunkInfo(World world, int x, int z, String key) {
         return getChunkData(world.getChunkAt(x, z)).getData(key);
+    }
+
+    public static Config getLocationInfo(Location location) {
+        var re = getBlockData(location);
+        return re == null ? emptyData : new BlockDataConfigWrapper(re);
     }
 }
