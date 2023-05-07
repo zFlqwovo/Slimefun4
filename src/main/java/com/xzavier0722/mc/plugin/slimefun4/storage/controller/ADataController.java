@@ -89,9 +89,7 @@ public abstract class ADataController {
             queuedTask = new QueuedWriteTask() {
                 @Override
                 protected void onSuccess() {
-                    lock.lock(scopeKey);
                     scheduledWriteTasks.remove(scopeToUse);
-                    lock.unlock(scopeKey);
                 }
 
                 @Override
