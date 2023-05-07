@@ -499,6 +499,29 @@ public class SlimefunItem implements Placeable {
     }
 
     /**
+     * This method is called when this {@link SlimefunItem} is being reloaded.
+     */
+    public void unregister() {
+        if (this instanceof Radioactive) {
+            Slimefun.getRegistry().getRadioactiveItems().remove(this);
+        }
+
+        // Disable ticking block
+        Slimefun.getRegistry().getTickerBlocks().remove(getId());
+
+        // Remove item from item group
+        this.itemGroup.remove(this);
+        // Remove item from research
+        this.research.getAffectedItems().remove(this);
+
+        recipeType.unregister(recipe, getRecipeOutput());
+
+        Slimefun.getRegistry().getEnabledSlimefunItems().remove(this);
+        Slimefun.getRegistry().getAllSlimefunItems().remove(this);
+        Slimefun.getRegistry().getSlimefunItemIds().remove(id, this);
+    }
+
+    /**
      * This method is called when this {@link SlimefunItem} is currently being registered
      * and we are certain that it will be enabled.
      *

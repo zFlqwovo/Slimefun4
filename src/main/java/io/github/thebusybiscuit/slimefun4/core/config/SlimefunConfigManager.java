@@ -119,12 +119,12 @@ public class SlimefunConfigManager {
 
         for (SlimefunItem item : Slimefun.getRegistry().getAllSlimefunItems()) {
             var itemStatus = itemsConfig.getBoolean(item.getId() + ".enabled");
-            if (item.isDisabled() != !itemStatus && item.getAddon() != null) {
+            if (item.isDisabled() == itemStatus) {
                 if (itemStatus && SlimefunItem.getById(item.getId()) == null) {
                     item.register(item.getAddon());
                 } else {
-                    Slimefun.logger().log(Level.WARNING, "物品禁用暂时不支持热重载, 请手动重启服务器.");
-                    isSuccessful = false;
+                    // FIXME: Unsafe
+                    item.unregister();
                 }
             }
 
