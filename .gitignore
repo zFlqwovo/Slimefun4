@@ -16,3 +16,5 @@
 dependency-reduced-pom.xml
 /src/test/implementation/items/autocrafters/TestAutoCrafter.java
 /.git-versioned-pom.xml
+
+*.db
