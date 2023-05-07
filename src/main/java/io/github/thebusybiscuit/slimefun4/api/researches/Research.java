@@ -161,6 +161,17 @@ public class Research implements Keyed {
 
     /**
      * Gets the cost in XP levels to unlock this {@link Research}.
+     * Deprecated, use {@link Research#getLevelCost} instead.
+     *
+     * @return The cost in XP levels for this {@link Research}
+     */
+    @Deprecated
+    public int getCost() {
+        return levelCost;
+    }
+
+    /**
+     * Gets the cost in XP levels to unlock this {@link Research}.
      *
      * @return The cost in XP levels for this {@link Research}
      */
@@ -170,9 +181,23 @@ public class Research implements Keyed {
 
     /**
      * Sets the cost in XP levels to unlock this {@link Research}.
+     * Deprecated, use {@link Research#setLevelCost(int)} instead.
      *
-     * @param levelCost
-     *            The cost in XP levels
+     * @param cost The cost in XP levels
+     */
+    @Deprecated
+    public void setCost(int cost) {
+        if (levelCost < 0) {
+            throw new IllegalArgumentException("Research cost must be zero or greater!");
+        }
+
+        levelCost = cost;
+    }
+
+    /**
+     * Sets the cost in XP levels to unlock this {@link Research}.
+     *
+     * @param levelCost The cost in XP levels
      */
     public void setLevelCost(int levelCost) {
         if (levelCost < 0) {
