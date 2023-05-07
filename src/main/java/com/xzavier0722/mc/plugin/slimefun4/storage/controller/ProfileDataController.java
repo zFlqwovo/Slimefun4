@@ -6,6 +6,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerBackpack;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
@@ -95,7 +96,7 @@ public class ProfileDataController extends ADataController {
         re = new PlayerBackpack(
                 owner,
                 UUID.fromString(idStr),
-                result.getOrDef(FieldKey.BACKPACK_NAME, ""),
+                DataUtils.profileDataDebase64(result.getOrDef(FieldKey.BACKPACK_NAME, "")),
                 num,
                 size,
                 getBackpackInv(idStr, size)
@@ -131,7 +132,7 @@ public class ProfileDataController extends ADataController {
         re = new PlayerBackpack(
                 Bukkit.getOfflinePlayer(UUID.fromString(result.get(FieldKey.PLAYER_UUID))),
                 UUID.fromString(idStr),
-                result.getOrDef(FieldKey.BACKPACK_NAME, ""),
+                DataUtils.profileDataDebase64(result.getOrDef(FieldKey.BACKPACK_NAME, "")),
                 result.getInt(FieldKey.BACKPACK_NUMBER),
                 size,
                 getBackpackInv(idStr, size)
@@ -309,7 +310,7 @@ public class ProfileDataController extends ADataController {
         re.put(FieldKey.BACKPACK_ID, bp.getUniqueId().toString());
         re.put(FieldKey.BACKPACK_NUMBER, bp.getId() + "");
         re.put(FieldKey.BACKPACK_SIZE, bp.getSize() + "");
-        re.put(FieldKey.BACKPACK_NAME, bp.getName());
+        re.put(FieldKey.BACKPACK_NAME, DataUtils.profileDataBase64(bp.getName()));
         return re;
     }
 

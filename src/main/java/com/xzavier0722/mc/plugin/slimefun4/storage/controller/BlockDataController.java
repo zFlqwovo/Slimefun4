@@ -296,7 +296,7 @@ public class BlockDataController extends ADataController {
 
             getData(key).forEach(data -> chunkData.setCacheInternal(
                     data.get(FieldKey.DATA_KEY),
-                    DataUtils.debase64(data.get(FieldKey.DATA_VALUE)),
+                    DataUtils.blockDataDebase64(data.get(FieldKey.DATA_VALUE)),
                     false)
             );
             chunkData.setIsDataLoaded(true);
@@ -323,7 +323,7 @@ public class BlockDataController extends ADataController {
             getData(key).forEach(
                     recordSet -> blockData.setCacheInternal(
                             recordSet.get(FieldKey.DATA_KEY),
-                            DataUtils.debase64(recordSet.get(FieldKey.DATA_VALUE)),
+                            DataUtils.blockDataDebase64(recordSet.get(FieldKey.DATA_VALUE)),
                             false)
             );
 
@@ -467,7 +467,7 @@ public class BlockDataController extends ADataController {
             reqKey.addField(FieldKey.DATA_VALUE);
             data.put(FieldKey.LOCATION, lKey);
             data.put(FieldKey.DATA_KEY, key);
-            data.put(FieldKey.DATA_VALUE, DataUtils.base64(val));
+            data.put(FieldKey.DATA_VALUE, DataUtils.blockDataBase64(val));
             scheduleWriteTask(scopeKey, reqKey, data, true);
         }
     }
@@ -509,7 +509,7 @@ public class BlockDataController extends ADataController {
             reqKey.addField(FieldKey.DATA_VALUE);
             data.put(FieldKey.CHUNK, cKey);
             data.put(FieldKey.DATA_KEY, key);
-            data.put(FieldKey.DATA_VALUE, DataUtils.base64(val));
+            data.put(FieldKey.DATA_VALUE, DataUtils.blockDataBase64(val));
             scheduleWriteTask(scopeKey, reqKey, data, false);
         }
     }

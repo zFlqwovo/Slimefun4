@@ -36,11 +36,19 @@ public class DataUtils {
         }
     }
 
-    public static String base64(String text) {
-        return Slimefun.getDatabaseManager().isBase64Enabled() ? Base64Coder.encodeString(text) : text;
+    public static String blockDataBase64(String text) {
+        return Slimefun.getDatabaseManager().isBlockDataBase64Enabled() ? Base64Coder.encodeString(text) : text;
     }
 
-    public static String debase64(String base64Str) {
-        return Slimefun.getDatabaseManager().isBase64Enabled() ? Base64Coder.decodeString(base64Str) : base64Str;
+    public static String blockDataDebase64(String base64Str) {
+        return Slimefun.getDatabaseManager().isBlockDataBase64Enabled() ? Base64Coder.decodeString(base64Str) : base64Str;
+    }
+
+    public static String profileDataBase64(String text) {
+        return Slimefun.getDatabaseManager().isProfileDataBase64Enabled() ? Base64Coder.encodeString(text) : text;
+    }
+
+    public static String profileDataDebase64(String base64Str) {
+        return Slimefun.getDatabaseManager().isProfileDataBase64Enabled() ? Base64Coder.decodeString(base64Str) : base64Str;
     }
 }
