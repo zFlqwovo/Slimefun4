@@ -10,11 +10,10 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.Capacitor;
 import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.logging.Level;
+import javax.annotation.Nonnull;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
-
-import javax.annotation.Nonnull;
-import java.util.logging.Level;
 
 /**
  * This Interface, when attached to a class that inherits from {@link SlimefunItem}, marks
@@ -138,6 +137,16 @@ public interface EnergyNetComponent extends ItemAttribute {
 
                 // Do we even need to update the value?
                 if (charge != getCharge(l)) {
+                    var blockData = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(l);
+
+                    if (blockData == null || blockData.isPendingRemove()) {
+                        return;
+                    }
+
+                    if (!blockData.isDataLoaded()) {
+                        StorageCacheUtils.requestLoad(blockData);
+                    }
+
                     StorageCacheUtils.setData(l, "energy-charge", String.valueOf(charge));
 
                     // Update the capacitor texture
