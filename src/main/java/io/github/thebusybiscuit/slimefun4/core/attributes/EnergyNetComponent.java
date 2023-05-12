@@ -145,9 +145,10 @@ public interface EnergyNetComponent extends ItemAttribute {
 
                     if (!blockData.isDataLoaded()) {
                         StorageCacheUtils.requestLoad(blockData);
+                        return;
                     }
 
-                    StorageCacheUtils.setData(l, "energy-charge", String.valueOf(charge));
+                    blockData.setData("energy-charge", String.valueOf(charge));
 
                     // Update the capacitor texture
                     if (getEnergyComponentType() == EnergyNetComponentType.CAPACITOR) {
