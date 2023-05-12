@@ -137,7 +137,7 @@ public interface EnergyNetComponent extends ItemAttribute {
 
                 // Do we even need to update the value?
                 if (charge != getCharge(l)) {
-                    var blockData = Slimefun.getDatabaseManager().getBlockDataController().getBlockData(l);
+                    var blockData = StorageCacheUtils.getBlock(l);
 
                     if (blockData == null || blockData.isPendingRemove()) {
                         return;
