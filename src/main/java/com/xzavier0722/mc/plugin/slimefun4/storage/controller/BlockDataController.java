@@ -288,8 +288,9 @@ public class BlockDataController extends ADataController {
         key.addField(FieldKey.DATA_KEY);
         key.addField(FieldKey.DATA_VALUE);
         key.addCondition(FieldKey.CHUNK, chunkData.getKey());
+
+        lock.lock(key);
         try {
-            lock.lock(key);
             if (chunkData.isDataLoaded()) {
                 return;
             }
@@ -314,8 +315,8 @@ public class BlockDataController extends ADataController {
         key.addField(FieldKey.DATA_KEY);
         key.addField(FieldKey.DATA_VALUE);
 
+        lock.lock(key);
         try {
-            lock.lock(key);
             if (blockData.isDataLoaded()) {
                 return;
             }
