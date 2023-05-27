@@ -15,6 +15,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -268,13 +269,21 @@ public class BlockDataController extends ADataController {
         getData(key).forEach(block -> {
             var lKey = block.get(FieldKey.LOCATION);
             var sfId = block.get(FieldKey.SLIMEFUN_ID);
+            var sfItem = SlimefunItem.getById(sfId);
+            if (sfItem == null) {
+                return;
+            }
+
             var cache = getBlockDataFromCache(chunkData.getKey(), lKey);
             var blockData = cache == null ? new SlimefunBlockData(LocationUtils.toLocation(lKey), sfId) : cache;
             chunkData.addBlockCacheInternal(blockData, false);
-            if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
+
+            if (sfItem.loadDataByDefault()) {
                 scheduleReadTask(() -> {
                     loadBlockData(blockData);
-                    Slimefun.getTickerTask().enableTicker(blockData.getLocation());
+                    if (sfItem.isTicking()) {
+                        Slimefun.getTickerTask().enableTicker(blockData.getLocation());
+                    }
                 });
             }
         });
