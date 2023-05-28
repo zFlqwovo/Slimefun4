@@ -334,18 +334,19 @@ public class BlockDataController extends ADataController {
                     recordSet -> blockData.setCacheInternal(
                             recordSet.get(FieldKey.DATA_KEY),
                             DataUtils.blockDataDebase64(recordSet.get(FieldKey.DATA_VALUE)),
-                            false)
+                            false
+                    )
             );
 
             var menuPreset = BlockMenuPreset.getPreset(blockData.getSfId());
             if (menuPreset != null) {
-                key = new RecordKey(DataScope.BLOCK_INVENTORY);
-                key.addCondition(FieldKey.LOCATION, blockData.getKey());
-                key.addField(FieldKey.INVENTORY_SLOT);
-                key.addField(FieldKey.INVENTORY_ITEM);
+                var menuKey = new RecordKey(DataScope.BLOCK_INVENTORY);
+                menuKey.addCondition(FieldKey.LOCATION, blockData.getKey());
+                menuKey.addField(FieldKey.INVENTORY_SLOT);
+                menuKey.addField(FieldKey.INVENTORY_ITEM);
 
                 var inv = new ItemStack[54];
-                getData(key).forEach(record -> inv[record.getInt(FieldKey.INVENTORY_SLOT)] = record.getItemStack(FieldKey.INVENTORY_ITEM));
+                getData(menuKey).forEach(record -> inv[record.getInt(FieldKey.INVENTORY_SLOT)] = record.getItemStack(FieldKey.INVENTORY_ITEM));
                 blockData.setBlockMenu(new BlockMenu(menuPreset, blockData.getLocation(), inv));
             }
 
