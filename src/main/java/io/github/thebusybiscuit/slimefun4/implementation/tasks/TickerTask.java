@@ -9,10 +9,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitScheduler;
 
@@ -185,13 +183,12 @@ public class TickerTask implements Runnable {
             bugs.put(position, errors);
         } else if (errors == 4) {
             Slimefun.logger().log(Level.SEVERE, "X: {0} Y: {1} Z: {2} ({3})", new Object[] { l.getBlockX(), l.getBlockY(), l.getBlockZ(), item.getId() });
-            Slimefun.logger().log(Level.SEVERE, "has thrown 4 error messages in the last 4 Ticks, the Block has been terminated.");
-            Slimefun.logger().log(Level.SEVERE, "Check your /plugins/Slimefun/error-reports/ folder for details.");
+            Slimefun.logger().log(Level.SEVERE, "在过去的4个Tick中连续发生错误，该方块的Ticker已被暂时移除。");
+            Slimefun.logger().log(Level.SEVERE, "请在 /plugins/Slimefun/error-reports/ 文件夹中查看错误详情。");
             Slimefun.logger().log(Level.SEVERE, " ");
             bugs.remove(position);
 
-            Slimefun.getDatabaseManager().getBlockDataController().removeBlock(l);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(Slimefun.instance(), () -> l.getBlock().setType(Material.AIR));
+            disableTicker(l);
         } else {
             bugs.put(position, errors);
         }
