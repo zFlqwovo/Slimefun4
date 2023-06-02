@@ -191,19 +191,23 @@ public class SlimefunItem implements Placeable {
      * This method returns the {@link ItemState} this {@link SlimefunItem}
      * is currently in. This can be used to determine whether a {@link SlimefunItem}
      * is enabled or disabled.
-     * 
+     *
      * {@link VanillaItem} represents a special case here.
-     * 
+     *
      * @return The {@link ItemState} of this {@link SlimefunItem}
      */
     public @Nonnull ItemState getState() {
         return state;
     }
 
+    protected void setState(ItemState state) {
+        this.state = state;
+    }
+
     /**
      * This returns the {@link ItemStack} of this {@link SlimefunItem}.
      * The {@link ItemStack} describes the look and feel of this {@link SlimefunItem}.
-     * 
+     *
      * @return The {@link ItemStack} that this {@link SlimefunItem} represents
      */
     public @Nonnull ItemStack getItem() {
@@ -213,7 +217,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This returns the {@link ItemGroup} of our {@link SlimefunItem}, every {@link SlimefunItem}
      * is associated with exactly one {@link ItemGroup}.
-     * 
+     *
      * @return The {@link ItemGroup} that this {@link SlimefunItem} belongs to
      */
     public @Nonnull ItemGroup getItemGroup() {
@@ -232,7 +236,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This method returns the {@link RecipeType}.
      * The {@link RecipeType} determines how this {@link SlimefunItem} is crafted.
-     * 
+     *
      * @return The {@link RecipeType} of this {@link SlimefunItem}
      */
     public @Nonnull RecipeType getRecipeType() {
@@ -241,7 +245,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This method returns the result of crafting this {@link SlimefunItem}
-     * 
+     *
      * @return The recipe output of this {@link SlimefunItem}
      */
     public @Nonnull ItemStack getRecipeOutput() {
@@ -251,7 +255,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This method returns the {@link Research} this {@link SlimefunItem} is linked to.
      * This will be null if the item is not linked to any {@link Research}
-     * 
+     *
      * @return The linked {@link Research} or null
      */
     public final @Nullable Research getResearch() {
@@ -262,7 +266,7 @@ public class SlimefunItem implements Placeable {
      * This returns whether this {@link SlimefunItem} has a {@link Research}
      * assigned to it.
      * It is equivalent to a null check performed on {@link #getResearch()}.
-     * 
+     *
      * @return Whether this {@link SlimefunItem} has a {@link Research}
      */
     public final boolean hasResearch() {
@@ -271,7 +275,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This returns a {@link Set} containing all instances of {@link ItemSetting} for this {@link SlimefunItem}.
-     * 
+     *
      * @return A {@link Set} of every {@link ItemSetting} for this {@link SlimefunItem}
      */
     public @Nonnull Set<ItemSetting<?>> getItemSettings() {
@@ -281,14 +285,10 @@ public class SlimefunItem implements Placeable {
     /**
      * This method returns an {@link Optional} holding an {@link ItemSetting} with the given
      * key and data type. Or an empty {@link Optional} if this {@link SlimefunItem} has no such {@link ItemSetting}.
-     * 
-     * @param <T>
-     *            The Type of value stored in this {@link ItemSetting}
-     * @param key
-     *            The key of this {@link ItemSetting}
-     * @param c
-     *            The {@link Class} of the type of value stored by this setting
-     * 
+     *
+     * @param <T> The Type of value stored in this {@link ItemSetting}
+     * @param key The key of this {@link ItemSetting}
+     * @param c   The {@link Class} of the type of value stored by this setting
      * @return An {@link Optional} describing the result
      */
     @SuppressWarnings("unchecked")
@@ -305,7 +305,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This returns whether or not this {@link SlimefunItem} is allowed to be used in
      * an {@link AutoEnchanter}.
-     * 
+     *
      * @return Whether this {@link SlimefunItem} can be enchanted.
      */
     public boolean isEnchantable() {
@@ -315,7 +315,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This returns whether or not this {@link SlimefunItem} is allowed to be used in
      * an {@link AutoDisenchanter}.
-     * 
+     *
      * @return Whether this {@link SlimefunItem} can be disenchanted.
      */
     public boolean isDisenchantable() {
@@ -325,7 +325,7 @@ public class SlimefunItem implements Placeable {
     /**
      * This method returns whether this {@link SlimefunItem} was hidden from the
      * {@link SlimefunGuide}.
-     * 
+     *
      * @return Whether this {@link SlimefunItem} is hidden.
      */
     public final boolean isHidden() {
@@ -334,9 +334,8 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This method will forcefully hide this {@link SlimefunItem} from the {@link SlimefunGuide}.
-     * 
-     * @param hidden
-     *            Whether to hide this {@link SlimefunItem} or not
+     *
+     * @param hidden Whether to hide this {@link SlimefunItem} or not
      */
     public void setHidden(boolean hidden) {
         if (this.hidden != hidden) {
@@ -354,7 +353,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This method returns whether this {@link SlimefunItem} is disabled.
-     * 
+     *
      * @return Whether this {@link SlimefunItem} is disabled.
      */
     public boolean isDisabled() {
@@ -370,10 +369,8 @@ public class SlimefunItem implements Placeable {
      * This method returns whether this {@link SlimefunItem} is disabled
      * for that specific {@link World}.
      * Note that if the item is disabled globally, this method will still return false.
-     * 
-     * @param world
-     *            The {@link World} to check
-     * 
+     *
+     * @param world The {@link World} to check
      * @return Whether this {@link SlimefunItem} is disabled in that world (or in general).
      */
     public boolean isDisabledIn(@Nonnull World world) {
@@ -391,7 +388,7 @@ public class SlimefunItem implements Placeable {
      * {@link SlimefunItem}. If this Item is from Slimefun itself, the current
      * instance of {@link Slimefun} will be returned.
      * Use an instanceof check to account for that.
-     * 
+     *
      * @return The {@link SlimefunAddon} that registered this {@link SlimefunItem}
      */
     public final @Nonnull SlimefunAddon getAddon() {
@@ -410,9 +407,8 @@ public class SlimefunItem implements Placeable {
      * This method registers this {@link SlimefunItem}.
      * Always call this method after your {@link SlimefunItem} has been initialized.
      * Never call it more than once!
-     * 
-     * @param addon
-     *            The {@link SlimefunAddon} that this {@link SlimefunItem} belongs to.
+     *
+     * @param addon The {@link SlimefunAddon} that this {@link SlimefunItem} belongs to.
      */
     public void register(@Nonnull SlimefunAddon addon) {
         Validate.notNull(addon, "A SlimefunAddon cannot be null!");
@@ -497,26 +493,30 @@ public class SlimefunItem implements Placeable {
         }
     }
 
+    public void enable() {
+        if (state != ItemState.DISABLED) {
+            return;
+        }
+
+        if (this instanceof Radioactive) {
+            Slimefun.getRegistry().getRadioactiveItems().add(this);
+        }
+
+        state = ItemState.ENABLED;
+
+        Slimefun.getRegistry().getEnabledSlimefunItems().add(this);
+    }
+
     /**
      * This method is called when this {@link SlimefunItem} is disabled after reloaded.
      */
-    public void unregister() {
+    public void disable() {
         if (this instanceof Radioactive) {
             Slimefun.getRegistry().getRadioactiveItems().remove(this);
         }
 
         // Disable ticking block
         Slimefun.getRegistry().getTickerBlocks().remove(getId());
-
-        // Remove item from item group
-        itemGroup.remove(this);
-
-        // Remove item from research
-        if (research != null) {
-            research.getAffectedItems().remove(this);
-        }
-
-        recipeType.unregister(recipe, getRecipeOutput());
 
         state = ItemState.DISABLED;
 

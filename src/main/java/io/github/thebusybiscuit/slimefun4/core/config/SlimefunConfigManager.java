@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.core.config;
 
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemSetting;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemState;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
@@ -120,17 +121,18 @@ public class SlimefunConfigManager {
             }
         }
 
-        var enabledItemSnapshot = new ArrayList<>(Slimefun.getRegistry().getEnabledSlimefunItems());
+        var enabledItemSnapshot = new ArrayList<>(Slimefun.getRegistry().getAllSlimefunItems());
 
         for (SlimefunItem item : enabledItemSnapshot) {
-            var itemStatus = itemsConfig.getBoolean(item.getId() + ".enabled");
+            var newState = itemsConfig.getBoolean(item.getId() + ".enabled") ? ItemState.ENABLED : ItemState.DISABLED;
 
-            if (item.isDisabled() == itemStatus) {
-                if (itemStatus && SlimefunItem.getById(item.getId()) == null) {
-                    item.register(item.getAddon());
-                } else {
-                    item.unregister();
-                    continue;
+            if (item.getState() != newState) {
+                switch (newState) {
+                    case ENABLED -> item.enable();
+                    case DISABLED -> {
+                        item.disable();
+                        continue;
+                    }
                 }
             }
 
