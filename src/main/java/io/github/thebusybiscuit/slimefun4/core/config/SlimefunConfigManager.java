@@ -5,6 +5,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemSetting;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.researches.Research;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
@@ -96,8 +97,10 @@ public class SlimefunConfigManager {
             isSuccessful = false;
         }
 
+        var researchSnapshot = new ArrayList<>(Slimefun.getRegistry().getResearches());
+
         // Reload Research costs
-        for (Research research : Slimefun.getRegistry().getResearches()) {
+        for (Research research : researchSnapshot) {
             try {
                 NamespacedKey key = research.getKey();
                 int cost = researchesConfig.getInt(key.getNamespace() + '.' + key.getKey() + ".cost");
@@ -117,14 +120,17 @@ public class SlimefunConfigManager {
             }
         }
 
-        for (SlimefunItem item : Slimefun.getRegistry().getAllSlimefunItems()) {
+        var enabledItemSnapshot = new ArrayList<>(Slimefun.getRegistry().getEnabledSlimefunItems());
+
+        for (SlimefunItem item : enabledItemSnapshot) {
             var itemStatus = itemsConfig.getBoolean(item.getId() + ".enabled");
+
             if (item.isDisabled() == itemStatus) {
                 if (itemStatus && SlimefunItem.getById(item.getId()) == null) {
                     item.register(item.getAddon());
                 } else {
-                    // FIXME: Unsafe
                     item.unregister();
+                    continue;
                 }
             }
 
