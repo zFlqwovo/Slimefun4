@@ -509,14 +509,16 @@ public class SlimefunItem implements Placeable {
         Slimefun.getRegistry().getTickerBlocks().remove(getId());
 
         // Remove item from item group
-        this.itemGroup.remove(this);
+        itemGroup.remove(this);
+
         // Remove item from research
-        this.research.getAffectedItems().remove(this);
+        if (research != null) {
+            research.getAffectedItems().remove(this);
+        }
 
         recipeType.unregister(recipe, getRecipeOutput());
 
         Slimefun.getRegistry().getEnabledSlimefunItems().remove(this);
-        Slimefun.getRegistry().getSlimefunItemIds().remove(id, this);
     }
 
     /**
