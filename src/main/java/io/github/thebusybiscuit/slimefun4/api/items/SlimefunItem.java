@@ -200,10 +200,6 @@ public class SlimefunItem implements Placeable {
         return state;
     }
 
-    protected void setState(ItemState state) {
-        this.state = state;
-    }
-
     /**
      * This returns the {@link ItemStack} of this {@link SlimefunItem}.
      * The {@link ItemStack} describes the look and feel of this {@link SlimefunItem}.
