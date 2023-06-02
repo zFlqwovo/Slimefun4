@@ -518,6 +518,8 @@ public class SlimefunItem implements Placeable {
 
         recipeType.unregister(recipe, getRecipeOutput());
 
+        state = ItemState.DISABLED;
+
         Slimefun.getRegistry().getEnabledSlimefunItems().remove(this);
     }
 
