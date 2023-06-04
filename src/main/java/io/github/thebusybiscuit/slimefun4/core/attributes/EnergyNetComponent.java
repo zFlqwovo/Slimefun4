@@ -3,6 +3,7 @@ package io.github.thebusybiscuit.slimefun4.core.attributes;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
+import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNet;
 import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNetComponentType;
@@ -85,10 +86,34 @@ public interface EnergyNetComponent extends ItemAttribute {
         return getCharge(l, blockData);
     }
 
+    @Deprecated
+    default int getCharge(@Nonnull Location l, @Nonnull Config config) {
+        Slimefun.logger().log(Level.FINE, "正在调用旧 BlockStorage 的方法, 建议使用对应附属的新方块存储适配版.");
+
+        Validate.notNull(l, "Location was null!");
+
+        // Emergency fallback, this cannot hold a charge, so we'll just return zero
+        if (!isChargeable()) {
+            return 0;
+        }
+
+        var blockData = StorageCacheUtils.getBlock(l);
+        if (blockData == null || blockData.isPendingRemove()) {
+            return 0;
+        }
+
+        if (!blockData.isDataLoaded()) {
+            StorageCacheUtils.requestLoad(blockData);
+            return 0;
+        }
+
+        return getCharge(l, blockData);
+    }
+
     /**
      * This returns the currently stored charge at a given {@link Location}.
      * object for this {@link Location}.
-     * 
+     *
      * @param l
      *            The target {@link Location}
      * @param data
