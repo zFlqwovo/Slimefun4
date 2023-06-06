@@ -292,8 +292,8 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         registry.load(this);
 
         logger.log(Level.INFO, "正在加载数据库...");
-        PlayerProfileMigrator.checkOldData();
-        BlockStorageMigrator.checkOldData();
+        PlayerProfileMigrator.getInstance().checkOldData();
+        BlockStorageMigrator.getInstance().checkOldData();
         databaseManager.init();
 
         // Set up localization
