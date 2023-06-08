@@ -33,7 +33,7 @@ public class PlayerProfileMigrator implements IMigrator {
 
     @Override
     public boolean isOldDataExists() {
-        return MigratorUtil.checkMigrateMark(this)
+        return MigratorUtil.checkMigrateMark()
                 || (playerFolder.exists() && playerFolder.listFiles() != null && playerFolder.listFiles().length > 0);
     }
 
@@ -101,7 +101,6 @@ public class PlayerProfileMigrator implements IMigrator {
                 result = MigrateStatus.FAILED;
                 Slimefun.logger().log(Level.WARNING, "删除旧玩家数据文件夹失败, 请手动删除", e);
             }
-            MigratorUtil.markMigrated(this);
         }
 
         migrateLock = false;

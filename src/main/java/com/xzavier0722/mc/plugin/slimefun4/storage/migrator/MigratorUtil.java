@@ -45,15 +45,8 @@ class MigratorUtil {
         }
     }
 
-    protected static void markMigrated(IMigrator migrator) {
-        try {
-            Files.createFile(Path.of("data-storage/Slimefun/marks" + migrator + ".mark"));
-        } catch (Exception e) {
-            Slimefun.logger().log(Level.WARNING, "为 " + migrator.getName() + " 创建已迁移标记时出现问题", e);
-        }
-    }
-
-    protected static boolean checkMigrateMark(IMigrator migrator) {
-        return Files.exists(Path.of("data-storage/Slimefun/marks/" + migrator + ".mark"));
+    protected static boolean checkMigrateMark() {
+        var backupData = new File("data-storage/Slimefun/old_data/");
+        return backupData.exists() && backupData.isDirectory() && backupData.listFiles() != null && backupData.listFiles().length > 0;
     }
 }

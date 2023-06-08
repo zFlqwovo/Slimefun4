@@ -39,7 +39,7 @@ public class BlockStorageMigrator implements IMigrator {
 
     @Override
     public boolean isOldDataExists() {
-        return MigratorUtil.checkMigrateMark(this) || hasBlockData() || chunk.exists();
+        return MigratorUtil.checkMigrateMark() || hasBlockData() || chunk.exists();
     }
 
     @Override
@@ -90,8 +90,6 @@ public class BlockStorageMigrator implements IMigrator {
             Slimefun.logger().log(Level.WARNING, "备份旧数据 " + chunk.getName() + " 时出现问题", e);
             status = MigrateStatus.FAILED;
         }
-
-        MigratorUtil.markMigrated(this);
 
         migrateLock = false;
 
