@@ -301,7 +301,7 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
         } else if (isSurvivalMode() && research != null && !profile.hasUnlocked(research)) {
             String lore;
 
-            if (VaultIntegration.isUsable()) {
+            if (VaultIntegration.isEnabled()) {
                 lore = String.format("%.2f", research.getCurrencyCost()) + " 游戏币";
             } else {
                 lore = research.getLevelCost() + " 级经验";
