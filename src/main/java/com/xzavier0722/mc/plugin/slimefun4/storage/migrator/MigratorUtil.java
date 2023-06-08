@@ -36,4 +36,17 @@ class MigratorUtil {
             return false;
         }
     }
+
+    protected static void deleteOldFolder(File dir) {
+        try {
+            Files.delete(dir.toPath());
+        } catch (Exception e) {
+            Slimefun.logger().log(Level.WARNING, "删除文件夹 " + dir.getAbsolutePath() + " 时出现问题", e);
+        }
+    }
+
+    protected static boolean checkMigrateMark() {
+        var backupData = new File("data-storage/Slimefun/old_data/");
+        return backupData.exists() && backupData.isDirectory() && backupData.listFiles() != null && backupData.listFiles().length > 0;
+    }
 }
