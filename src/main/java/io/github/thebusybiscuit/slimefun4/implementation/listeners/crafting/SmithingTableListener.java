@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners.crafting;
 
+import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
 import javax.annotation.Nonnull;
 
 import org.bukkit.entity.Player;
@@ -27,13 +28,19 @@ public class SmithingTableListener implements SlimefunCraftingListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onSmith(InventoryClickEvent e) {
-        if (e.getInventory().getType() == InventoryType.SMITHING && e.getRawSlot() == 2 && e.getWhoClicked() instanceof Player) {
-            ItemStack materialItem = e.getInventory().getContents()[1];
+        if (e.getInventory().getType() == InventoryType.SMITHING && e.getWhoClicked() instanceof Player p) {
+            ItemStack materialItem;
+
+            if (Slimefun.getMinecraftVersion().isAtLeast(MinecraftVersion.MINECRAFT_1_20) && e.getRawSlot() == 3) {
+                materialItem = e.getInventory().getContents()[2];
+            } else {
+                materialItem = e.getInventory().getContents()[1];
+            }
 
             // Checks if the item in the Material/Netherite slot is allowed to be used.
             if (isUnallowed(materialItem)) {
                 e.setResult(Result.DENY);
-                Slimefun.getLocalization().sendMessage(e.getWhoClicked(), "smithing_table.not-working", true);
+                Slimefun.getLocalization().sendMessage(p, "smithing_table.not-working", true);
             }
         }
     }
