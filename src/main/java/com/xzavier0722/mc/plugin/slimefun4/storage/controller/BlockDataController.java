@@ -337,6 +337,7 @@ public class BlockDataController extends ADataController {
                             false
                     )
             );
+            blockData.setIsDataLoaded(true);
 
             var menuPreset = BlockMenuPreset.getPreset(blockData.getSfId());
             if (menuPreset != null) {
@@ -349,8 +350,6 @@ public class BlockDataController extends ADataController {
                 getData(menuKey).forEach(record -> inv[record.getInt(FieldKey.INVENTORY_SLOT)] = record.getItemStack(FieldKey.INVENTORY_ITEM));
                 blockData.setBlockMenu(new BlockMenu(menuPreset, blockData.getLocation(), inv));
             }
-
-            blockData.setIsDataLoaded(true);
         } finally {
             lock.unlock(key);
         }
