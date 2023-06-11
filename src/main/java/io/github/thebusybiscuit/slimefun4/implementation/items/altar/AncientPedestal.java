@@ -1,26 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.altar;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.util.Vector;
-
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
 import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.items.CustomItemStack;
@@ -37,6 +17,26 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunIte
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.AncientAltarListener;
 import io.github.thebusybiscuit.slimefun4.implementation.tasks.AncientAltarTask;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.Vector;
 
 /**
  * The {@link AncientPedestal} is a part of the {@link AncientAltar}.
@@ -55,6 +55,8 @@ import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
 
     public static final String ITEM_PREFIX = ChatColors.color("&dALTAR &3Probe - &e");
+
+    private static final NamespacedKey ALTAR_ITEM_BASE64 = new NamespacedKey(Slimefun.instance(), "ALTAR_ITEM_BASE64");
 
     private static final Map<BlockPosition, UUID> pedestalVirtualItemCache = new ConcurrentHashMap<>();
 
@@ -127,16 +129,25 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
 
     public @Nonnull ItemStack getOriginalItemStack(@Nonnull Item item) {
         ItemStack stack = item.getItemStack().clone();
-        String customName = item.getCustomName();
+        var im = stack.getItemMeta();
 
-        if (customName.equals(ItemUtils.getItemName(new ItemStack(stack.getType())))) {
-            ItemMeta im = stack.getItemMeta();
-            im.setDisplayName(null);
-            stack.setItemMeta(im);
-        } else {
-            ItemMeta im = stack.getItemMeta();
-            im.setDisplayName(customName);
-            stack.setItemMeta(im);
+        if (im != null) {
+            var itemBase64 = im.getPersistentDataContainer().get(ALTAR_ITEM_BASE64, PersistentDataType.STRING);
+            var originalItem = DataUtils.string2ItemStack(itemBase64);
+
+            if (originalItem != null) {
+                return originalItem;
+            } else {
+                String customName = item.getCustomName();
+
+                if (customName.equals(ItemUtils.getItemName(new ItemStack(stack.getType())))) {
+                    im.setDisplayName(null);
+                    stack.setItemMeta(im);
+                } else {
+                    im.setDisplayName(customName);
+                    stack.setItemMeta(im);
+                }
+            }
         }
 
         return stack;
@@ -145,6 +156,12 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
     public void placeItem(@Nonnull Player p, @Nonnull Block b) {
         ItemStack hand = p.getInventory().getItemInMainHand();
         ItemStack displayItem = new CustomItemStack(hand, ITEM_PREFIX + System.nanoTime());
+        ItemStack handCopy = hand.clone();
+        handCopy.setAmount(1);
+
+        var displayItemMeta = displayItem.getItemMeta();
+        displayItemMeta.getPersistentDataContainer().set(ALTAR_ITEM_BASE64, PersistentDataType.STRING, DataUtils.itemStack2String(handCopy));
+        displayItem.setItemMeta(displayItemMeta);
         displayItem.setAmount(1);
 
         // Get the display name of the original Item in the Player's hand
