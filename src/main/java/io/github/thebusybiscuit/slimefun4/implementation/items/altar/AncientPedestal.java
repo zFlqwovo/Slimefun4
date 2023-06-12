@@ -1,6 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.altar;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
+import city.norain.slimefun4.pdc.datatypes.DataTypes;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
 import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.items.CustomItemStack;
@@ -35,7 +35,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
 /**
@@ -56,7 +55,7 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
 
     public static final String ITEM_PREFIX = ChatColors.color("&dALTAR &3Probe - &e");
 
-    private static final NamespacedKey ALTAR_ITEM_BASE64 = new NamespacedKey(Slimefun.instance(), "ALTAR_ITEM_BASE64");
+    private static final NamespacedKey ALTAR_DISPLAY_ITEM = new NamespacedKey(Slimefun.instance(), "ALTAR_DISPLAY_ITEM");
 
     private static final Map<BlockPosition, UUID> pedestalVirtualItemCache = new ConcurrentHashMap<>();
 
@@ -132,8 +131,7 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
         var im = stack.getItemMeta();
 
         if (im != null) {
-            var itemBase64 = im.getPersistentDataContainer().get(ALTAR_ITEM_BASE64, PersistentDataType.STRING);
-            var originalItem = DataUtils.string2ItemStack(itemBase64);
+            var originalItem = im.getPersistentDataContainer().get(ALTAR_DISPLAY_ITEM, DataTypes.ITEMSTACK);
 
             if (originalItem != null) {
                 return originalItem;
@@ -160,7 +158,7 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
         handCopy.setAmount(1);
 
         var displayItemMeta = displayItem.getItemMeta();
-        displayItemMeta.getPersistentDataContainer().set(ALTAR_ITEM_BASE64, PersistentDataType.STRING, DataUtils.itemStack2String(handCopy));
+        displayItemMeta.getPersistentDataContainer().set(ALTAR_DISPLAY_ITEM, DataTypes.ITEMSTACK, handCopy);
         displayItem.setItemMeta(displayItemMeta);
         displayItem.setAmount(1);
 
