@@ -362,6 +362,11 @@ public class BlockDataController extends ADataController {
         });
     }
 
+    public void loadBlockDataAsync(List<SlimefunBlockData> blockDataList, IAsyncReadCallback<List<SlimefunBlockData>> callback) {
+        scheduleReadTask(() -> blockDataList.forEach(this::loadBlockData));
+        invokeCallback(callback, blockDataList);
+    }
+
     public SlimefunChunkData getChunkData(Chunk chunk) {
         checkDestroy();
         loadChunk(chunk, false);
