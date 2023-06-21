@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 
 class EnvironmentChecker {
-    private static final List<String> UNSUPPORTED_PLUGINS = List.of("BedrockTechnology", "SlimefunFix", "SlimefunBugFixer");
+    private static final List<String> UNSUPPORTED_PLUGINS = List.of("BedrockTechnology", "SlimefunFix", "SlimefunBugFixer", "Slimefunbookfix");
 
     static void checkUnsupportedPlugins(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         for (String name : UNSUPPORTED_PLUGINS) {
