@@ -59,7 +59,7 @@ public class PlayerProfileMigrator implements IMigrator {
 
         var listFiles = playerFolder.listFiles();
 
-        if (!isOldDataExists()) {
+        if (!isOldDataExists() || listFiles == null) {
             migrateLock = false;
             return MigrateStatus.MIGRATED;
         }
