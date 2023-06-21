@@ -104,4 +104,26 @@ public class StorageCacheUtils {
                 }
         );
     }
+
+    public static void executeAfterLoad(SlimefunBlockData data, Runnable execute, boolean runOnMainThread) {
+        if (data.isDataLoaded()) {
+            execute.run();
+            return;
+        }
+
+        Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
+                data,
+                new IAsyncReadCallback<>() {
+                    @Override
+                    public boolean runOnMainThread() {
+                        return runOnMainThread;
+                    }
+
+                    @Override
+                    public void onResult(SlimefunBlockData result) {
+                        execute.run();
+                    }
+                }
+        );
+    }
 }
