@@ -47,6 +47,12 @@ class MigratorUtil {
 
     protected static void deleteOldFolder(File dir) {
         try {
+            if (dir.isDirectory() && dir.listFiles() != null) {
+                for (File file : dir.listFiles()) {
+                    Files.delete(file.toPath());
+                }
+            }
+
             Files.delete(dir.toPath());
         } catch (Exception e) {
             Slimefun.logger().log(Level.WARNING, "删除文件夹 " + dir.getAbsolutePath() + " 时出现问题", e);
