@@ -99,6 +99,13 @@ public class BlockDataController extends ADataController {
         enableDelayedSaving = isEnable;
     }
 
+    /**
+     * Creates a new slimefun block data at specific location
+     *
+     * @param l    slimefun block location {@link Location}
+     * @param sfId slimefun block id {@link SlimefunItem#getId()}
+     * @return {@link SlimefunBlockData}
+     */
     @Nonnull
     public SlimefunBlockData createBlock(Location l, String sfId) {
         checkDestroy();
@@ -125,6 +132,11 @@ public class BlockDataController extends ADataController {
         scheduleWriteTask(scopeKey, key, data, true);
     }
 
+    /**
+     * Remove slimefun block data at specific location
+     *
+     * @param l slimefun block location {@link Location}
+     */
     public void removeBlock(Location l) {
         checkDestroy();
         var removed = getChunkDataCache(l.getChunk(), true).removeBlockData(l);
@@ -152,6 +164,12 @@ public class BlockDataController extends ADataController {
         scheduleDeleteTask(scopeKey, key, true);
     }
 
+    /**
+     * Get slimefun block data at specific location
+     *
+     * @param l slimefun block location {@link Location}
+     * @return {@link SlimefunBlockData}
+     */
     @Nullable
     @ParametersAreNonnullByDefault
     public SlimefunBlockData getBlockData(Location l) {
@@ -180,16 +198,28 @@ public class BlockDataController extends ADataController {
         return re;
     }
 
+    /**
+     * Get slimefun block data at specific location async
+     *
+     * @param l        slimefun block location {@link Location}
+     * @param callback operation when block data fetched {@link IAsyncReadCallback}
+     */
     public void getBlockDataAsync(Location l, IAsyncReadCallback<SlimefunBlockData> callback) {
         scheduleReadTask(() -> invokeCallback(callback, getBlockData(l)));
     }
 
+    /**
+     * Get slimefun block data at specific location from cache
+     *
+     * @param l slimefun block location {@link Location}
+     * @return {@link SlimefunBlockData}
+     */
     public SlimefunBlockData getBlockDataFromCache(Location l) {
         return getBlockDataFromCache(LocationUtils.getChunkKey(l.getChunk()), LocationUtils.getLocKey(l));
     }
 
     /**
-     * Move block data to specific location.
+     * Move block data to specific location
      * <p>
      * Similar to original BlockStorage#move.
      *
