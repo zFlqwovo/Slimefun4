@@ -10,7 +10,6 @@ import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNet;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -45,7 +44,6 @@ public class EnergyRegulator extends SlimefunItem implements HologramOwner {
             @Override
             public void onBlockBreak(@Nonnull Block b) {
                 removeHologram(b);
-                Slimefun.getNetworkManager().updateAllNetworks(b.getLocation());
             }
         };
     }

@@ -139,6 +139,9 @@ public class BlockDataController extends ADataController {
      */
     public void removeBlock(Location l) {
         checkDestroy();
+
+        Slimefun.getNetworkManager().updateAllNetworks(l);
+
         var removed = getChunkDataCache(l.getChunk(), true).removeBlockData(l);
         if (removed == null) {
             return;
