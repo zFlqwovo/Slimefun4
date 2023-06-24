@@ -62,11 +62,17 @@ public class BlockDataController extends ADataController {
     }
 
     private void loadLoadedChunks() {
-        for (var world : Bukkit.getWorlds()) {
-            for (var chunk : world.getLoadedChunks()) {
-                loadChunk(chunk, false);
-            }
-        }
+        Bukkit.getScheduler().runTaskLater(
+                Slimefun.instance(),
+                () -> {
+                    for (var world : Bukkit.getWorlds()) {
+                        for (var chunk : world.getLoadedChunks()) {
+                            loadChunk(chunk, false);
+                        }
+                    }
+                },
+                1
+        );
     }
 
     public void initDelayedSaving(Plugin p, int delayedSecond, int forceSavePeriod) {
