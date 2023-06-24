@@ -408,6 +408,11 @@ public class BlockDataController extends ADataController {
                 var inv = new ItemStack[54];
                 getData(menuKey).forEach(record -> inv[record.getInt(FieldKey.INVENTORY_SLOT)] = record.getItemStack(FieldKey.INVENTORY_ITEM));
                 blockData.setBlockMenu(new BlockMenu(menuPreset, blockData.getLocation(), inv));
+
+                var content = blockData.getMenuContents();
+                if (content != null) {
+                    invSnapshots.put(blockData.getKey(), InvStorageUtils.getInvSnapshot(content));
+                }
             }
         } finally {
             lock.unlock(key);
