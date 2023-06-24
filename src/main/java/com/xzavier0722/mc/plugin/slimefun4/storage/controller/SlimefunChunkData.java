@@ -13,10 +13,15 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
 public class SlimefunChunkData extends ASlimefunDataContainer {
+    private static final SlimefunBlockData INVALID_BLOCK_DATA = new SlimefunBlockData(
+            new Location(Bukkit.getWorlds().get(0), Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE),
+            "INVALID_BLOCK_DATA_SF_KEY"
+    );
     private final Chunk chunk;
     private final Map<String, SlimefunBlockData> sfBlocks;
 
@@ -36,7 +41,7 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
     @ParametersAreNonnullByDefault
     public SlimefunBlockData createBlockData(Location l, String sfId) {
         var lKey = LocationUtils.getLocKey(l);
-        if (sfBlocks.get(lKey) != null) {
+        if (getBlockCacheInternal(lKey) != null) {
             throw new IllegalStateException("There already a block in this location: " + lKey);
         }
         var re = new SlimefunBlockData(l, sfId);
@@ -61,19 +66,19 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
     @ParametersAreNonnullByDefault
     public SlimefunBlockData getBlockData(Location l) {
         checkData();
-        return sfBlocks.get(LocationUtils.getLocKey(l));
+        return getBlockCacheInternal(LocationUtils.getLocKey(l));
     }
 
     @Nullable
     @ParametersAreNonnullByDefault
     public SlimefunBlockData removeBlockData(Location l) {
         var lKey = LocationUtils.getLocKey(l);
-        var re = sfBlocks.remove(lKey);
+        var re = removeBlockDataCacheInternal(lKey);
         if (re == null) {
             if (isDataLoaded()) {
                 return null;
             }
-            sfBlocks.put(lKey, null);
+            sfBlocks.put(lKey, INVALID_BLOCK_DATA);
         }
         Slimefun.getDatabaseManager().getBlockDataController().removeBlockDirectly(l);
         return re;
@@ -88,11 +93,14 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
     }
 
     SlimefunBlockData getBlockCacheInternal(String lKey) {
-        return sfBlocks.get(lKey);
+        var re = sfBlocks.get(lKey);
+        return re == INVALID_BLOCK_DATA ? null : re;
     }
 
     Set<SlimefunBlockData> getAllCacheInternal() {
-        return new HashSet<>(sfBlocks.values());
+        var re = new HashSet<>(sfBlocks.values());
+        re.removeIf(v -> v == INVALID_BLOCK_DATA);
+        return re;
     }
 
     boolean hasBlockCache(String lKey) {
@@ -100,7 +108,8 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
     }
 
     SlimefunBlockData removeBlockDataCacheInternal(String lKey) {
-        return sfBlocks.remove(lKey);
+        var re = sfBlocks.put(lKey, INVALID_BLOCK_DATA);
+        return re == INVALID_BLOCK_DATA ? null : re;
     }
 
     @ParametersAreNonnullByDefault
