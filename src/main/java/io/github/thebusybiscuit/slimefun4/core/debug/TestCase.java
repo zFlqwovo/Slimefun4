@@ -20,7 +20,10 @@ public enum TestCase {
 
     DATABASE,
 
-    BACKPACK;
+    BACKPACK,
+
+
+    ENERGYNET;
 
     TestCase() {
     }

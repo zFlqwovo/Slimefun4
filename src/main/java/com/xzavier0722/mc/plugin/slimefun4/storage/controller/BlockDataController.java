@@ -233,9 +233,11 @@ public class BlockDataController extends ADataController {
             return;
         }
 
+        var hasTicker = false;
+
         if (Slimefun.getRegistry().getTickerBlocks().contains(blockData.getSfId())) {
             Slimefun.getTickerTask().disableTicker(blockData.getLocation());
-            Slimefun.getTickerTask().enableTicker(target);
+            hasTicker = true;
         }
 
         var chunk = blockData.getLocation().getChunk();
@@ -282,6 +284,10 @@ public class BlockDataController extends ADataController {
         }
 
         scheduleWriteTask(scopeKey, key, data, true);
+
+        if (hasTicker) {
+            Slimefun.getTickerTask().enableTicker(target);
+        }
     }
 
     private SlimefunBlockData getBlockDataFromCache(String cKey, String lKey) {
