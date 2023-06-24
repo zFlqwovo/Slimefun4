@@ -91,7 +91,7 @@ public class BlockDataController extends ADataController {
                 },
                 key -> {
                     synchronized (delayedWriteTasks) {
-                        delayedWriteTasks.keySet().remove(key);
+                        delayedWriteTasks.remove(key);
                     }
                 }
         ), 20, 20);
