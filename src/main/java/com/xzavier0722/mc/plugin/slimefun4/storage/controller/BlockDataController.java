@@ -16,6 +16,8 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
+import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -186,7 +188,17 @@ public class BlockDataController extends ADataController {
         return getBlockDataFromCache(LocationUtils.getChunkKey(l.getChunk()), LocationUtils.getLocKey(l));
     }
 
+    /**
+     * Move block data to specific location.
+     * <p>
+     * Similar to original BlockStorage#move.
+     *
+     * @param blockData the block data {@link SlimefunBlockData} need to move
+     * @param target    move target {@link Location}
+     */
     public void setBlockDataLocation(SlimefunBlockData blockData, Location target) {
+        Debug.log(TestCase.DATABASE, "Move block data location now, at " + target + ", with " + blockData);
+
         if (LocationUtils.isSameLoc(blockData.getLocation(), target)) {
             return;
         }
@@ -199,7 +211,7 @@ public class BlockDataController extends ADataController {
         var chunk = blockData.getLocation().getChunk();
         var chunkData = getChunkDataCache(chunk, false);
         if (chunkData != null) {
-            chunkData.removeBlockDataCacheInternal(blockData.getKey());
+            chunkData.removeBlockData(blockData.getLocation());
         }
 
         var newBlockData = new SlimefunBlockData(target, blockData);
@@ -212,6 +224,7 @@ public class BlockDataController extends ADataController {
         } else {
             chunkData = getChunkDataCache(target.getChunk(), true);
         }
+
         chunkData.addBlockCacheInternal(newBlockData, true);
 
         var menu = blockData.getBlockMenu();
@@ -237,6 +250,7 @@ public class BlockDataController extends ADataController {
                 }
             }
         }
+
         scheduleWriteTask(scopeKey, key, data, true);
     }
 

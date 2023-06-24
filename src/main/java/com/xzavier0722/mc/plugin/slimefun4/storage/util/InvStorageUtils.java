@@ -7,10 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.bukkit.inventory.ItemStack;
 
 public class InvStorageUtils {
@@ -60,10 +57,7 @@ public class InvStorageUtils {
             }
         }
 
-        var changedItemStacks = re.stream().map(slot -> snapshot.stream().filter(pair -> Objects.equals(pair.getSecondValue(), slot)).findFirst()).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
-
         Debug.log(TestCase.BACKPACK, "changedSlots: " + re);
-        Debug.log(TestCase.BACKPACK, "changedItemStacks: " + changedItemStacks);
 
         return re;
     }
@@ -73,8 +67,6 @@ public class InvStorageUtils {
         for (var each : invContents) {
             re.add(each == null ? emptyPair : new Pair<>(each, each.getAmount()));
         }
-
-        Debug.log(TestCase.BACKPACK, "getInvSnapshot: " + re);
 
         return re;
     }
