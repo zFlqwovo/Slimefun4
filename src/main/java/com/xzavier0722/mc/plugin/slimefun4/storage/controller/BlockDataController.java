@@ -201,7 +201,7 @@ public class BlockDataController extends ADataController {
     /**
      * Get slimefun block data at specific location async
      *
-     * @param l        slimefun block location {@link Location}
+     * @param l slimefun block location {@link Location}
      * @param callback operation when block data fetched {@link IAsyncReadCallback}
      */
     public void getBlockDataAsync(Location l, IAsyncReadCallback<SlimefunBlockData> callback) {
@@ -241,7 +241,7 @@ public class BlockDataController extends ADataController {
         var chunk = blockData.getLocation().getChunk();
         var chunkData = getChunkDataCache(chunk, false);
         if (chunkData != null) {
-            chunkData.removeBlockData(blockData.getLocation());
+            chunkData.removeBlockDataCacheInternal(blockData.getKey());
         }
 
         var newBlockData = new SlimefunBlockData(target, blockData);
