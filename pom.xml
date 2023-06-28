@@ -365,20 +365,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.bekvon.bukkit</groupId>
-            <artifactId>residence</artifactId>
-            <version>4.9.3.5</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/Residence.jar</systemPath>
-            <exclusions>
-                <exclusion>
-                    <!-- We don't need any of the dependencies -->
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.maxgamer</groupId>
             <artifactId>QuickShop</artifactId>
             <version>5.1.0.9</version>
