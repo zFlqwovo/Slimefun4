@@ -281,15 +281,9 @@ public final class SlimefunUtils {
     public static boolean isItemSimilar(@Nullable ItemStack item, @Nullable ItemStack sfitem, boolean checkLore, boolean checkAmount, boolean checkDistinctiveItem, boolean checkCustomModelData) {
         if (item == null) {
             return sfitem == null;
-        } else if (sfitem == null) {
+        } else if (sfitem == null || item.getType() != sfitem.getType() || checkAmount && item.getAmount() < sfitem.getAmount()) {
             return false;
-        } else if (item.getType() != sfitem.getType()) {
-            return false;
-        } else if (checkAmount && item.getAmount() < sfitem.getAmount()) {
-            return false;
-        } else if (checkDistinctiveItem && sfitem instanceof SlimefunItemStack && item instanceof SlimefunItemStack) {
-            SlimefunItemStack stackOne = (SlimefunItemStack) sfitem;
-            SlimefunItemStack stackTwo = (SlimefunItemStack) item;
+        } else if (checkDistinctiveItem && sfitem instanceof SlimefunItemStack stackOne && item instanceof SlimefunItemStack stackTwo) {
             if (stackOne.getItemId().equals(stackTwo.getItemId())) {
                 /*
                  * PR #3417
@@ -297,8 +291,8 @@ public final class SlimefunUtils {
                  * Some items can't rely on just IDs matching and will implement Distinctive Item
                  * in which case we want to use the method provided to compare
                  */
-                if (stackOne instanceof DistinctiveItem && stackTwo instanceof DistinctiveItem) {
-                    return ((DistinctiveItem) stackOne).canStack(stackOne.getItemMeta(), stackTwo.getItemMeta());
+                if (stackOne instanceof DistinctiveItem && stackTwo instanceof DistinctiveItem distinctiveItem) {
+                    return distinctiveItem.canStack(stackOne.getItemMeta(), stackTwo.getItemMeta());
                 }
                 return true;
             }
@@ -307,7 +301,7 @@ public final class SlimefunUtils {
             Debug.log(TestCase.CARGO_INPUT_TESTING, "SlimefunUtils#isItemSimilar - item.hasItemMeta()");
             ItemMeta itemMeta = item.getItemMeta();
 
-            if (sfitem instanceof SlimefunItemStack) {
+            if (sfitem instanceof SlimefunItemStack sfItemStack) {
                 String id = Slimefun.getItemDataService().getItemData(itemMeta).orElse(null);
 
                 if (id != null) {
@@ -324,7 +318,7 @@ public final class SlimefunUtils {
                             return optionalDistinctive.get().canStack(sfItemMeta, itemMeta);
                         }
                     }
-                    return id.equals(((SlimefunItemStack) sfitem).getItemId());
+                    return id.equals(sfItemStack.getItemId());
                 }
 
                 ItemMetaSnapshot meta = ((SlimefunItemStack) sfitem).getItemMetaSnapshot();
@@ -375,8 +369,8 @@ public final class SlimefunUtils {
 
     private static @Nonnull Optional<DistinctiveItem> getDistinctiveItem(@Nonnull String id) {
         SlimefunItem slimefunItem = SlimefunItem.getById(id);
-        if (slimefunItem instanceof DistinctiveItem) {
-            return Optional.of((DistinctiveItem) slimefunItem);
+        if (slimefunItem instanceof DistinctiveItem distinctiveItem) {
+            return Optional.of(distinctiveItem);
         }
         return Optional.empty();
     }
@@ -590,28 +584,5 @@ public final class SlimefunUtils {
     @ParametersAreNonnullByDefault
     public static @Nullable Item spawnItem(Location loc, ItemStack item, ItemSpawnReason reason) {
         return spawnItem(loc, item, reason, false);
-    }
-
-    /**
-     * Helper method to check if an Inventory is empty (has no items in "storage").
-     * If the MC version is 1.16 or above
-     * this will call {@link Inventory#isEmpty()} (Which calls MC code resulting in a faster method).
-     *
-     * @param inventory
-     *            The {@link Inventory} to check.
-     *
-     * @return True if the inventory is empty and false otherwise
-     */
-    public static boolean isInventoryEmpty(@Nonnull Inventory inventory) {
-        if (Slimefun.getMinecraftVersion().isAtLeast(MinecraftVersion.MINECRAFT_1_16)) {
-            return inventory.isEmpty();
-        } else {
-            for (ItemStack is : inventory.getStorageContents()) {
-                if (is != null && !is.getType().isAir()) {
-                    return false;
-                }
-            }
-            return true;
-        }
     }
 }
