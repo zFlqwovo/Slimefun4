@@ -20,7 +20,7 @@ class EnvironmentChecker {
 
     static boolean checkHybridServer(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         try {
-            Class.forName("net/minecraftforge/common/MinecraftForge");
+            Class.forName("net.minecraftforge.common.MinecraftForge");
             logger.log(Level.WARNING, "检测到正在使用混合端, Slimefun 将会被禁用!");
             Bukkit.getPluginManager().disablePlugin(sf);
 
