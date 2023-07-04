@@ -62,10 +62,10 @@ Slimefun 4 可以在 Releases 页面下 **免费下载**.<br>
 目前汉化版仅提供了官方开发版的选项, 但某些发布的版本会被标记为官方的 "稳定" 版.<br>
 以下是两种版本的区别: 
 
-|                      | 开发版 (最新更新)                                                                 | "稳定版"                                                                                 |
+|                      | 金丝雀版 (最新更新)                                                                 | "稳定版"                                                                                 |
 |----------------------|----------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| **支持的 Minecraft 版本** | :video_game: 1.14.X - 1.20.X                                               | :video_game: 1.14.X - 1.19.X                                                          |
-| **Java 版本**          | :computer: **Java 16 (或更高)**                                               | :computer: **Java 8 (或更高)**                                                           |
+| **支持的 Minecraft 版本** | :video_game: 1.16.X - 1.20.X                                               | :video_game: 1.16.X - 1.19.X                                                          |
+| **Java 版本**          | :computer: **Java 16 (或更高)**                                               | :computer: **Java 16 (或更高)**                                                           |
 | **自动更新系统**           | :heavy_check_mark:                                                         | :x:                                                                                   |
 | **频繁更新**             | :heavy_check_mark:                                                         | :x:                                                                                   |
 | **享有最新内容**           | :heavy_check_mark:                                                         | :x:                                                                                   |
@@ -73,9 +73,9 @@ Slimefun 4 可以在 Releases 页面下 **免费下载**.<br>
 | **Bug 反馈**           | :heavy_check_mark:                                                         | :x:                                                                                   |
 | **在发布前进行测试**         | :x:                                                                        | :heavy_check_mark:                                                                    |
 | **有无更新日志**           | :x:                                                                        | :memo: **[更新日志(英文)](https://github.com/Slimefun/Slimefun4/blob/master/CHANGELOG.md)** |
-| **下载链接**             | :package: **[下载 最新版](https://github.com/StarWishsama/Slimefun4/releases)** | :package: **[下载 "稳定版"](https://github.com/StarWishsama/Slimefun4/releases/latest)**   |
+| **下载链接**             | :package: **[下载 最新版](https://builds.guizhanss.net/StarWishsama/Slimefun4/master)** | :package: **[下载 "稳定版"](https://github.com/StarWishsama/Slimefun4/releases/latest)**   |
 
-**! 建议你使用最新版本的开发版, 可以获得最新的内容更新和 Bug 修复 !**
+**! 建议你使用最新版本的金丝雀版, 可以获得最新的内容更新和 Bug 修复 !**
 
 ## :framed_picture: 截图
 
