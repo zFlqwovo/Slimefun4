@@ -13,14 +13,14 @@ class EnvironmentChecker {
     static void checkUnsupportedPlugins(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         for (String name : UNSUPPORTED_PLUGINS) {
             if (sf.getServer().getPluginManager().isPluginEnabled(name)) {
-                logger.log(Level.WARNING, "检测到安装了 {0}, 该插件已不再兼容新版 Slimefun!", name);
+                logger.log(Level.WARNING, "检测到安装了 {0}, 该插件已不再兼容新版 Slimefun, 可能会带来不良效果!", name);
             }
         }
     }
 
     static boolean checkHybridServer(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         try {
-            Class.forName("net/minecraftforge/common/MinecraftForge");
+            Class.forName("net.minecraftforge.common.MinecraftForge");
             logger.log(Level.WARNING, "检测到正在使用混合端, Slimefun 将会被禁用!");
             Bukkit.getPluginManager().disablePlugin(sf);
 
