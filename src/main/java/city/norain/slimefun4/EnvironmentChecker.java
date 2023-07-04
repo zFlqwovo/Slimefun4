@@ -13,7 +13,7 @@ class EnvironmentChecker {
     static void checkUnsupportedPlugins(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         for (String name : UNSUPPORTED_PLUGINS) {
             if (sf.getServer().getPluginManager().isPluginEnabled(name)) {
-                logger.log(Level.WARNING, "检测到安装了 {0}, 该插件已不再兼容新版 Slimefun!", name);
+                logger.log(Level.WARNING, "检测到安装了 {0}, 该插件已不再兼容新版 Slimefun, 可能会带来不良效果!", name);
             }
         }
     }
