@@ -11,6 +11,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockDispenseHandler;
+import io.github.thebusybiscuit.slimefun4.core.services.sounds.SoundEffect;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.handlers.SimpleBlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunItem;
@@ -178,7 +179,7 @@ public class AncientPedestal extends SimpleSlimefunItem<BlockDispenseHandler> {
             entity.setCustomNameVisible(true);
             entity.setCustomName(nametag);
             SlimefunUtils.markAsNoPickup(entity, "altar_item");
-            p.playSound(pedestalLocation, Sound.ENTITY_ITEM_PICKUP, 0.3F, 0.3F);
+            SoundEffect.ANCIENT_PEDESTAL_ITEM_PLACE_SOUND.playAt(b);
 
             startItemWatcher(pedestalLocation, entity);
         }

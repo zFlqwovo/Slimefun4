@@ -90,6 +90,10 @@ public class BlockListener implements Listener {
         ItemStack item = e.getItemInHand();
         SlimefunItem sfItem = SlimefunItem.getByItem(item);
 
+        // TODO: Protection manager is null in testing environment.
+        if (!Slimefun.instance().isUnitTest()) {
+            Slimefun.getProtectionManager().logAction(e.getPlayer(), e.getBlock(), Interaction.BREAK_BLOCK);
+        }
         if (sfItem != null && !(sfItem instanceof NotPlaceable)) {
             if (!sfItem.canUse(e.getPlayer(), true)) {
                 e.setCancelled(true);
@@ -195,9 +199,12 @@ public class BlockListener implements Listener {
 
     @ParametersAreNonnullByDefault
     private void dropItems(BlockBreakEvent e, List<ItemStack> drops) {
-        if (!drops.isEmpty() && !e.isCancelled()) {
-            // Notify plugins like CoreProtect
-            Slimefun.getProtectionManager().logAction(e.getPlayer(), e.getBlock(), Interaction.BREAK_BLOCK);
+        if (!drops.isEmpty()) {
+            // TODO: properly support loading inventories within unit tests
+            if (!Slimefun.instance().isUnitTest()) {
+                // Notify plugins like CoreProtect
+                Slimefun.getProtectionManager().logAction(e.getPlayer(), e.getBlock(), Interaction.BREAK_BLOCK);
+            }
 
             // Fixes #2560
             if (e.isDropItems()) {

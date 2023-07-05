@@ -34,6 +34,7 @@ import io.github.thebusybiscuit.slimefun4.core.services.UpdaterService;
 import io.github.thebusybiscuit.slimefun4.core.services.github.GitHubService;
 import io.github.thebusybiscuit.slimefun4.core.services.holograms.HologramsService;
 import io.github.thebusybiscuit.slimefun4.core.services.profiler.SlimefunProfiler;
+import io.github.thebusybiscuit.slimefun4.core.services.sounds.SoundService;
 import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AncientAltar;
 import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AncientPedestal;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.Cooler;
@@ -181,6 +182,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     private final PerWorldSettingsService worldSettingsService = new PerWorldSettingsService(this);
     private final MinecraftRecipeService recipeService = new MinecraftRecipeService(this);
     private final HologramsService hologramsService = new HologramsService(this);
+    private final SoundService soundService = new SoundService(this);
 
     // Some other things we need
     private final IntegrationsManager integrations = new IntegrationsManager(this);
@@ -210,10 +212,14 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     /**
      * This constructor is invoked in Unit Test environments only.
      *
-     * @param loader      Our {@link JavaPluginLoader}
-     * @param description A {@link PluginDescriptionFile}
-     * @param dataFolder  The data folder
-     * @param file        A {@link File} for this {@link Plugin}
+     * @param loader
+     *            Our {@link JavaPluginLoader}
+     * @param description
+     *            A {@link PluginDescriptionFile}
+     * @param dataFolder
+     *            The data folder
+     * @param file
+     *            A {@link File} for this {@link Plugin}
      */
     @ParametersAreNonnullByDefault
     public Slimefun(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
@@ -252,6 +258,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         cfgManager.load();
         registry.load(this);
         loadTags();
+        soundService.reload(false);
     }
 
     /**
@@ -350,6 +357,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         runSync(new SlimefunStartupTask(this, () -> {
             textureService.register(registry.getAllSlimefunItems(), true);
             permissionsService.update(registry.getAllSlimefunItems(), true);
+            soundService.reload(true);
 
             // This try/catch should prevent buggy Spigot builds from blocking item loading
             try {
@@ -374,7 +382,6 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
         }
 
         // Pedestal item watcher Task
-
         getServer().getScheduler().runTaskTimerAsynchronously(this, new AncientPedestalTask((AncientPedestal) SlimefunItems.ANCIENT_PEDESTAL.getItem()), 5 * 20L, 5 * 20L);
 
         // Starting our tasks
@@ -472,8 +479,9 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * Having this as a seperate method ensures the seperation between static and non-static fields.
      * It also makes sonarcloud happy :)
      * Only ever use it during {@link #onEnable()} or {@link #onDisable()}.
-     *
-     * @param pluginInstance Our instance of {@link Slimefun} or null
+     * 
+     * @param pluginInstance
+     *            Our instance of {@link Slimefun} or null
      */
     private static void setInstance(@Nullable Slimefun pluginInstance) {
         instance = pluginInstance;
@@ -481,8 +489,10 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
 
     /**
      * This returns the time it took to load Slimefun (given a starting point).
-     *
-     * @param timestamp The time at which we started to load Slimefun.
+     * 
+     * @param timestamp
+     *            The time at which we started to load Slimefun.
+     * 
      * @return The total time it took to load Slimefun (in ms or s)
      */
     private @Nonnull String getStartupTime(long timestamp) {
@@ -498,7 +508,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     /**
      * This method checks if this is currently running in a unit test
      * environment.
-     *
+     * 
      * @return Whether we are inside a unit test
      */
     public boolean isUnitTest() {
@@ -558,11 +568,11 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * that Slimefun is compatible with (as a {@link String} representation).
      * <p>
      * Example:
-     *
+     * 
      * <pre>
      * { 1.14.x, 1.15.x, 1.16.x }
      * </pre>
-     *
+     * 
      * @return A {@link Collection} of all compatible minecraft versions as strings
      */
     static @Nonnull Collection<String> getSupportedVersions() {
@@ -734,7 +744,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * This returns the {@link Logger} instance that Slimefun uses.
      * <p>
      * <strong>Any {@link SlimefunAddon} should use their own {@link Logger} instance!</strong>
-     *
+     * 
      * @return Our {@link Logger} instance
      */
     public static @Nonnull Logger logger() {
@@ -771,7 +781,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * This returns our {@link GPSNetwork} instance.
      * The {@link GPSNetwork} is responsible for handling any GPS-related
      * operations and for managing any {@link GEOResource}.
-     *
+     * 
      * @return Our {@link GPSNetwork} instance
      */
     public static @Nonnull GPSNetwork getGPSNetwork() {
@@ -798,7 +808,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * This method returns out {@link MinecraftRecipeService} for Slimefun.
      * This service is responsible for finding/identifying {@link Recipe Recipes}
      * from vanilla Minecraft.
-     *
+     * 
      * @return Slimefun's {@link MinecraftRecipeService} instance
      */
     public static @Nonnull MinecraftRecipeService getMinecraftRecipeService() {
@@ -831,7 +841,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * That service is responsible for managing item settings per
      * {@link World}, such as disabling a {@link SlimefunItem} in a
      * specific {@link World}.
-     *
+     * 
      * @return Our instance of {@link PerWorldSettingsService}
      */
     public static @Nonnull PerWorldSettingsService getWorldSettingsService() {
@@ -842,7 +852,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     /**
      * This returns our {@link HologramsService} which handles the creation and
      * cleanup of any holograms.
-     *
+     * 
      * @return Our instance of {@link HologramsService}
      */
     public static @Nonnull HologramsService getHologramsService() {
@@ -851,9 +861,20 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     }
 
     /**
+     * This returns our {@link  SoundService} which handles the configuration of all sounds used in Slimefun
+     *
+     * @return Our instance of {@link SoundService}
+     */
+    @Nonnull
+    public static SoundService getSoundService() {
+        validateInstance();
+        return instance.soundService;
+    }
+
+    /**
      * This returns our instance of {@link IntegrationsManager}.
      * This is responsible for managing any integrations with third party {@link Plugin plugins}.
-     *
+     * 
      * @return Our instance of {@link IntegrationsManager}
      */
     public static @Nonnull IntegrationsManager getIntegrations() {
@@ -864,7 +885,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     /**
      * This returns out instance of the {@link ProtectionManager}.
      * This bridge is used to hook into any third-party protection {@link Plugin}.
-     *
+     * 
      * @return Our instanceof of the {@link ProtectionManager}
      */
     public static @Nonnull ProtectionManager getProtectionManager() {
@@ -907,7 +928,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     /**
      * This returns our {@link NetworkManager} which is responsible
      * for handling the Cargo and Energy networks.
-     *
+     * 
      * @return Our {@link NetworkManager} instance
      */
 
