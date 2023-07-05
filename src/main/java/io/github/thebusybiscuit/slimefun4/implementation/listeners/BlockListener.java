@@ -4,6 +4,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
+import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockBreakEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
@@ -11,6 +12,7 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ToolUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -117,6 +119,21 @@ public class BlockListener implements Listener {
         }
 
         ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
+        var block = e.getBlock();
+        var blockData = StorageCacheUtils.getBlock(block.getLocation());
+
+        // If there is a Slimefun Block here, call our BreakEvent and, if cancelled, cancel this event and return
+        if (blockData != null) {
+            var sfItem = SlimefunItem.getById(blockData.getSfId());
+            SlimefunBlockBreakEvent breakEvent = new SlimefunBlockBreakEvent(e.getPlayer(), item, e.getBlock(), sfItem);
+            Bukkit.getPluginManager().callEvent(breakEvent);
+
+            if (breakEvent.isCancelled()) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+
         checkForSensitiveBlockAbove(e, item);
 
         int fortune = getBonusDropsWithFortune(item, e.getBlock());
@@ -124,11 +141,10 @@ public class BlockListener implements Listener {
 
         if (!e.isCancelled() && !item.getType().isAir()) {
             callToolHandler(e, item, fortune, drops);
+            dropItems(e, drops);
         }
 
         if (!e.isCancelled()) {
-            var block = e.getBlock();
-            var blockData = StorageCacheUtils.getBlock(block.getLocation());
             if (blockData == null || blockData.isPendingRemove()) {
                 return;
             }
