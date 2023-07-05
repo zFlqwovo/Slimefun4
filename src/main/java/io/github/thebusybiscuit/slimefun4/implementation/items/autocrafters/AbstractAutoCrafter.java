@@ -461,15 +461,15 @@ public abstract class AbstractAutoCrafter extends SlimefunItem implements Energy
      * the given {@link Inventory}.
      * This will consume items and add the result to the {@link Inventory}.
      * This method does not handle energy consumption.
-     * 
+     *
      * @param inv
      *            The {@link Inventory} to take resources from
      * @param recipe
      *            The {@link AbstractRecipe} to craft
-     * 
+     *
      * @return Whether this crafting operation was successful or not
      */
-    public boolean craft(@Nonnull Inventory inv, @Nonnull AbstractRecipe recipe) {
+    public boolean craft(@Nonnull CrafterInteractable inv, @Nonnull AbstractRecipe recipe) {
         Validate.notNull(inv, "The Inventory must not be null");
         Validate.notNull(recipe, "The Recipe shall not be null");
 

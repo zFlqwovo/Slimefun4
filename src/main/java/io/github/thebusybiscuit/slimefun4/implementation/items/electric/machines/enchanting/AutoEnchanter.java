@@ -132,11 +132,6 @@ public class AutoEnchanter extends AbstractEnchantmentMachine {
                 preExistingEnchants++;
             }
         }
-        int totalEnchants = enchantments.size() + preExistingEnchants;
-
-        if (!isEnchantmentAmountAllowed(totalEnchants)) {
-            return null;
-        }
 
         // Check if we found any valid enchantments
         if (!enchantments.isEmpty()) {

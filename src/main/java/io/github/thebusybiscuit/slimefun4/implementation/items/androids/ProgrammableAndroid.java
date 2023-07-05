@@ -104,8 +104,6 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                     Slimefun.getLocalization().sendMessage(p, "inventory.no-access", true);
                     return false;
                 }
-
-                return open;
             }
 
             @Override
