@@ -67,6 +67,16 @@ class GitHubTask implements Runnable {
 
         for (Contributor contributor : gitHubService.getContributors().values()) {
             int newRequests = requestTexture(contributor, skins);
+
+            if (newRequests == -2) {
+                try {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(3)); // wait 3 secs avoid affect yggdrasill verify server.
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+                continue;
+            }
+
             requests += newRequests;
 
             if (newRequests < 0 || requests >= MAX_REQUESTS_PER_MINUTE) {
@@ -111,6 +121,8 @@ class GitHubTask implements Runnable {
             } catch (Exception x) {
                 if (x.getCause() instanceof FileNotFoundException) {
                     contributor.setTexture(null);
+                    Slimefun.logger().log(Level.WARNING, "The specific user's skull not found, skipped.");
+                    return -2;
                 } else {
                     // Too many requests
                     Slimefun.logger().log(Level.WARNING, "Attempted to refresh skin cache, got this response: {0}: {1}", new Object[]{x.getClass().getSimpleName(), x.getMessage()});
