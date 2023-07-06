@@ -68,15 +68,6 @@ class GitHubTask implements Runnable {
         for (Contributor contributor : gitHubService.getContributors().values()) {
             int newRequests = requestTexture(contributor, skins);
 
-            if (newRequests == -2) {
-                try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(3)); // wait 3 secs avoid affect yggdrasill verify server.
-                } catch (InterruptedException ignored) {
-                    Thread.currentThread().interrupt();
-                }
-                continue;
-            }
-
             requests += newRequests;
 
             if (newRequests < 0 || requests >= MAX_REQUESTS_PER_MINUTE) {
@@ -119,10 +110,7 @@ class GitHubTask implements Runnable {
                 Slimefun.logger().log(Level.WARNING, "The contributors thread was interrupted!");
                 Thread.currentThread().interrupt();
             } catch (Exception x) {
-                if (x.getCause() instanceof FileNotFoundException) {
-                    contributor.setTexture(null);
-                    return -2;
-                } else {
+                if (!(x.getCause() instanceof FileNotFoundException)) {
                     // Too many requests
                     Slimefun.logger().log(Level.WARNING, "Attempted to refresh skin cache, got this response: {0}: {1}", new Object[]{x.getClass().getSimpleName(), x.getMessage()});
                     Slimefun.logger().log(Level.WARNING, "This usually means mojang.com is temporarily down or started to rate-limit this connection, nothing to worry about!");
@@ -134,8 +122,8 @@ class GitHubTask implements Runnable {
                         Bukkit.getScheduler().runTaskLaterAsynchronously(Slimefun.instance(), this::grabTextures, 5 * 60 * 20L);
                     }
 
-                    return -1;
                 }
+                return -1;
             }
         }
 
