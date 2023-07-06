@@ -110,19 +110,17 @@ class GitHubTask implements Runnable {
                 Slimefun.logger().log(Level.WARNING, "The contributors thread was interrupted!");
                 Thread.currentThread().interrupt();
             } catch (Exception x) {
-                if (!(x.getCause() instanceof FileNotFoundException)) {
-                    // Too many requests
-                    Slimefun.logger().log(Level.WARNING, "Attempted to refresh skin cache, got this response: {0}: {1}", new Object[]{x.getClass().getSimpleName(), x.getMessage()});
-                    Slimefun.logger().log(Level.WARNING, "This usually means mojang.com is temporarily down or started to rate-limit this connection, nothing to worry about!");
+                // Too many requests
+                Slimefun.logger().log(Level.WARNING, "Attempted to refresh skin cache, got this response: {0}: {1}", new Object[]{x.getClass().getSimpleName(), x.getMessage()});
+                Slimefun.logger().log(Level.WARNING, "This usually means mojang.com is temporarily down or started to rate-limit this connection, nothing to worry about!");
 
-                    String msg = x.getMessage();
+                String msg = x.getMessage();
 
-                    // Retry after 5 minutes if it was just rate-limiting
-                    if (msg != null && msg.contains("429")) {
-                        Bukkit.getScheduler().runTaskLaterAsynchronously(Slimefun.instance(), this::grabTextures, 5 * 60 * 20L);
-                    }
-
+                // Retry after 5 minutes if it was just rate-limiting
+                if (msg != null && msg.contains("429")) {
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(Slimefun.instance(), this::grabTextures, 5 * 60 * 20L);
                 }
+
                 return -1;
             }
         }
