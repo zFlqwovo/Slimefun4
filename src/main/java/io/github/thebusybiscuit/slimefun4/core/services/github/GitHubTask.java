@@ -121,7 +121,6 @@ class GitHubTask implements Runnable {
             } catch (Exception x) {
                 if (x.getCause() instanceof FileNotFoundException) {
                     contributor.setTexture(null);
-                    Slimefun.logger().log(Level.WARNING, "The specific user's skull not found, skipped.");
                     return -2;
                 } else {
                     // Too many requests
