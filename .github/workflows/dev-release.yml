@@ -37,7 +37,7 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       - name: Find build artifact filename
         run: |
-          FILENAME=$(find ./target -maxdepth 1 -mindepth 1 -name "Slimefun-*" | cut -d'/' -f 2)
+          FILENAME=$(find ./target/ -maxdepth 1 -mindepth 1 -name "Slimefun-*" | cut -d'/' -f 2)
           echo $FILENAME
           echo "slimefun-artifact-name=$FILENAME" >> "$GITHUB_ENV"
           echo ${{ env.slimefun-artifact-name }}
