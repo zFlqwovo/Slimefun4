@@ -37,7 +37,7 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       - name: Find build artifact filename
         run: |
-          FILENAME=find . -maxdepth 1 -mindepth 1 -name "Slimefun-*" | cut -d'/' -f 2
+          FILENAME=$(find . -maxdepth 1 -mindepth 1 -name "Slimefun-*" | cut -d'/' -f 2)
           echo "slimefun-artifact-name=$FILENAME" >> "$GITHUB_ENV"
       - name: Publish
         uses: cloudflare/wrangler-action@2.0.0
