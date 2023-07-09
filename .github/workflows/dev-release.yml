@@ -38,10 +38,11 @@ jobs:
       - name: Find build artifact filename
         run: |
           FILENAME=$(find . -maxdepth 1 -mindepth 1 -name "Slimefun-*" | cut -d'/' -f 2)
+          echo $FILENAME
           echo "slimefun-artifact-name=$FILENAME" >> "$GITHUB_ENV"
           echo ${{ env.slimefun-artifact-name }}
       - name: Publish
         uses: cloudflare/wrangler-action@2.0.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          command: "wrangler r2 object put slimefun-dev/${{ env.slimefun-artifact-name }} --file=./${{ env.slimefun-artifact-name }}"
+          command: "r2 object put slimefun-dev/${{ env.slimefun-artifact-name }} --file=./${{ env.slimefun-artifact-name }}"
