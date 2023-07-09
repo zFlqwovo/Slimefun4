@@ -23,7 +23,8 @@ jobs:
           java-version: 17
           java-package: jdk
           architecture: x64
-      - run: mvn -B package --file pom.xml --errors
+      - if: github.event_name != 'pull_request'
+        run: mvn -B package --file pom.xml --errors
       - uses: actions/cache@v2
         if: github.event_name != 'pull_request'
         with:
@@ -31,15 +32,18 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Mask Output
+        if: github.event_name != 'pull_request'
         run: |
           echo "::add-mask::$CF_API_TOKEN"
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       - name: Find build artifact filename
+        if: github.event_name != 'pull_request'
         run: |
           cd target && FILENAME=$(find . -maxdepth 1 -mindepth 1 -name "Slimefun-*" | cut -d'/' -f 2)
           echo "slimefun-artifact-name=$FILENAME" >> "$GITHUB_ENV"
       - name: Publish
+        if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@2.0.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
