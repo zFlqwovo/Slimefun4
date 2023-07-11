@@ -23,14 +23,14 @@ jobs:
           java-version: 17
           java-package: jdk
           architecture: x64
-      - if: github.event_name != 'pull_request'
-        run: mvn -B package --file pom.xml --errors
       - uses: actions/cache@v2
         if: github.event_name != 'pull_request'
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      - if: github.event_name != 'pull_request'
+        run: mvn -B package --file pom.xml --errors
       - name: Mask Output
         if: github.event_name != 'pull_request'
         run: |
