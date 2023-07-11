@@ -15,7 +15,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 /**
  * This utility class provides a few handy methods and constants to build the lore of any
  * {@link SlimefunItemStack}. It is mostly used directly inside the class {@link SlimefunItems}.
- *
+ * 
  * @author TheBusyBiscuit
  * 
  * @see SlimefunItems
@@ -24,9 +24,10 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 public final class LoreBuilder {
 
     public static final String HAZMAT_SUIT_REQUIRED = "&8\u21E8 &4需要防化服!";
+    public static final String RAINBOW = "&d轮番展现彩虹的颜色!";
     public static final String RIGHT_CLICK_TO_USE = "&e右键&7 使用";
     public static final String RIGHT_CLICK_TO_OPEN = "&e右键&7 打开";
-    public static final String CROUCH_TO_USE = "&e按住 &eShift&7 使用";
+    public static final String CROUCH_TO_USE = "&e按住 &e蹲下&7 使用";
     private static final DecimalFormat hungerFormat = new DecimalFormat("#.0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
     private LoreBuilder() {}
