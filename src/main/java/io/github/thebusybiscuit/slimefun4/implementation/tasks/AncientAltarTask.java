@@ -142,7 +142,7 @@ public class AncientAltarTask implements Runnable {
             dropLocation.getWorld().spawnParticle(Particle.CRIT_MAGIC, pedestal.getLocation().add(0.5, 1.5, 0.5), 8, 0.3F, 0.2F, 0.3F);
 
             positionLock.remove(entity);
-            pedestalItem.removeVirtualItem(pedestal.getLocation(), entity);
+            entity.remove();
             entity.removeMetadata("no_pickup", Slimefun.instance());
         }
     }

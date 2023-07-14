@@ -95,8 +95,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.resources.GEOResourcesS
 import io.github.thebusybiscuit.slimefun4.implementation.setup.PostSetup;
 import io.github.thebusybiscuit.slimefun4.implementation.setup.ResearchSetup;
 import io.github.thebusybiscuit.slimefun4.implementation.setup.SlimefunItemSetup;
-import io.github.thebusybiscuit.slimefun4.implementation.tasks.AncientPedestalTask;
-import io.github.thebusybiscuit.slimefun4.implementation.tasks.ArmorTask;
 import io.github.thebusybiscuit.slimefun4.implementation.tasks.SlimefunStartupTask;
 import io.github.thebusybiscuit.slimefun4.implementation.tasks.TickerTask;
 import io.github.thebusybiscuit.slimefun4.implementation.tasks.armor.RadiationTask;
@@ -387,9 +385,6 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
             new RainbowArmorTask().schedule(this, config.getInt("options.rainbow-armor-update-interval") * 20L);
             new SolarHelmetTask().schedule(this, config.getInt("options.armor-update-interval"));
         }
-
-        // Pedestal item watcher Task
-        getServer().getScheduler().runTaskTimerAsynchronously(this, new AncientPedestalTask((AncientPedestal) SlimefunItems.ANCIENT_PEDESTAL.getItem()), 5 * 20L, 5 * 20L);
 
         // Starting our tasks
         autoSavingService.start(this, config.getInt("options.auto-save-delay-in-minutes"));

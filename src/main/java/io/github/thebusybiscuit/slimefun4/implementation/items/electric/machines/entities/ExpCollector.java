@@ -162,7 +162,7 @@ public class ExpCollector extends SlimefunItem implements InventoryBlock, Energy
                 break;
             }
         }
-        StorageCacheUtils.(location, DATA_KEY, String.valueOf(experiencePoints - withdrawn));
+        StorageCacheUtils.setData(location, DATA_KEY, String.valueOf(experiencePoints - withdrawn));
     }
 
     private int getStoredExperience(Location location) {
