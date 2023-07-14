@@ -23,10 +23,10 @@ jobs:
           java-version: 17
           java-package: jdk
           architecture: x64
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         if: github.event_name != 'pull_request'
         with:
-          path: ~/.m2
+          path: ~/.m2/repository
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - if: github.event_name != 'pull_request'
