@@ -481,40 +481,47 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
      * Having this as a seperate method ensures the seperation between static and non-static fields.
      * It also makes sonarcloud happy :)
      * Only ever use it during {@link #onEnable()} or {@link #onDisable()}.
-     * 
-     * @param pluginInstance
-     *            Our instance of {@link Slimefun} or null
+     *
+     * @param pluginInstance Our instance of {@link Slimefun} or null
      */
     private static void setInstance(@Nullable Slimefun pluginInstance) {
         instance = pluginInstance;
     }
 
     /**
-     * This returns the time it took to load Slimefun (given a starting point).
-     * 
-     * @param timestamp
-     *            The time at which we started to load Slimefun.
-     * 
-     * @return The total time it took to load Slimefun (in ms or s)
+     * This private method gives us a {@link Collection} of every {@link MinecraftVersion}
+     * that Slimefun is compatible with (as a {@link String} representation).
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * { 1.14.x, 1.15.x, 1.16.x }
+     * </pre>
+     *
+     * @return A {@link Collection} of all compatible minecraft versions as strings
      */
-    private @Nonnull String getStartupTime(long timestamp) {
-        long ms = (System.nanoTime() - timestamp) / 1000000;
+    static @Nonnull Collection<String> getSupportedVersions() {
+        List<String> list = new ArrayList<>();
 
-        if (ms > 1000) {
-            return NumberUtils.roundDecimalNumber(ms / 1000.0) + 's';
-        } else {
-            return NumberUtils.roundDecimalNumber(ms) + "ms";
+        for (MinecraftVersion version : MinecraftVersion.values()) {
+            if (!version.isVirtual()) {
+                list.add(version.getName());
+            }
         }
+
+        return list;
     }
 
     /**
-     * This method checks if this is currently running in a unit test
-     * environment.
-     * 
-     * @return Whether we are inside a unit test
+     * This returns the {@link Logger} instance that Slimefun uses.
+     * <p>
+     * <strong>Any {@link SlimefunAddon} should use their own {@link Logger} instance!</strong>
+     *
+     * @return Our {@link Logger} instance
      */
-    public boolean isUnitTest() {
-        return minecraftVersion == MinecraftVersion.UNIT_TEST;
+    public static @Nonnull Logger logger() {
+        validateInstance();
+        return instance.getLogger();
     }
 
     /**
@@ -566,27 +573,15 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     }
 
     /**
-     * This private method gives us a {@link Collection} of every {@link MinecraftVersion}
-     * that Slimefun is compatible with (as a {@link String} representation).
-     * <p>
-     * Example:
-     * 
-     * <pre>
-     * { 1.14.x, 1.15.x, 1.16.x }
-     * </pre>
-     * 
-     * @return A {@link Collection} of all compatible minecraft versions as strings
+     * This returns our {@link GPSNetwork} instance.
+     * The {@link GPSNetwork} is responsible for handling any GPS-related
+     * operations and for managing any {@link GEOResource}.
+     *
+     * @return Our {@link GPSNetwork} instance
      */
-    static @Nonnull Collection<String> getSupportedVersions() {
-        List<String> list = new ArrayList<>();
-
-        for (MinecraftVersion version : MinecraftVersion.values()) {
-            if (!version.isVirtual()) {
-                list.add(version.getName());
-            }
-        }
-
-        return list;
+    public static @Nonnull GPSNetwork getGPSNetwork() {
+        validateInstance();
+        return instance.gpsNetwork;
     }
 
     /**
@@ -744,15 +739,15 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     }
 
     /**
-     * This returns the {@link Logger} instance that Slimefun uses.
-     * <p>
-     * <strong>Any {@link SlimefunAddon} should use their own {@link Logger} instance!</strong>
-     * 
-     * @return Our {@link Logger} instance
+     * This method returns out {@link MinecraftRecipeService} for Slimefun.
+     * This service is responsible for finding/identifying {@link Recipe Recipes}
+     * from vanilla Minecraft.
+     *
+     * @return Slimefun's {@link MinecraftRecipeService} instance
      */
-    public static @Nonnull Logger logger() {
+    public static @Nonnull MinecraftRecipeService getMinecraftRecipeService() {
         validateInstance();
-        return instance.getLogger();
+        return instance.recipeService;
     }
 
     /**
@@ -781,15 +776,16 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     }
 
     /**
-     * This returns our {@link GPSNetwork} instance.
-     * The {@link GPSNetwork} is responsible for handling any GPS-related
-     * operations and for managing any {@link GEOResource}.
-     * 
-     * @return Our {@link GPSNetwork} instance
+     * This method returns out world settings service.
+     * That service is responsible for managing item settings per
+     * {@link World}, such as disabling a {@link SlimefunItem} in a
+     * specific {@link World}.
+     *
+     * @return Our instance of {@link PerWorldSettingsService}
      */
-    public static @Nonnull GPSNetwork getGPSNetwork() {
+    public static @Nonnull PerWorldSettingsService getWorldSettingsService() {
         validateInstance();
-        return instance.gpsNetwork;
+        return instance.worldSettingsService;
     }
 
     public static @Nonnull TickerTask getTickerTask() {
@@ -808,15 +804,14 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     }
 
     /**
-     * This method returns out {@link MinecraftRecipeService} for Slimefun.
-     * This service is responsible for finding/identifying {@link Recipe Recipes}
-     * from vanilla Minecraft.
-     * 
-     * @return Slimefun's {@link MinecraftRecipeService} instance
+     * This returns our {@link HologramsService} which handles the creation and
+     * cleanup of any holograms.
+     *
+     * @return Our instance of {@link HologramsService}
      */
-    public static @Nonnull MinecraftRecipeService getMinecraftRecipeService() {
+    public static @Nonnull HologramsService getHologramsService() {
         validateInstance();
-        return instance.recipeService;
+        return instance.hologramsService;
     }
 
     public static @Nonnull CustomItemDataService getItemDataService() {
@@ -840,27 +835,24 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     }
 
     /**
-     * This method returns out world settings service.
-     * That service is responsible for managing item settings per
-     * {@link World}, such as disabling a {@link SlimefunItem} in a
-     * specific {@link World}.
-     * 
-     * @return Our instance of {@link PerWorldSettingsService}
+     * This returns our instance of {@link IntegrationsManager}.
+     * This is responsible for managing any integrations with third party {@link Plugin plugins}.
+     *
+     * @return Our instance of {@link IntegrationsManager}
      */
-    public static @Nonnull PerWorldSettingsService getWorldSettingsService() {
+    public static @Nonnull IntegrationsManager getIntegrations() {
         validateInstance();
-        return instance.worldSettingsService;
+        return instance.integrations;
     }
 
     /**
-     * This returns our {@link HologramsService} which handles the creation and
-     * cleanup of any holograms.
-     * 
-     * @return Our instance of {@link HologramsService}
+     * This returns out instance of the {@link ProtectionManager}.
+     * This bridge is used to hook into any third-party protection {@link Plugin}.
+     *
+     * @return Our instanceof of the {@link ProtectionManager}
      */
-    public static @Nonnull HologramsService getHologramsService() {
-        validateInstance();
-        return instance.hologramsService;
+    public static @Nonnull ProtectionManager getProtectionManager() {
+        return getIntegrations().getProtectionManager();
     }
 
     /**
@@ -875,24 +867,31 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     }
 
     /**
-     * This returns our instance of {@link IntegrationsManager}.
-     * This is responsible for managing any integrations with third party {@link Plugin plugins}.
-     * 
-     * @return Our instance of {@link IntegrationsManager}
+     * This returns our {@link NetworkManager} which is responsible
+     * for handling the Cargo and Energy networks.
+     *
+     * @return Our {@link NetworkManager} instance
      */
-    public static @Nonnull IntegrationsManager getIntegrations() {
+
+    public static @Nonnull NetworkManager getNetworkManager() {
         validateInstance();
-        return instance.integrations;
+        return instance.networkManager;
     }
 
     /**
-     * This returns out instance of the {@link ProtectionManager}.
-     * This bridge is used to hook into any third-party protection {@link Plugin}.
-     * 
-     * @return Our instanceof of the {@link ProtectionManager}
+     * This returns the time it took to load Slimefun (given a starting point).
+     *
+     * @param timestamp The time at which we started to load Slimefun.
+     * @return The total time it took to load Slimefun (in ms or s)
      */
-    public static @Nonnull ProtectionManager getProtectionManager() {
-        return getIntegrations().getProtectionManager();
+    private @Nonnull String getStartupTime(long timestamp) {
+        long ms = (System.nanoTime() - timestamp) / 1000000;
+
+        if (ms > 1000) {
+            return NumberUtils.roundDecimalNumber(ms / 1000.0) + 's';
+        } else {
+            return NumberUtils.roundDecimalNumber(ms) + "ms";
+        }
     }
 
     /**
@@ -929,15 +928,13 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
     }
 
     /**
-     * This returns our {@link NetworkManager} which is responsible
-     * for handling the Cargo and Energy networks.
-     * 
-     * @return Our {@link NetworkManager} instance
+     * This method checks if this is currently running in a unit test
+     * environment.
+     *
+     * @return Whether we are inside a unit test
      */
-
-    public static @Nonnull NetworkManager getNetworkManager() {
-        validateInstance();
-        return instance.networkManager;
+    public boolean isUnitTest() {
+        return minecraftVersion == MinecraftVersion.UNIT_TEST;
     }
 
     public static @Nonnull SlimefunConfigManager getConfigManager() {
