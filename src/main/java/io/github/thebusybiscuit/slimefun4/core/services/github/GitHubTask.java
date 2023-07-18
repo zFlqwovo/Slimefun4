@@ -134,6 +134,10 @@ class GitHubTask implements Runnable {
         if (!uuid.isPresent()) {
             CompletableFuture<UUID> future = UUIDLookup.forUsername(Slimefun.instance(), contributor.getMinecraftName());
 
+            if (future.isCompletedExceptionally()) {
+                return null;
+            }
+
             // Fixes #3241 - Do not wait for more than 30 seconds
             uuid = Optional.ofNullable(future.get(30, TimeUnit.SECONDS));
             uuid.ifPresent(contributor::setUniqueId);
@@ -141,6 +145,12 @@ class GitHubTask implements Runnable {
 
         if (uuid.isPresent()) {
             CompletableFuture<PlayerSkin> future = PlayerSkin.fromPlayerUUID(Slimefun.instance(), uuid.get());
+
+            if (future.isCompletedExceptionally()) {
+                skins.put(contributor.getMinecraftName(), "");
+                return null;
+            }
+
             Optional<String> skin = Optional.of(future.get().toString());
             skins.put(contributor.getMinecraftName(), skin.orElse(""));
             return skin.orElse(null);
