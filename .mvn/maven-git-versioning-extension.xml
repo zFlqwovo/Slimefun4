@@ -3,11 +3,11 @@
    <refs>
        <ref type="branch">
            <pattern>master</pattern>
-           <version>${commit.short}-canary</version>
+           <version>${commit.short}-Beta</version>
        </ref>
        <ref type="branch">
            <pattern>dev</pattern>
-           <version>${commit.short}-DEV</version>
+           <version>${commit.short}-Insider</version>
        </ref>
        <ref type="branch">
            <pattern>release</pattern>
