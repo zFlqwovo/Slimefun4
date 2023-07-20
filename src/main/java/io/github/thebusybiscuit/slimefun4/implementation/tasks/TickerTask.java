@@ -37,7 +37,7 @@ public class TickerTask implements Runnable {
     /**
      * This Map holds all currently actively ticking locations.
      */
-    private final Map<ChunkPosition, Set<Location>> tickingLocations = new HashMap<>();
+    private final Map<ChunkPosition, Set<Location>> tickingLocations = new ConcurrentHashMap<>();
 
     /**
      * This Map tracks how many bugs have occurred in a given Location .
@@ -90,9 +90,11 @@ public class TickerTask implements Runnable {
             // Run our ticker code
             if (!halted) {
                 HashSet<Map.Entry<ChunkPosition, Set<Location>>> loc;
+
                 synchronized (tickingLocations) {
                     loc = new HashSet<>(tickingLocations.entrySet());
                 }
+
                 for (Map.Entry<ChunkPosition, Set<Location>> entry : loc) {
                     tickChunk(entry.getKey(), tickers, new HashSet<>(entry.getValue()));
                 }
