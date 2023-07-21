@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -89,10 +90,10 @@ public class TickerTask implements Runnable {
 
             // Run our ticker code
             if (!halted) {
-                HashSet<Map.Entry<ChunkPosition, Set<Location>>> loc;
+                CopyOnWriteArraySet<Map.Entry<ChunkPosition, Set<Location>>> loc;
 
                 synchronized (tickingLocations) {
-                    loc = new HashSet<>(tickingLocations.entrySet());
+                    loc = new CopyOnWriteArraySet<>(tickingLocations.entrySet());
 
                     for (Map.Entry<ChunkPosition, Set<Location>> entry : loc) {
                         tickChunk(entry.getKey(), tickers, new HashSet<>(entry.getValue()));
