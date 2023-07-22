@@ -94,10 +94,10 @@ public class TickerTask implements Runnable {
 
                 synchronized (tickingLocations) {
                     loc = new CopyOnWriteArraySet<>(tickingLocations.entrySet());
+                }
 
-                    for (Map.Entry<ChunkPosition, Set<Location>> entry : loc) {
-                        tickChunk(entry.getKey(), tickers, new HashSet<>(entry.getValue()));
-                    }
+                for (Map.Entry<ChunkPosition, Set<Location>> entry : loc) {
+                    tickChunk(entry.getKey(), tickers, new HashSet<>(entry.getValue()));
                 }
             }
 
