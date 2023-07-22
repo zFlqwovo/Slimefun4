@@ -13,7 +13,7 @@
        </ref>
        <ref type="branch">
            <pattern>release</pattern>
-           <version>${commit.timestamp.year.2digit}.${commit.timestamp.month}-release</version>
+           <version>${commit.timestamp.year.2digit}.${commit.timestamp.month}.${commit.timestamp.day}-release</version>
        </ref>
        <ref type="branch">
            <pattern>test/(.+)</pattern>
