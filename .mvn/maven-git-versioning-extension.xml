@@ -7,12 +7,13 @@
        </ref>
        <ref type="branch">
            <pattern>dev</pattern>
-           <version>${commit.timestamp.year}${commit.timestamp.month}${commit.timestamp.day}-${commit.short}-Insider
+           <version>
+               ${commit.timestamp.year.2digit}${commit.timestamp.month}${commit.timestamp.day}-${commit.short}-Insider
            </version>
        </ref>
        <ref type="branch">
            <pattern>release</pattern>
-           <version>${commit.timestamp.year}.${commit.timestamp.month}-release</version>
+           <version>${commit.timestamp.year.2digit}.${commit.timestamp.month}-release</version>
        </ref>
        <ref type="branch">
            <pattern>test/(.+)</pattern>
