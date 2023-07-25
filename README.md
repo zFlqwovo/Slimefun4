@@ -1,4 +1,4 @@
-# Slimefun
+# Slimefun 中文版
 
 Looking for English (or Original) Version? [**Click here**](https://github.com/Slimefun/Slimefun4/)
 
@@ -12,14 +12,16 @@ Looking for English (or Original) Version? [**Click here**](https://github.com/S
 MCBBS 链接: https://www.mcbbs.net/thread-827594-1-1.html
 
 ### 订阅计划
+
 ⚡ 汉化不易, 欢迎支持[爱发电](https://afdian.net/a/nora1ncity)
 
-加入爱发电订阅计划可抢先获得最新版本的 Slimefun 构建，以及优先技术支持。
+加入爱发电订阅计划可抢先获得最新版本的 Slimefun 构建，以及是优先技术支持。
+注意：**非年度计划用户**可在距上次公开仓库更新后 15 天获取自动同步的源代码，并非闭源。我们十分遵循 GPLv3 协议 :)
 
 了解订阅计划：[订阅计划](https://builds.guizhanss.com/sf-subscription)
 
 ![目前版本](https://img.shields.io/github/v/release/StarWishSama/Slimefun4?include_prereleases)
-![编译状态](https://github.com/StarWishsama/Slimefun4/workflows/Java%20CI/badge.svg)
+![构建状态](https://builds.guizhanss.com/StarWishsama/Slimefun4/master/badge.svg)
 [![Issues](https://img.shields.io/github/issues/StarWishsama/Slimefun4.svg?style=popout)](https://github.com/StarWishsama/Slimefun4/issues)
 ![下载数](https://img.shields.io/github/downloads/StarWishsama/Slimefun4/total)
 
@@ -36,17 +38,18 @@ MCBBS 链接: https://www.mcbbs.net/thread-827594-1-1.html
 * 修复了部分官方未修复的 Bug
 
 Slimefun 是一个致力于提供模组般体验的插件。它提供了你能想到的一切，不管是喷气背包还是魔法祭坛！
+
 Slimefun 让每个玩家可以自己决定在魔法或科技方面发展。  
 从魔杖到核反应堆，我们应有尽有。  
 除此之外，我们还有魔法祭坛、能源网络甚至物品运输系统。
 
-该项目从2013年开始开发，此后一直发展。  
-从那时一个人开发插件到发展成一个拥有数千名参与者和一百多位贡献者的社区。  
-它目前添加了超过 **500 种新物品/合成配方**
+该项目始于 2013 年，至今仍在发展。
+现在已从独自开发插件到发展成一个拥有数千名参与者和百名贡献者的社区。  
+目前 Slimefun 添加了超过 **500 种新物品/合成配方**
 ([查看关于 Slimefun 的历史](https://slimefun-wiki.guizhanss.cn/Slimefun-in-a-nutshell))。
 
 与此同时，Slimefun 还有种类繁多的附属插件可供选择！<br>
-打开[附属插件列表](https://slimefun-wiki.guizhanss.cn/Addons)，你可能会找到你想要的附属插件。
+打开[附属插件列表](https://slimefun-wiki.guizhanss.cn/Addons)，寻找你想要的附属插件！
 
 ### 导航
 
@@ -61,44 +64,56 @@ Slimefun 让每个玩家可以自己决定在魔法或科技方面发展。
 
 (可以查看: [如何安装 Slimefun](https://slimefun-wiki.guizhanss.cn/Installing-Slimefun))
 
-Slimefun 4 可以在 Releases 页面下**免费下载**。  
+Slimefun 4 可以在[鬼斩构建站](https://builds.guizhanss.com)页面中**免费下载**。
 
-以下是两种版本的区别: 
+以下是两种版本的区别:
 
-|                      | 公测版 (最新更新)                                                                 | "稳定版"                                                                                 |
-|----------------------|----------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| **支持的 Minecraft 版本** | :video_game: 1.16.X - 1.20.X                                               | :video_game: 1.16.X - 1.19.X                                                          |
-| **Java 版本**          | :computer: **Java 16 (或更高)**                                               | :computer: **Java 16 (或更高)**                                                           |
-| **自动更新系统**           | :heavy_check_mark:                                                         | :x:                                                                                   |
-| **频繁更新**             | :heavy_check_mark:                                                         | :x:                                                                                   |
-| **享有最新内容**           | :heavy_check_mark:                                                         | :x:                                                                                   |
-| **Discord 支持**       | :heavy_check_mark:                                                         | :x:                                                                                   |
-| **Bug 反馈**           | :heavy_check_mark:                                                         | :x:                                                                                   |
-| **在发布前进行测试**         | :x:                                                                        | :heavy_check_mark:                                                                    |
-| **有无更新日志**           | :x:                                                                        | :memo: **[更新日志(英文)](https://github.com/Slimefun/Slimefun4/blob/master/CHANGELOG.md)** |
-| **下载链接**             | :package: **[下载 最新版](https://builds.guizhanss.com/StarWishsama/Slimefun4/master)** | :package: **[下载 "稳定版"](https://github.com/StarWishsama/Slimefun4/releases/latest)**   |
+|                      | 测试版 (最新更新)                                                                         | "稳定版"                                                                                 |
+|----------------------|------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| **支持的 Minecraft 版本** | :video_game: 1.16.X - 1.20.X                                                       | :video_game: 1.16.X - 1.12.X                                                          |
+| **Java 版本**          | :computer: **Java 16 (或更高)**                                                       | :computer: **Java 16 (或更高)**                                                          |
+| **自动更新系统**           | :heavy_check_mark:                                                                 | :x:                                                                                   |
+| **频繁更新**             | :heavy_check_mark:                                                                 | :x:                                                                                   |
+| **享有最新内容**           | :heavy_check_mark:                                                                 | :x:                                                                                   |
+| **Discord 支持**       | :heavy_check_mark:                                                                 | :x:                                                                                   |
+| **Bug 反馈**           | :heavy_check_mark:                                                                 | :x:                                                                                   |
+| **在发布前进行测试**         | :x:                                                                                | :heavy_check_mark:                                                                    |
+| **有无更新日志**           | :x:                                                                                | :memo: **[更新日志(英文)](https://github.com/Slimefun/Slimefun4/blob/master/CHANGELOG.md)** |
+| **下载链接**             | :package: **[下载 最新版](https://builds.guizhanss.com/StarWishsama/Slimefun4/master)** | :package: **[下载 "稳定版"](https://builds.guizhanss.com/StarWishsama/Slimefun4/release)** |
 
-**! 建议你使用最新版本的公测版，可以获得最新的内容更新和 Bug 修复！**
+**! 建议你使用最新的测试版，可以获得最新的内容更新和 Bug 修复！**
 
 ## :framed_picture: 截图
 
 那么，Slimefun 看起来是怎样的呢？<br>
 我们让 [Discord 服务器](#discord) 中的一些人发给了我们一些截图：
-|                 反应堆和电力                  |            了不起的自动化工厂             |          魔法实验室           |
+| 反应堆和电力 | 了不起的自动化工厂 | 魔法实验室 |
 | :-------------------------------------------: | :--------------------------------------: | :----------------------------------------: |
 | ![](https://raw.githubusercontent.com/Slimefun/Slimefun-Wiki/master/images/showcase1.png) | ![](https://raw.githubusercontent.com/Slimefun/Slimefun-Wiki/master/images/showcase6.png) | ![](https://raw.githubusercontent.com/Slimefun/Slimefun-Wiki/master/images/showcase5.png) |
 | *截图由 HamtaBot#0001 提供* | *截图由 Piͭxͪeͤl (mnb)#5049 提供* | *截图由 Kilaruna#4981 提供* |
 | ![](https://raw.githubusercontent.com/Slimefun/Slimefun-Wiki/master/images/showcase4.png) | ![](https://raw.githubusercontent.com/Slimefun/Slimefun-Wiki/master/images/showcase3.png) | ![](https://raw.githubusercontent.com/Slimefun/Slimefun-Wiki/master/images/showcase2.png) |
 | *截图由 GalaxyKat11#3816 提供* | *截图由 TamThan#7987 提供* | *截图由 Kilaruna#4981 提供* |
 
-## :headphones: Discord
+## :headphones: 社区
 
-你可以在 Discord 上找到我们的社区服务器，并与 **超过 7000** 个来自全世界的用户进行交流。  
+### 汉化版 QQ 群
+
+汉化版交流 QQ 群：807302496 (Slimefun 汉化版交流)
+附属交流 QQ 群：205679802 (Slimefun 附属交流，以及汉化组插件更新通知)
+
+### KOOK 交流频道
+
+欢迎加入 KOOK [粘液科技简中社区](https://kook.top/oqZwh8) 服务器
+
+### 官方 Discord
+
+你可以在 Discord 上找到 Slimefun 的社区服务器，并与 **超过 7000** 个来自全世界的用户进行交流。  
 单击下面的徽标加入 Discord 服务器反馈问题和提出意见，或者讨论关于此插件的内容。  
-我们经常会举办一些社区活动，加入我们了解更多。  
-**注意**：我们在 Discord 服务器 **不** 接受任何形式的问题反馈，请使用我们的 [问题追踪器](https://github.com/StarWishsama/Slimefun4/issues) 反馈问题！
+Slimefun 官方经常会举办一些社区活动，加入我们了解更多。  
+**注意**：Slimefun 官方在 Discord 服务器 **不**
+接受任何形式的问题反馈，请使用 [问题追踪器](https://github.com/StarWishsama/Slimefun4/issues) 反馈问题！
 
-由于 Discord 服务器规模已经庞大，我们需要强调一下 [重要的规则](https://github.com/Slimefun/Slimefun4/wiki/Discord-Rules)。  
+在加入前请先了解官方 Discord 服务器[重要的规则](https://github.com/Slimefun/Slimefun4/wiki/Discord-Rules)。  
 不遵守以上规则的人可能会被从服务器中踢出甚至封禁。
 
 <p align="center">
@@ -144,7 +159,7 @@ Slimefun4 使用多种系统收集使用数据，以及使用自动更新让你�
 <details>
   <summary>自动更新</summary>
 
-Slimefun4 汉化版 使用 Github API 以检测和下载更新。  
+Slimefun 汉化版 使用 Github API + GuizhanBuild API 以检测和下载更新。  
 这一功能被默认启用，但你可以在 `/plugins/Slimefun/config.yml` 里选择关闭。  
 我们强烈推荐你使用自动更新，以确保你能获得最新功能/修复的更新。
 
@@ -154,8 +169,8 @@ Slimefun4 汉化版 使用 Github API 以检测和下载更新。
   <summary>指标与统计</summary>
 
 Slimefun4 使用 [bStats](https://bstats.org/plugin/bukkit/Slimefun/4574) 收集关于插件的匿名信息。  
-这些仅是为了统计目的，因为我们对服务器/玩家如何使用插件感到兴趣。  
-所有公开的数据均为匿名且已被汇总，我们绝对无法看到单个服务器或玩家的信息。  
+这些仅是为了统计目的，因为我们对服务器和玩家如何使用插件很感兴趣。  
+所有公开的数据均为匿名，我们绝对无法根据上报的数据追溯到某个服务器或是某个玩家。  
 所有收集的数据均可公开访问: https://bstats.org/plugin/bukkit/Slimefun/4574
 
 你也可以在 `/plugins/bStats/config.yml` 下关闭数据收集。  
@@ -166,20 +181,20 @@ Slimefun4 使用 [bStats](https://bstats.org/plugin/bukkit/Slimefun/4574) 收集
 <details>
   <summary>GitHub 整合</summary>
 
-最近，Slimefun4 连接到了 https://api.github.com/ 以收集关于此开源项目的数据。  
-你的 Minecraft 服务器信息不会被发送到 Github。
+Slimefun4 使用 [GitHub API](https://api.github.com/) 收集关于此开源项目的使用数据。  
+请放心，你的 Minecraft 服务器信息不会被发送到 Github。
 
 这些信息包括但不限于
 
 * 协作者列表，TA 们的用户名和个人主页链接 (来自仓库`Slimefun/Slimefun4`、`Slimefun/Slimefun-Wiki`和`Slimefun/Resourcepack`)
 * 仓库中开启的问题的数量
 * 仓库中待定合并请求的数量
-* 仓库的小星星数量
+* 仓库的 Star 数量
 * 仓库的分支数量
 * 仓库的代码大小
 * 仓库中代码上次提交的日期
 
   </details>
 
-另外，插件还连接到了 [textures.minecraft.net](https://www.minecraft.net/en-us) 以获取协作者的 Minecraft 皮肤。  
+另外，插件还使用了 [textures.minecraft.net](https://www.minecraft.net/en-us) 以获取协作者的 Minecraft 皮肤。  
 请注意：Slimefun 与 `Mojang Studios` 或 Minecraft 无关。
