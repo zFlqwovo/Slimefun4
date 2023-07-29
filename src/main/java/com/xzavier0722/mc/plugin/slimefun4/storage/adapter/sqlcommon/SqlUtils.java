@@ -118,6 +118,8 @@ public class SqlUtils {
     }
 
     public static List<RecordSet> execQuery(Connection conn, String sql) throws SQLException {
+        Debug.log(TestCase.DATABASE, "Prepare execute sql query: {}", sql);
+
         try (var stmt = conn.createStatement()) {
             try (var result = stmt.executeQuery(sql)) {
                 List<RecordSet> re = null;
@@ -142,7 +144,7 @@ public class SqlUtils {
     }
 
     public static void execSql(Connection conn, String sql) throws SQLException {
-        Debug.log(TestCase.DATABASE, "Executing sql statement: " + sql);
+        Debug.log(TestCase.DATABASE, "Prepare execute sql statement: {}", sql);
 
         try (var stmt = conn.createStatement()) {
             stmt.execute(sql);
@@ -150,8 +152,6 @@ public class SqlUtils {
     }
 
     public static int execUpdate(Connection conn, String sql) throws SQLException {
-        Debug.log(TestCase.DATABASE, "Executing update statement: " + sql);
-
         try (var stmt = conn.createStatement()) {
             return stmt.executeUpdate(sql);
         }
