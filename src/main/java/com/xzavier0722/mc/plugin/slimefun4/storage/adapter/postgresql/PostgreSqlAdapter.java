@@ -145,7 +145,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
                         + ");"
         );
 
-        executeSql("CREATE INDEX index_player_name ON " + profileTable + " (" + FIELD_PLAYER_NAME + ");");
+        executeSql("CREATE INDEX IF NOT EXISTS index_player_name ON " + profileTable + " (" + FIELD_PLAYER_NAME + ");");
     }
 
     private void createResearchTable() {
@@ -160,7 +160,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
                         + ");"
         );
 
-        executeSql("CREATE INDEX index_player_research ON " + researchTable + " (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ");");
+        executeSql("CREATE INDEX IF NOT EXISTS index_player_research ON " + researchTable + " (" + FIELD_PLAYER_UUID + ", " + FIELD_RESEARCH_KEY + ");");
     }
 
     private void createBackpackTable() {
