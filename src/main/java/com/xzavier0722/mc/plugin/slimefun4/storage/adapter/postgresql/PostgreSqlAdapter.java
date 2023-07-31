@@ -94,7 +94,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "INSERT INTO " + mapTable(key.getScope()) + " (" + fieldStr.get() + ") "
                         + "VALUES (" + valStr + ")"
-                        + (updateFields.isEmpty() ? "" : " ON CONFLICT {" + fieldStr.get() + "} DO UPDATE SET "
+                        + (updateFields.isEmpty() ? "" : " ON CONFLICT (" + fieldStr.get() + ") DO UPDATE SET "
                         + String.join(", ", updateFields.stream().map(field -> {
                     var val = item.get(field);
                     if (val == null) {
