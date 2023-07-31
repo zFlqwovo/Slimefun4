@@ -17,6 +17,15 @@ public record MysqlConfig(
         var config = new HikariConfig();
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setJdbcUrl(jdbcUrl());
+
+        if (!user.isEmpty()) {
+            config.setUsername(user);
+        }
+
+        if (!passwd.isEmpty()) {
+            config.setPassword(passwd);
+        }
+
         config.setMaximumPoolSize(maxConnection);
 
         return new HikariDataSource(config);

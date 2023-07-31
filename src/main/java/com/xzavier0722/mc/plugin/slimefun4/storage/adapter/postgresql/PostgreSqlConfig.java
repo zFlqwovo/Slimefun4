@@ -17,6 +17,15 @@ public record PostgreSqlConfig(
         var config = new HikariConfig();
         config.setDriverClassName("org.postgresql.Driver");
         config.setJdbcUrl(jdbcUrl());
+
+        if (!user.isEmpty()) {
+            config.setUsername(user);
+        }
+
+        if (!passwd.isEmpty()) {
+            config.setPassword(passwd);
+        }
+
         config.setMaximumPoolSize(maxConnection);
 
         return new HikariDataSource(config);

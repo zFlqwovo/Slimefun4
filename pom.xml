@@ -261,6 +261,12 @@
             <version>5.0.1</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.6.0</version>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- Third party plugin integrations / soft dependencies -->
         <dependency>
