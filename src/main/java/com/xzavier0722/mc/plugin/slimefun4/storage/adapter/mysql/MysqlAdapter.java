@@ -95,7 +95,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 "INSERT INTO " + mapTable(key.getScope()) + " (" + fieldStr.get() + ") "
                 + "VALUES (" + valStr + ")"
                 + (updateFields.isEmpty() ? "" : " ON DUPLICATE KEY UPDATE "
-                        + String.join(", ", updateFields.stream().map(field -> {
+                        + String.join(", ", fields.stream().filter(fk -> !updateFields.contains(fk)).map(field -> {
                             var val = item.get(field);
                             if (val == null) {
                                 throw new IllegalArgumentException("Cannot find value in RecordSet for the specific key: " + field);
