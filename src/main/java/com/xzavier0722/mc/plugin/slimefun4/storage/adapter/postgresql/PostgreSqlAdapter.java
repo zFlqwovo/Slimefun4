@@ -139,7 +139,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + profileTable + "("
-                        + FIELD_PLAYER_UUID + " CHAR(64) PRIMARY KEY NOT NULL, "
+                        + FIELD_PLAYER_UUID + " UUID PRIMARY KEY NOT NULL, "
                         + FIELD_PLAYER_NAME + " CHAR(64) NOT NULL, "
                         + FIELD_BACKPACK_NUM + " INT DEFAULT 0, "
                         + ");"
@@ -152,7 +152,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + researchTable + "("
-                        + FIELD_PLAYER_UUID + " CHAR(64) NOT NULL, "
+                        + FIELD_PLAYER_UUID + " UUID NOT NULL, "
                         + FIELD_RESEARCH_KEY + " CHAR(64) NOT NULL, "
                         + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
                         + "REFERENCES " + profileTable + "(" + FIELD_PLAYER_UUID + ") "
@@ -168,7 +168,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
                 "CREATE TABLE IF NOT EXISTS "
                         + backpackTable + "("
                         + FIELD_BACKPACK_ID + " CHAR(64) PRIMARY KEY NOT NULL, "
-                        + FIELD_PLAYER_UUID + " CHAR(64) NOT NULL, "
+                        + FIELD_PLAYER_UUID + " UUID NOT NULL, "
                         + FIELD_BACKPACK_NUM + " INT NOT NULL, "
                         + FIELD_BACKPACK_NAME + " CHAR(64) NULL, "
                         + FIELD_BACKPACK_SIZE + " SMALLINT NOT NULL, "

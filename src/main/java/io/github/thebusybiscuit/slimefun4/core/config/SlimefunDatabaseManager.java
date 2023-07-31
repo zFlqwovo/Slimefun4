@@ -3,6 +3,8 @@ package io.github.thebusybiscuit.slimefun4.core.config;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.MysqlAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql.MysqlConfig;
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.postgresql.PostgreSqlAdapter;
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.postgresql.PostgreSqlConfig;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteConfig;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
@@ -119,6 +121,26 @@ public class SlimefunDatabaseManager {
                 }
 
                 adapter.prepare(new SqliteConfig(databasePath.getAbsolutePath()));
+            }
+            case POSTGRESQL -> {
+                var adapter = new PostgreSqlAdapter();
+
+                adapter.prepare(
+                        new PostgreSqlConfig(
+                                databaseConfig.getString("mysql.host"),
+                                databaseConfig.getInt("mysql.port"),
+                                databaseConfig.getString("mysql.database"),
+                                databaseConfig.getString("mysql.tablePrefix"),
+                                databaseConfig.getString("mysql.user"),
+                                databaseConfig.getString("mysql.password"),
+                                databaseConfig.getBoolean("mysql.useSSL"),
+                                databaseConfig.getInt("mysql.maxConnection")
+                        ));
+
+                switch (dataType) {
+                    case BLOCK_STORAGE -> blockStorageAdapter = adapter;
+                    case PLAYER_PROFILE -> profileAdapter = adapter;
+                }
             }
         }
     }
