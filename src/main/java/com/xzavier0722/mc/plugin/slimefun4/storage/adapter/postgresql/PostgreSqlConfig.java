@@ -1,9 +1,9 @@
-package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql;
+package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.postgresql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-public record MysqlConfig(
+public record PostgreSqlConfig(
         String host,
         int port,
         String database,
@@ -15,7 +15,7 @@ public record MysqlConfig(
 ) {
     public HikariDataSource createDataSource() {
         var config = new HikariConfig();
-        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        config.setDriverClassName("org.postgresql.Driver");
         config.setJdbcUrl(jdbcUrl());
         config.setMaximumPoolSize(maxConnection);
 
@@ -23,8 +23,8 @@ public record MysqlConfig(
     }
 
     public String jdbcUrl() {
-        return "jdbc:mysql://"
+        return "jdbc:postgresql://"
                 + host + ":" + port + "/" + database
-                + "?characterEncoding=utf8&useSSL=" + useSsl;
+                + "?ssl=" + useSsl;
     }
 }
