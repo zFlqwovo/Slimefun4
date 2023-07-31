@@ -1,7 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.controller;
 
 import city.norain.slimefun4.utils.InventoryUtil;
-import city.norain.slimefun4.utils.Timer;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
@@ -305,12 +304,7 @@ public class BlockDataController extends ADataController {
     }
 
     public void loadChunk(Chunk chunk, boolean isNewChunk) {
-        Timer timer = null;
-        if (Debug.hasTestCase(TestCase.DATABASE)) {
-            timer = Timer.createTimer();
-        }
-
-        Debug.log(TestCase.DATABASE, "Loading chunk @x = {}, Z = {}, isNewChunk = {}", chunk.getX(), chunk.getZ(), isNewChunk);
+        Debug.log(TestCase.DATABASE, "Loading chunk @x = {}, z = {}, isNewChunk = {}", chunk.getX(), chunk.getZ(), isNewChunk);
 
         checkDestroy();
         var chunkData = getChunkDataCache(chunk, true);
@@ -352,11 +346,6 @@ public class BlockDataController extends ADataController {
                 });
             }
         });
-
-        if (timer != null) {
-            var duration = timer.measureDuration();
-            Debug.log(TestCase.DATABASE, "Loaded chunk data costs {}ms", duration.toMillis());
-        }
     }
 
     private void loadChunkData(SlimefunChunkData chunkData) {

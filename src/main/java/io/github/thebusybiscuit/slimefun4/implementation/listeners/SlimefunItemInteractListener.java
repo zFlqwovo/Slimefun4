@@ -10,6 +10,9 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
@@ -23,10 +26,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Optional;
 
 /**
  * This {@link Listener} listens to the {@link PlayerInteractEvent}.
@@ -145,6 +144,8 @@ public class SlimefunItemInteractListener implements Listener {
                 if (blockData.isDataLoaded()) {
                     openMenu(blockData.getBlockMenu(), clickedBlock, p);
                 } else {
+                    var uuid = p.getUniqueId();
+
                     Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
                             blockData,
                             new IAsyncReadCallback<>() {
@@ -155,7 +156,13 @@ public class SlimefunItemInteractListener implements Listener {
 
                                 @Override
                                 public void onResult(SlimefunBlockData result) {
-                                    openMenu(blockData.getBlockMenu(), clickedBlock, p);
+                                    var player = Bukkit.getPlayer(uuid);
+
+                                    if (player == null || !player.isOnline()) {
+                                        return;
+                                    }
+
+                                    openMenu(result.getBlockMenu(), clickedBlock, player);
                                 }
                             }
                     );
