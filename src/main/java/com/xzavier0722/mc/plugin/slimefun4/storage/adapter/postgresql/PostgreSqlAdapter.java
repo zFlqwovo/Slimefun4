@@ -143,8 +143,8 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + profileTable + "("
-                        + FIELD_PLAYER_UUID + " CHAR(64) PRIMARY KEY NOT NULL, "
-                        + FIELD_PLAYER_NAME + " CHAR(64) NOT NULL, "
+                        + FIELD_PLAYER_UUID + " VARCHAR(64) PRIMARY KEY NOT NULL, "
+                        + FIELD_PLAYER_NAME + " VARCHAR(64) NOT NULL, "
                         + FIELD_BACKPACK_NUM + " INT DEFAULT 0"
                         + ");"
         );
@@ -156,8 +156,8 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + researchTable + "("
-                        + FIELD_PLAYER_UUID + " CHAR(64) NOT NULL, "
-                        + FIELD_RESEARCH_KEY + " CHAR(64) NOT NULL, "
+                        + FIELD_PLAYER_UUID + " VARCHAR(64) NOT NULL, "
+                        + FIELD_RESEARCH_KEY + " VARCHAR(64) NOT NULL, "
                         + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
                         + "REFERENCES " + profileTable + "(" + FIELD_PLAYER_UUID + ") "
                         + "ON UPDATE CASCADE ON DELETE CASCADE"
@@ -171,10 +171,10 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + backpackTable + "("
-                        + FIELD_BACKPACK_ID + " CHAR(64) PRIMARY KEY NOT NULL, "
-                        + FIELD_PLAYER_UUID + " CHAR(64) NOT NULL, "
+                        + FIELD_BACKPACK_ID + " VARCHAR(64) PRIMARY KEY NOT NULL, "
+                        + FIELD_PLAYER_UUID + " VARCHAR(64) NOT NULL, "
                         + FIELD_BACKPACK_NUM + " INT NOT NULL, "
-                        + FIELD_BACKPACK_NAME + " CHAR(64) NULL, "
+                        + FIELD_BACKPACK_NAME + " VARCHAR(64) NULL, "
                         + FIELD_BACKPACK_SIZE + " SMALLINT NOT NULL, "
                         + "FOREIGN KEY (" + FIELD_PLAYER_UUID + ") "
                         + "REFERENCES " + profileTable + "(" + FIELD_PLAYER_UUID + ") "
@@ -189,7 +189,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + bpInvTable + "("
-                        + FIELD_BACKPACK_ID + " CHAR(64) NOT NULL, "
+                        + FIELD_BACKPACK_ID + " VARCHAR(64) NOT NULL, "
                         + FIELD_INVENTORY_SLOT + " SMALLINT NOT NULL, "
                         + FIELD_INVENTORY_ITEM + " TEXT NOT NULL, "
                         + "FOREIGN KEY (" + FIELD_BACKPACK_ID + ") "
@@ -204,9 +204,9 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + blockRecordTable + "("
-                        + FIELD_LOCATION + " CHAR(64) PRIMARY KEY NOT NULL, "
-                        + FIELD_CHUNK + " CHAR(64) NOT NULL, "
-                        + FIELD_SLIMEFUN_ID + " CHAR(64) NOT NULL"
+                        + FIELD_LOCATION + " VARCHAR(64) PRIMARY KEY NOT NULL, "
+                        + FIELD_CHUNK + " VARCHAR(64) NOT NULL, "
+                        + FIELD_SLIMEFUN_ID + " VARCHAR(64) NOT NULL"
                         + ");"
         );
 
@@ -217,8 +217,8 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + blockDataTable + "("
-                        + FIELD_LOCATION + " CHAR(64) NOT NULL, "
-                        + FIELD_DATA_KEY + " CHAR(64) NOT NULL, "
+                        + FIELD_LOCATION + " VARCHAR(64) NOT NULL, "
+                        + FIELD_DATA_KEY + " VARCHAR(64) NOT NULL, "
                         + FIELD_DATA_VALUE + " TEXT NOT NULL, "
                         + "FOREIGN KEY (" + FIELD_LOCATION + ") "
                         + "REFERENCES " + blockRecordTable + "(" + FIELD_LOCATION + ") "
@@ -232,8 +232,8 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + chunkDataTable + "("
-                        + FIELD_CHUNK + " CHAR(64) NOT NULL, "
-                        + FIELD_DATA_KEY + " CHAR(64) NOT NULL, "
+                        + FIELD_CHUNK + " VARCHAR(64) NOT NULL, "
+                        + FIELD_DATA_KEY + " VARCHAR(64) NOT NULL, "
                         + FIELD_DATA_VALUE + " TEXT NOT NULL, "
                         + "PRIMARY KEY (" + FIELD_CHUNK + ", " + FIELD_DATA_KEY + ")"
                         + ");"
@@ -244,7 +244,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         executeSql(
                 "CREATE TABLE IF NOT EXISTS "
                         + blockInvTable + "("
-                        + FIELD_LOCATION + " CHAR(64) NOT NULL, "
+                        + FIELD_LOCATION + " VARCHAR(64) NOT NULL, "
                         + FIELD_INVENTORY_SLOT + " SMALLINT NOT NULL, "
                         + FIELD_INVENTORY_ITEM + " TEXT NOT NULL, "
                         + "FOREIGN KEY (" + FIELD_LOCATION + ") "
