@@ -4,7 +4,7 @@ public enum DataScope {
     NONE,
     PLAYER_RESEARCH,
     PLAYER_PROFILE(new FieldKey[]{FieldKey.PLAYER_NAME}),
-    BACKPACK_PROFILE(new FieldKey[]{FieldKey.PLAYER_UUID, FieldKey.BACKPACK_NAME}),
+    BACKPACK_PROFILE(new FieldKey[]{FieldKey.BACKPACK_ID}),
     BACKPACK_INVENTORY(new FieldKey[]{FieldKey.BACKPACK_ID, FieldKey.INVENTORY_SLOT}),
     BLOCK_RECORD(new FieldKey[]{FieldKey.LOCATION}),
     BLOCK_DATA(new FieldKey[]{FieldKey.LOCATION, FieldKey.DATA_KEY}),
