@@ -93,7 +93,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         }
 
         var updateFields = key.getFields();
-        var contrastStr = Arrays.stream(key.getScope().getIndexKey()).map(SqlUtils::mapField).collect(Collectors.joining(", "));
+        var contrastStr = Arrays.stream(key.getScope().getPrimaryKeys()).map(SqlUtils::mapField).collect(Collectors.joining(", "));
 
         executeSql(
                 "INSERT INTO " + mapTable(key.getScope()) + " (" + fieldStr.get() + ") "

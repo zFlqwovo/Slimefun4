@@ -3,7 +3,7 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.common;
 public enum DataScope {
     NONE,
     PLAYER_RESEARCH,
-    PLAYER_PROFILE(new FieldKey[]{FieldKey.PLAYER_NAME}),
+    PLAYER_PROFILE(new FieldKey[]{FieldKey.PLAYER_UUID}),
     BACKPACK_PROFILE(new FieldKey[]{FieldKey.BACKPACK_ID}),
     BACKPACK_INVENTORY(new FieldKey[]{FieldKey.BACKPACK_ID, FieldKey.INVENTORY_SLOT}),
     BLOCK_RECORD(new FieldKey[]{FieldKey.LOCATION}),
@@ -11,17 +11,17 @@ public enum DataScope {
     CHUNK_DATA(new FieldKey[]{FieldKey.CHUNK, FieldKey.DATA_KEY}),
     BLOCK_INVENTORY(new FieldKey[]{FieldKey.LOCATION, FieldKey.INVENTORY_SLOT});
 
-    private final FieldKey[] indexKey;
+    private final FieldKey[] primaryKeys;
 
     DataScope() {
-        indexKey = new FieldKey[0];
+        primaryKeys = new FieldKey[0];
     }
 
-    DataScope(FieldKey[] indexKey) {
-        this.indexKey = indexKey;
+    DataScope(FieldKey[] primaryKeys) {
+        this.primaryKeys = primaryKeys;
     }
 
-    public FieldKey[] getIndexKey() {
-        return indexKey;
+    public FieldKey[] getPrimaryKeys() {
+        return primaryKeys;
     }
 }
