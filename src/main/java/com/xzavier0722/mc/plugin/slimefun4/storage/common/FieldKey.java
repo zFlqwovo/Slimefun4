@@ -1,49 +1,38 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.common;
 
 public enum FieldKey {
-    PLAYER_UUID(false, true),
+    PLAYER_UUID,
     PLAYER_NAME,
     PLAYER_BACKPACK_NUM(true),
 
     RESEARCH_ID,
 
-    BACKPACK_ID(false, true),
+    BACKPACK_ID,
     BACKPACK_NUMBER(true),
     BACKPACK_NAME,
     BACKPACK_SIZE(true),
 
-    INVENTORY_SLOT(true, true),
+    INVENTORY_SLOT,
     INVENTORY_ITEM,
 
-    LOCATION(false, true),
-    CHUNK(false, true),
+    LOCATION,
+    CHUNK,
     SLIMEFUN_ID,
 
-    DATA_KEY(false, true),
+    DATA_KEY,
     DATA_VALUE;
 
     private final boolean isNumType;
-    private final boolean isPrimary;
 
     FieldKey() {
-        this(false, false);
+        this(false);
     }
 
     FieldKey(boolean isNumType) {
         this.isNumType = isNumType;
-        this.isPrimary = false;
-    }
-
-    FieldKey(boolean isNumType, boolean isPrimary) {
-        this.isNumType = isNumType;
-        this.isPrimary = isPrimary;
     }
 
     public boolean isNumType() {
         return isNumType;
-    }
-
-    public boolean isPrimary() {
-        return isPrimary;
     }
 }

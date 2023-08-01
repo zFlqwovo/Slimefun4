@@ -310,11 +310,13 @@ public class BlockDataController extends ADataController {
         var chunkData = getChunkDataCache(chunk, true);
 
         if (isNewChunk) {
+            Debug.log(TestCase.DATABASE, "Loaded chunk");
             chunkData.setIsDataLoaded(true);
             return;
         }
 
         if (chunkData.isDataLoaded()) {
+            Debug.log(TestCase.DATABASE, "Chunk already loaded");
             return;
         }
 

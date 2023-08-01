@@ -4,11 +4,11 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
-import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_ID;
@@ -93,10 +93,12 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
         }
 
         var updateFields = key.getFields();
+        var contrastStr = Arrays.stream(key.getScope().getIndexKey()).map(SqlUtils::mapField).collect(Collectors.joining(", "));
+
         executeSql(
                 "INSERT INTO " + mapTable(key.getScope()) + " (" + fieldStr.get() + ") "
                         + "VALUES (" + valStr + ")"
-                        + (updateFields.isEmpty() ? "" : " ON CONFLICT (" + fields.stream().filter(FieldKey::isPrimary).map(SqlUtils::mapField).collect(Collectors.joining(", ")) + ") DO UPDATE SET "
+                        + (contrastStr.isEmpty() ? "" : " ON CONFLICT (" + contrastStr + ") " + (updateFields.isEmpty() ? "DO NOTHING" : "DO UPDATE SET "
                         + String.join(", ", updateFields.stream().map(field -> {
                     var val = item.get(field);
                     if (val == null) {
@@ -104,7 +106,7 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
                     }
                     return SqlUtils.buildKvStr(field, val);
                 }).toList())
-                ) + ";"
+                )) + ";"
         );
     }
 
