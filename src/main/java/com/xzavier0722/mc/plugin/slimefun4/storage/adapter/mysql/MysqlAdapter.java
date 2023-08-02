@@ -1,13 +1,12 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlCommonAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.zaxxer.hikari.HikariDataSource;
-import java.sql.SQLException;
 import java.util.List;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_ID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NAME;
@@ -24,11 +23,9 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 
-public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
+public class MysqlAdapter extends SqlCommonAdapter<MysqlConfig> {
     private HikariDataSource ds;
     private MysqlConfig config;
-    private String profileTable, researchTable, backpackTable, bpInvTable;
-    private String blockRecordTable, blockDataTable, chunkDataTable, blockInvTable;
 
     @Override
     public void prepare(MysqlConfig config) {
@@ -95,7 +92,7 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 "INSERT INTO " + mapTable(key.getScope()) + " (" + fieldStr.get() + ") "
                 + "VALUES (" + valStr + ")"
                 + (updateFields.isEmpty() ? "" : " ON DUPLICATE KEY UPDATE "
-                        + String.join(", ", fields.stream().filter(fk -> !updateFields.contains(fk)).map(field -> {
+                        + String.join(", ", updateFields.stream().map(field -> {
                             var val = item.get(field);
                             if (val == null) {
                                 throw new IllegalArgumentException("Cannot find value in RecordSet for the specific key: " + field);
@@ -244,35 +241,5 @@ public class MysqlAdapter implements IDataSourceAdapter<MysqlConfig> {
                 + "PRIMARY KEY (" + FIELD_LOCATION + ", " + FIELD_INVENTORY_SLOT + ")"
                 + ");"
         );
-    }
-
-    private void executeSql(String sql) {
-        try (var conn = ds.getConnection()) {
-            SqlUtils.execSql(conn, sql);
-        } catch (SQLException e) {
-            throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
-        }
-    }
-
-    private List<RecordSet> executeQuery(String sql) {
-        try (var conn = ds.getConnection()) {
-            return SqlUtils.execQuery(conn, sql);
-        } catch (SQLException e) {
-            throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
-        }
-    }
-
-    private String mapTable(DataScope scope) {
-        return switch (scope) {
-            case PLAYER_PROFILE -> profileTable;
-            case BACKPACK_INVENTORY -> bpInvTable;
-            case BACKPACK_PROFILE -> backpackTable;
-            case PLAYER_RESEARCH -> researchTable;
-            case BLOCK_INVENTORY -> blockInvTable;
-            case CHUNK_DATA -> chunkDataTable;
-            case BLOCK_DATA -> blockDataTable;
-            case BLOCK_RECORD -> blockRecordTable;
-            case NONE -> throw new IllegalArgumentException("NONE cannot be a storage data scope!");
-        };
     }
 }

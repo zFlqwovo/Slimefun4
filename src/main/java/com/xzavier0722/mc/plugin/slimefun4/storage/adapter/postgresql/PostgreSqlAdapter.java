@@ -1,13 +1,12 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.postgresql;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlCommonAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.zaxxer.hikari.HikariDataSource;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +25,7 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 
-public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
+public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
     private HikariDataSource ds;
     private PostgreSqlConfig config;
     private String profileTable, researchTable, backpackTable, bpInvTable;
@@ -253,35 +252,5 @@ public class PostgreSqlAdapter implements IDataSourceAdapter<PostgreSqlConfig> {
                         + "PRIMARY KEY (" + FIELD_LOCATION + ", " + FIELD_INVENTORY_SLOT + ")"
                         + ");"
         );
-    }
-
-    private void executeSql(String sql) {
-        try (var conn = ds.getConnection()) {
-            SqlUtils.execSql(conn, sql);
-        } catch (SQLException e) {
-            throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
-        }
-    }
-
-    private List<RecordSet> executeQuery(String sql) {
-        try (var conn = ds.getConnection()) {
-            return SqlUtils.execQuery(conn, sql);
-        } catch (SQLException e) {
-            throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
-        }
-    }
-
-    private String mapTable(DataScope scope) {
-        return switch (scope) {
-            case PLAYER_PROFILE -> profileTable;
-            case BACKPACK_INVENTORY -> bpInvTable;
-            case BACKPACK_PROFILE -> backpackTable;
-            case PLAYER_RESEARCH -> researchTable;
-            case BLOCK_INVENTORY -> blockInvTable;
-            case CHUNK_DATA -> chunkDataTable;
-            case BLOCK_DATA -> blockDataTable;
-            case BLOCK_RECORD -> blockRecordTable;
-            case NONE -> throw new IllegalArgumentException("NONE cannot be a storage data scope!");
-        };
     }
 }
