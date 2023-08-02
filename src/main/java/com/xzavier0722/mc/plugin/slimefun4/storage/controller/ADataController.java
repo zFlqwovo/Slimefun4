@@ -8,16 +8,19 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.QueuedWriteTask;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ADataController {
+    private final Logger logger = LoggerFactory.getLogger("Slimefun-Data-Controller");
     private final DataType dataType;
     private final Map<ScopeKey, QueuedWriteTask> scheduledWriteTasks;
     private final ScopedLock lock;
@@ -51,15 +54,18 @@ public abstract class ADataController {
         readExecutor.shutdownNow();
         callbackExecutor.shutdownNow();
         try {
+            float totalTask = scheduledWriteTasks.size();
             var pendingTask = scheduledWriteTasks.size();
             while (pendingTask > 0) {
-                System.out.println("数据保存中，请稍候... 剩余 " + pendingTask + " 个任务");
-                Thread.sleep(500);
+                var doneTaskPercent = String.format("%.1f", (totalTask - pendingTask) / totalTask * 100);
+                logger.info("数据保存中，请稍候... 剩余 {} 个任务 ({}%)", pendingTask, doneTaskPercent);
+                TimeUnit.SECONDS.sleep(1);
                 pendingTask = scheduledWriteTasks.size();
             }
+
+            logger.info("数据保存完成.");
         } catch (InterruptedException e) {
-            System.err.println("Exception thrown while saving data: ");
-            e.printStackTrace();
+            logger.warn("Exception thrown while saving data: ", e);
         }
         writeExecutor.shutdownNow();
         dataAdapter = null;
