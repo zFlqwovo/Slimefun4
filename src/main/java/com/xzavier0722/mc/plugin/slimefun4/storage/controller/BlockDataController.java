@@ -16,8 +16,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
-import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -304,8 +302,6 @@ public class BlockDataController extends ADataController {
     }
 
     public void loadChunk(Chunk chunk, boolean isNewChunk) {
-        Debug.log(TestCase.DATABASE, "Loading chunk @x = {}, z = {}, isNewChunk = {}", chunk.getX(), chunk.getZ(), isNewChunk);
-
         checkDestroy();
         var chunkData = getChunkDataCache(chunk, true);
 

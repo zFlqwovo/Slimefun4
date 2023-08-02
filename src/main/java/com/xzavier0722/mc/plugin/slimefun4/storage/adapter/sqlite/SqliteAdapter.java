@@ -6,13 +6,10 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_ID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NAME;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NUM;
@@ -29,18 +26,17 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 
 public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
-    private SqliteConfig config;
+    private HikariDataSource ds;
     private Connection conn;
 
     @Override
     public void prepare(SqliteConfig config) {
-        this.config = config;
+        this.ds = config.createDataSource();
         conn = createConn();
     }
 
     @Override
     public void initStorage(DataType type) {
-        executeSql("PRAGMA foreign_keys = ON;");
         switch (type) {
             case PLAYER_PROFILE -> createProfileTables();
             case BLOCK_STORAGE -> createBlockStorageTables();
@@ -51,11 +47,12 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
     public void shutdown() {
         try {
             conn.close();
+            ds.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         conn = null;
-        config = null;
+        ds = null;
     }
 
     @Override
@@ -284,10 +281,8 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
 
     private Connection createConn() {
         try {
-            // Manually re-trigger sqlite driver init avoid driver list is empty.
-            Class.forName("org.sqlite.JDBC");
-            return DriverManager.getConnection("jdbc:sqlite:" + config.path());
-        } catch (SQLException | ClassNotFoundException e) {
+            return ds.getConnection();
+        } catch (SQLException e) {
             throw new IllegalStateException("Failed to create Sqlite connection: ", e);
         }
     }
