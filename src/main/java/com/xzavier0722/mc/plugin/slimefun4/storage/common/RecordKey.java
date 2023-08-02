@@ -1,18 +1,18 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.common;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.fields.CommonValue;
 import io.github.bakedlibs.dough.collections.Pair;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 public class RecordKey extends ScopeKey {
     private final Set<FieldKey> fields;
-    private final List<Pair<FieldKey, String>> conditions;
+    private final List<Pair<FieldKey, FieldValue>> conditions;
     private volatile String strKey = "";
     private volatile boolean changed = true;
 
@@ -27,7 +27,7 @@ public class RecordKey extends ScopeKey {
     }
 
     @ParametersAreNonnullByDefault
-    public RecordKey(DataScope scope, Set<FieldKey> fields, List<Pair<FieldKey, String>> conditions) {
+    public RecordKey(DataScope scope, Set<FieldKey> fields, List<Pair<FieldKey, FieldValue>> conditions) {
         super(scope);
         this.fields = fields.isEmpty() ? fields : new HashSet<>(fields);
         this.conditions = conditions.isEmpty() ? conditions : new LinkedList<>(conditions);
@@ -46,6 +46,12 @@ public class RecordKey extends ScopeKey {
 
     @ParametersAreNonnullByDefault
     public void addCondition(FieldKey key, String val) {
+        conditions.add(new Pair<>(key, new CommonValue(val)));
+        changed = true;
+    }
+
+    @ParametersAreNonnullByDefault
+    public void addCondition(FieldKey key, FieldValue val) {
         conditions.add(new Pair<>(key, val));
         changed = true;
     }
@@ -56,7 +62,7 @@ public class RecordKey extends ScopeKey {
     }
 
     @Nonnull
-    public List<Pair<FieldKey, String>> getConditions() {
+    public List<Pair<FieldKey, FieldValue>> getConditions() {
         return Collections.unmodifiableList(conditions);
     }
 

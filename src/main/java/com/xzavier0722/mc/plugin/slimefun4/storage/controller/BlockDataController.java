@@ -9,6 +9,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
+import com.xzavier0722.mc.plugin.slimefun4.storage.common.fields.PatternValue;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedSavingLooperTask;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedTask;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
@@ -21,6 +22,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -31,6 +34,7 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -435,6 +439,47 @@ public class BlockDataController extends ADataController {
 
     public void getChunkDataAsync(Chunk chunk, IAsyncReadCallback<SlimefunChunkData> callback) {
         scheduleReadTask(() -> invokeCallback(callback, getChunkData(chunk)));
+    }
+
+    public Set<SlimefunBlockData> getAllBlockData(@Nonnull World world) {
+        Objects.requireNonNull(world, "World cannot be null!");
+        checkDestroy();
+
+        var key = new RecordKey(DataScope.BLOCK_RECORD);
+        key.addField(FieldKey.LOCATION);
+        key.addField(FieldKey.CHUNK);
+        key.addField(FieldKey.SLIMEFUN_ID);
+        key.addCondition(FieldKey.LOCATION, new PatternValue(world.getName() + "%"));
+
+        var result = new HashSet<SlimefunBlockData>();
+
+        lock.lock(key);
+        try {
+            getData(key).forEach(block -> {
+                var lKey = block.get(FieldKey.LOCATION);
+                var sfId = block.get(FieldKey.SLIMEFUN_ID);
+                var chunkKey = block.get(FieldKey.CHUNK);
+                var sfItem = SlimefunItem.getById(sfId);
+                if (sfItem == null) {
+                    return;
+                }
+
+                var chunk = LocationUtils.toChunk(chunkKey);
+                var chunkData = getChunkDataCache(chunk, false);
+                var cache = getBlockDataFromCache(chunkData.getKey(), lKey);
+                var blockData = cache == null ? new SlimefunBlockData(LocationUtils.toLocation(lKey), sfId) : cache;
+
+                result.add(blockData);
+            });
+        } finally {
+            lock.unlock(key);
+        }
+
+        return result;
+    }
+
+    public void getAllBlockDataAsync(@Nonnull World world, IAsyncReadCallback<Set<SlimefunBlockData>> callback) {
+        scheduleReadTask(() -> invokeCallback(callback, getAllBlockData(world)));
     }
 
     public void saveAllBlockInventories() {
