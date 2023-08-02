@@ -293,7 +293,7 @@ public class PlayerProfile {
     public void sendStats(@Nonnull CommandSender sender) {
         Set<Research> unlockedResearches = getResearches();
         int levels = unlockedResearches.stream().mapToInt(Research::getLevelCost).sum();
-        int allResearches = Slimefun.getRegistry().getResearches().size();
+        int allResearches = nonEmptyResearches();
 
         float progress = Math.round(((unlockedResearches.size() * 100.0F) / allResearches) * 100.0F) / 100.0F;
 
@@ -455,6 +455,14 @@ public class PlayerProfile {
 
     public boolean isInvalid() {
         return isInvalid;
+    }
+
+    // returns the amount of researches with at least 1 enabled item
+    private int nonEmptyResearches() {
+        return (int) Slimefun.getRegistry().getResearches()
+                .stream()
+                .filter(research -> research.getAffectedItems().stream().anyMatch(item -> item.getState() == ItemState.ENABLED))
+                .count();
     }
 
     private static void getOrCreate(OfflinePlayer p, Consumer<PlayerProfile> cb) {
