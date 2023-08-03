@@ -10,6 +10,6 @@ public class PatternValue extends FieldValue {
 
     @Override
     public String serializeToSql(FieldKey key) {
-        return "LIKE '" + value + "'";
+        return " LIKE '" + value + "'";
     }
 }

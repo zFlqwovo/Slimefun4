@@ -11,6 +11,6 @@ public class CommonValue extends FieldValue {
 
     @Override
     public String serializeToSql(FieldKey key) {
-        return "= " + SqlUtils.toSqlValStr(key, value);
+        return " = " + SqlUtils.toSqlValStr(key, value);
     }
 }

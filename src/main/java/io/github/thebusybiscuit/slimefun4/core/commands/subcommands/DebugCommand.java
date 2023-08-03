@@ -1,11 +1,14 @@
 package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
 import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * The debug command will allow server owners to get information for us developers.
@@ -43,12 +46,22 @@ public class DebugCommand extends SubCommand {
 
         String test = args[1];
 
-        if (test.equalsIgnoreCase("disable") || test.equalsIgnoreCase("off")) {
-            Debug.disableTestCase();
-            Slimefun.getLocalization().sendMessage(sender, "commands.debug.disabled");
-        } else {
-            Debug.addTestCase(test);
-            Slimefun.getLocalization().sendMessage(sender, "commands.debug.running", msg -> msg.replace("%test%", test));
+        switch (test.toLowerCase()) {
+            case "disable", "off" -> {
+                Debug.disableTestCase();
+                Slimefun.getLocalization().sendMessage(sender, "commands.debug.disabled");
+            }
+            case "get_all_blocks" -> {
+                if (sender instanceof Player p) {
+                    var data = Slimefun.getDatabaseManager().getBlockDataController().getAllBlockData(p.getWorld());
+                    p.sendMessage("All block data in current world count: " + data.size());
+                    p.sendMessage("Raw block datas: " + data.stream().map(bd -> bd.getSfId() + ";" + LocationUtils.locationToString(bd.getLocation())).collect(Collectors.joining(", ")));
+                }
+            }
+            default -> {
+                Debug.addTestCase(test);
+                Slimefun.getLocalization().sendMessage(sender, "commands.debug.running", msg -> msg.replace("%test%", test));
+            }
         }
     }
 }
