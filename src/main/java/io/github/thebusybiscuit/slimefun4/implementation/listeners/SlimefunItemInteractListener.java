@@ -162,7 +162,7 @@ public class SlimefunItemInteractListener implements Listener {
                                         return;
                                     }
 
-                                    openMenu(result.getBlockMenu(), clickedBlock, player);
+                                    Slimefun.runSync(() -> openMenu(result.getBlockMenu(), clickedBlock, player));
                                 }
                             }
                     );
