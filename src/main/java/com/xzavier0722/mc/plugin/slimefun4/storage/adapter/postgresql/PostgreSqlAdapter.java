@@ -6,7 +6,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-import com.zaxxer.hikari.HikariDataSource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,14 +25,13 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 
 public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
-    private HikariDataSource ds;
     private PostgreSqlConfig config;
     private String profileTable, researchTable, backpackTable, bpInvTable;
     private String blockRecordTable, blockDataTable, chunkDataTable, blockInvTable;
 
     @Override
     public void prepare(PostgreSqlConfig config) {
-        ds = config.createDataSource();
+        this.ds = config.createDataSource();
         this.config = config;
     }
 

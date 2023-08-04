@@ -6,7 +6,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-import com.zaxxer.hikari.HikariDataSource;
 import java.util.List;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_ID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NAME;
@@ -24,12 +23,11 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 
 public class MysqlAdapter extends SqlCommonAdapter<MysqlConfig> {
-    private HikariDataSource ds;
     private MysqlConfig config;
 
     @Override
     public void prepare(MysqlConfig config) {
-        ds = config.createDataSource();
+        this.ds = config.createDataSource();
         this.config = config;
     }
 
