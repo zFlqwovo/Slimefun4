@@ -28,10 +28,10 @@ jobs:
           settings-path: ${{ github.workspace }}
       - name: Build Slimefun
         if: github.event_name != 'pull_request'
-        run: mvn -B package --file pom.xml --errors
+        run: mvn -B package --file pom-github-package.xml --errors
       - name: Publish Slimefun
         if: github.event_name != 'pull_request'
-        run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml --errors
+        run: mvn deploy --file pom-github-package.xml --errors
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Mask Output
