@@ -44,7 +44,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           cd target && FILENAME=$(find . -maxdepth 1 -mindepth 1 -name "Slimefun-*" | cut -d'/' -f 2)
-          echo ls
+          echo $PWD
           echo "slimefun-artifact-name=$FILENAME" >> "$GITHUB_ENV"
           cd ..
       - name: Upload Build
