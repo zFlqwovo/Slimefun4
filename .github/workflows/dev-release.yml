@@ -24,12 +24,13 @@ jobs:
           java-package: jdk
           architecture: x64
           cache: maven
+          settings-path: ${{ github.workspace }}
       - name: Build Slimefun
         if: github.event_name != 'pull_request'
         run: mvn -B package --file pom.xml --errors
       - name: Publish Slimefun
         if: github.event_name != 'pull_request'
-        run: mvn deploy --errors
+        run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml --errors
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Mask Output
