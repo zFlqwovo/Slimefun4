@@ -31,7 +31,7 @@ jobs:
         run: mvn -B package --file pom-github-package.xml --errors
       - name: Publish Slimefun
         if: github.event_name != 'pull_request'
-        run: mvn deploy --file pom-github-package.xml --errors
+        run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml --file pom-github-package.xml --errors
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Mask Output
