@@ -26,8 +26,6 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 
 public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
     private PostgreSqlConfig config;
-    private String profileTable, researchTable, backpackTable, bpInvTable;
-    private String blockRecordTable, blockDataTable, chunkDataTable, blockInvTable;
 
     @Override
     public void prepare(PostgreSqlConfig config) {
