@@ -8,6 +8,7 @@ public record SqliteConfig(String path) {
         var config = new HikariConfig();
         config.setDriverClassName("org.sqlite.JDBC");
         config.setJdbcUrl("jdbc:sqlite:" + path + "?foreign_keys=on");
+        config.setMaximumPoolSize(1);
 
         return new HikariDataSource(config);
     }
