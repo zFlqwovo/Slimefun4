@@ -144,8 +144,6 @@ public class SlimefunItemInteractListener implements Listener {
                 if (blockData.isDataLoaded()) {
                     openMenu(blockData.getBlockMenu(), clickedBlock, p);
                 } else {
-                    var uuid = p.getUniqueId();
-
                     Slimefun.getDatabaseManager().getBlockDataController().loadBlockDataAsync(
                             blockData,
                             new IAsyncReadCallback<>() {
@@ -156,13 +154,11 @@ public class SlimefunItemInteractListener implements Listener {
 
                                 @Override
                                 public void onResult(SlimefunBlockData result) {
-                                    var player = Bukkit.getPlayer(uuid);
-
-                                    if (player == null || !player.isOnline()) {
+                                    if (!p.isOnline()) {
                                         return;
                                     }
 
-                                    Slimefun.runSync(() -> openMenu(result.getBlockMenu(), clickedBlock, player));
+                                    openMenu(result.getBlockMenu(), clickedBlock, p);
                                 }
                             }
                     );

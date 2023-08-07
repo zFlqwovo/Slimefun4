@@ -246,7 +246,7 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
             // We wanna ensure that the Server uses a compatible version of Minecraft.
             getServer().getPluginManager().disablePlugin(this);
         } else if (!SlimefunExtended.checkEnvironment(this)) {
-            // We wanna ensure that the Server uses a compatible server software and have no incompatible plugins
+            // We want to ensure that the Server uses a compatible server software and have no incompatible plugins
             getServer().getPluginManager().disablePlugin(this);
         } else {
             // The Environment has been validated.
