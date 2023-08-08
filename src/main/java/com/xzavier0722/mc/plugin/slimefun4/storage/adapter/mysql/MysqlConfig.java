@@ -31,6 +31,7 @@ public record MysqlConfig(
         config.setMaximumPoolSize(Math.max(Runtime.getRuntime().availableProcessors(), maxConnection));
         config.setIdleTimeout(TimeUnit.MINUTES.toMillis(1));
         config.setMaxLifetime(TimeUnit.MINUTES.toMillis(10));
+        config.setLeakDetectionThreshold(TimeUnit.MINUTES.toMillis(1));
 
         var props = new Properties();
         props.setProperty("dataSource.cachePrepStmts", "true");
@@ -43,6 +44,8 @@ public record MysqlConfig(
         props.setProperty("dataSource.cacheServerConfiguration", "true");
         props.setProperty("dataSource.elideSetAutoCommits", "true");
         props.setProperty("dataSource.maintainTimeStats", "false");
+
+        config.setDataSourceProperties(props);
 
         return new HikariDataSource(config);
     }
