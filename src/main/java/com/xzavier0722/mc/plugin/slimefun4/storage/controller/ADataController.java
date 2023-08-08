@@ -15,12 +15,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class ADataController {
-    private final Logger logger = LoggerFactory.getLogger("Slimefun-Data-Controller");
+    private final Logger logger = Logger.getLogger("Slimefun-Data-Controller");
     private final DataType dataType;
     private final Map<ScopeKey, QueuedWriteTask> scheduledWriteTasks;
     private final ScopedLock lock;
@@ -58,14 +57,14 @@ public abstract class ADataController {
             var pendingTask = scheduledWriteTasks.size();
             while (pendingTask > 0) {
                 var doneTaskPercent = String.format("%.1f", (totalTask - pendingTask) / totalTask * 100);
-                logger.info("数据保存中，请稍候... 剩余 {} 个任务 ({}%)", pendingTask, doneTaskPercent);
+                logger.log(Level.INFO, "数据保存中，请稍候... 剩余 {} 个任务 ({}%)", new Object[]{pendingTask, doneTaskPercent});
                 TimeUnit.SECONDS.sleep(1);
                 pendingTask = scheduledWriteTasks.size();
             }
 
             logger.info("数据保存完成.");
         } catch (InterruptedException e) {
-            logger.warn("Exception thrown while saving data: ", e);
+            logger.log(Level.WARNING, "Exception thrown while saving data: ", e);
         }
         writeExecutor.shutdownNow();
         dataAdapter = null;
