@@ -3,28 +3,40 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-import com.zaxxer.hikari.HikariDataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
 public abstract class SqlCommonAdapter<T> implements IDataSourceAdapter<T> {
-    protected HikariDataSource ds;
+    protected ConnectionPool pool;
     protected String profileTable, researchTable, backpackTable, bpInvTable;
     protected String blockRecordTable, blockDataTable, chunkDataTable, blockInvTable;
 
     protected void executeSql(String sql) {
-        try (var conn = ds.getConnection()) {
+        Connection conn = null;
+        try {
+            conn = pool.getConn();
             SqlUtils.execSql(conn, sql);
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
+        } finally {
+            if (conn != null) {
+                pool.releaseConn(conn);
+            }
         }
     }
 
     protected List<RecordSet> executeQuery(String sql) {
-        try (var conn = ds.getConnection()) {
+        Connection conn = null;
+        try {
+            conn = pool.getConn();
             return SqlUtils.execQuery(conn, sql);
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
+        } finally {
+            if (conn != null) {
+                pool.releaseConn(conn);
+            }
         }
     }
 

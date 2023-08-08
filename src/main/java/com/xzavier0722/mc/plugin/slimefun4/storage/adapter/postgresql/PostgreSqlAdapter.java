@@ -1,11 +1,14 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.postgresql;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.ConnectionPool;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlCommonAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +32,20 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
 
     @Override
     public void prepare(PostgreSqlConfig config) {
-        this.ds = config.createDataSource();
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("No suitable jdbc driver found.", e);
+        }
+
+        pool = new ConnectionPool(() -> {
+            try {
+                return DriverManager.getConnection(config.jdbcUrl(), config.user(), config.passwd());
+            } catch (SQLException e) {
+                throw new IllegalStateException("Failed to create Mysql connection: ", e);
+            }
+        }, config.maxConnection());
+
         this.config = config;
     }
 
@@ -55,8 +71,8 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
 
     @Override
     public void shutdown() {
-        ds.close();
-        ds = null;
+        pool.destroy();
+        pool = null;
         profileTable = null;
         researchTable = null;
         backpackTable = null;
