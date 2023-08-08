@@ -39,9 +39,9 @@ public abstract class ADataController {
     public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
         this.dataAdapter = dataAdapter;
         dataAdapter.initStorage(dataType);
-        readExecutor = Executors.newFixedThreadPool(maxReadThread);
-        writeExecutor = Executors.newFixedThreadPool(maxWriteThread);
-        callbackExecutor = Executors.newCachedThreadPool();
+        readExecutor = Executors.newFixedThreadPool(maxReadThread, r -> new Thread(r, "Slimefun Database Reader"));
+        writeExecutor = Executors.newFixedThreadPool(maxWriteThread, r -> new Thread(r, "Slimefun Database Writer"));
+        callbackExecutor = Executors.newCachedThreadPool(r -> new Thread(r, "Slimefun Database Callback"));
     }
 
     @OverridingMethodsMustInvokeSuper
