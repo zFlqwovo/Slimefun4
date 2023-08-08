@@ -281,7 +281,7 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         try {
             // Manually re-trigger sqlite driver init avoid driver list is empty.
             Class.forName("org.sqlite.JDBC");
-            return DriverManager.getConnection("jdbc:sqlite:" + config.path() + "?foreign_keys=on&journal_mode=WAL");
+            return DriverManager.getConnection("jdbc:sqlite:" + config.path() + "?foreign_keys=on");
         } catch (SQLException | ClassNotFoundException e) {
             throw new IllegalStateException("Failed to create Sqlite connection: ", e);
         }
