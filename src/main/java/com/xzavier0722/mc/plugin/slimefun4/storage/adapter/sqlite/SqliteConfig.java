@@ -10,8 +10,9 @@ public record SqliteConfig(String path) {
         var config = new HikariConfig();
         config.setDriverClassName("org.sqlite.JDBC");
         config.setJdbcUrl("jdbc:sqlite:" + path + "?foreign_keys=on&journal_mode=WAL");
+        config.setPoolName("SlimefunHikariPool");
         config.setMaximumPoolSize(1);
-        config.setIdleTimeout(TimeUnit.MINUTES.toMillis(1));
+
         config.setMaxLifetime(TimeUnit.MINUTES.toMillis(10));
 
         var props = new Properties();

@@ -19,6 +19,7 @@ public record MysqlConfig(
         var config = new HikariConfig();
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setJdbcUrl(jdbcUrl());
+        config.setPoolName("SlimefunHikariPool");
 
         if (!user.isEmpty()) {
             config.setUsername(user);
@@ -29,7 +30,6 @@ public record MysqlConfig(
         }
 
         config.setMaximumPoolSize(Math.max(Runtime.getRuntime().availableProcessors(), maxConnection));
-        config.setIdleTimeout(TimeUnit.MINUTES.toMillis(1));
         config.setMaxLifetime(TimeUnit.MINUTES.toMillis(10));
         config.setLeakDetectionThreshold(TimeUnit.MINUTES.toMillis(1));
 
