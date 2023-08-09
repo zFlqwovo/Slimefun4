@@ -9,6 +9,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
+import com.xzavier0722.mc.plugin.slimefun4.storage.event.SlimefunChunkDataLoadEvent;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedSavingLooperTask;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DelayedTask;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.DataUtils;
@@ -334,6 +335,7 @@ public class BlockDataController extends ADataController {
 
         if (isNewChunk) {
             chunkData.setIsDataLoaded(true);
+            Bukkit.getPluginManager().callEvent(new SlimefunChunkDataLoadEvent(chunkData));
             return;
         }
 
@@ -369,6 +371,7 @@ public class BlockDataController extends ADataController {
                 });
             }
         });
+        Bukkit.getPluginManager().callEvent(new SlimefunChunkDataLoadEvent(chunkData));
     }
 
     public void loadWorld(World world) {
