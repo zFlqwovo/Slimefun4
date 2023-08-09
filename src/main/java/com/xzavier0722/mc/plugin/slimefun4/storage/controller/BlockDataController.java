@@ -48,6 +48,7 @@ public class BlockDataController extends ADataController {
     private int delayedSecond = 0;
     private BukkitTask looperTask;
     private ChunkDataLoadMode chunkDataLoadMode;
+    private boolean initLoading = false;
 
     BlockDataController() {
         super(DataType.BLOCK_STORAGE);
@@ -75,9 +76,11 @@ public class BlockDataController extends ADataController {
         Bukkit.getScheduler().runTaskLater(
                 Slimefun.instance(),
                 () -> {
+                    initLoading = true;
                     for (var world : Bukkit.getWorlds()) {
                         loadWorld(world);
                     }
+                    initLoading = false;
                 },
                 1
         );
@@ -87,11 +90,13 @@ public class BlockDataController extends ADataController {
         Bukkit.getScheduler().runTaskLater(
                 Slimefun.instance(),
                 () -> {
+                    initLoading = true;
                     for (var world : Bukkit.getWorlds()) {
                         for (var chunk : world.getLoadedChunks()) {
                             loadChunk(chunk, false);
                         }
                     }
+                    initLoading = false;
                 },
                 1
         );
@@ -648,7 +653,7 @@ public class BlockDataController extends ADataController {
         return createOnNotExists ?
                 loadedChunk.computeIfAbsent(LocationUtils.getChunkKey(chunk), k -> {
                     var re = new SlimefunChunkData(chunk);
-                    if (chunkDataLoadMode.readCacheOnly()) {
+                    if (!initLoading && chunkDataLoadMode.readCacheOnly()) {
                         re.setIsDataLoaded(true);
                     }
                     return re;
