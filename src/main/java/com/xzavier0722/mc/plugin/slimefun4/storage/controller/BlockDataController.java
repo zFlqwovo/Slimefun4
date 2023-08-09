@@ -18,16 +18,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
@@ -37,6 +27,18 @@ import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class BlockDataController extends ADataController {
 
@@ -380,18 +382,22 @@ public class BlockDataController extends ADataController {
     }
 
     public void loadWorld(World world) {
+        var start = System.currentTimeMillis();
+        var worldName = world.getName();
+        logger.log(Level.INFO, "正在加载世界数据: " + worldName);
         var chunkKeys = new HashSet<String>();
         var key = new RecordKey(DataScope.CHUNK_DATA);
         key.addField(FieldKey.CHUNK);
-        key.addCondition(FieldKey.CHUNK, world.getName() + ";%");
-        getData(key).forEach(data -> chunkKeys.add(data.get(FieldKey.CHUNK)));
+        key.addCondition(FieldKey.CHUNK, worldName + ";%");
+        getData(key, true).forEach(data -> chunkKeys.add(data.get(FieldKey.CHUNK)));
 
         key = new RecordKey(DataScope.BLOCK_RECORD);
         key.addField(FieldKey.CHUNK);
         key.addCondition(FieldKey.CHUNK, world.getName() + ";%");
-        getData(key).forEach(data -> chunkKeys.add(data.get(FieldKey.CHUNK)));
+        getData(key, true).forEach(data -> chunkKeys.add(data.get(FieldKey.CHUNK)));
 
         chunkKeys.forEach(cKey -> loadChunk(LocationUtils.toChunk(world, cKey), false));
+        logger.log(Level.INFO, worldName + " 数据加载完成。耗时 " + (System.currentTimeMillis() - start) + "ms");
     }
 
     private void loadChunkData(SlimefunChunkData chunkData) {

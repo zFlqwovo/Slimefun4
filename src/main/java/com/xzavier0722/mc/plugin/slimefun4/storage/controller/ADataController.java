@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 public abstract class ADataController {
-    private final Logger logger = Logger.getLogger("Slimefun-Data-Controller");
     private final DatabaseThreadFactory threadFactory = new DatabaseThreadFactory();
     private final DataType dataType;
     private final Map<ScopeKey, QueuedWriteTask> scheduledWriteTasks;
@@ -30,11 +29,13 @@ public abstract class ADataController {
     private ExecutorService writeExecutor;
     private ExecutorService callbackExecutor;
     private volatile boolean destroyed = false;
+    protected final Logger logger;
 
     protected ADataController(DataType dataType) {
         this.dataType = dataType;
         scheduledWriteTasks = new ConcurrentHashMap<>();
         lock = new ScopedLock();
+        logger = Logger.getLogger("Slimefun-Data-Controller");
     }
 
     @OverridingMethodsMustInvokeSuper
@@ -144,7 +145,11 @@ public abstract class ADataController {
     }
 
     protected List<RecordSet> getData(RecordKey key) {
-        return dataAdapter.getData(key);
+        return getData(key, false);
+    }
+
+    protected List<RecordSet> getData(RecordKey key, boolean distinct) {
+        return dataAdapter.getData(key, distinct);
     }
 
     protected void setData(RecordKey key, RecordSet data) {
