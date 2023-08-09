@@ -1,14 +1,11 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.mysql;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.ConnectionPool;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlCommonAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.List;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_ID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NAME;
@@ -30,19 +27,7 @@ public class MysqlAdapter extends SqlCommonAdapter<MysqlConfig> {
 
     @Override
     public void prepare(MysqlConfig config) {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("No suitable jdbc driver found.", e);
-        }
-
-        pool = new ConnectionPool(() -> {
-            try {
-                return DriverManager.getConnection(config.jdbcUrl(), config.user(), config.passwd());
-            } catch (SQLException e) {
-                throw new IllegalStateException("Failed to create Mysql connection: ", e);
-            }
-        }, config.maxConnection());
+        this.ds = config.createDataSource();
         this.config = config;
     }
 
@@ -68,8 +53,8 @@ public class MysqlAdapter extends SqlCommonAdapter<MysqlConfig> {
 
     @Override
     public void shutdown() {
-        pool.destroy();
-        pool = null;
+        ds.close();
+        ds = null;
         profileTable = null;
         researchTable = null;
         backpackTable = null;
