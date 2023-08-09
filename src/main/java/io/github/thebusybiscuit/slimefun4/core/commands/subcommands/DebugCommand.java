@@ -1,14 +1,12 @@
 package io.github.thebusybiscuit.slimefun4.core.commands.subcommands;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
 import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+
+import javax.annotation.Nonnull;
 
 /**
  * The debug command will allow server owners to get information for us developers.
@@ -50,13 +48,6 @@ public class DebugCommand extends SubCommand {
             case "disable", "off" -> {
                 Debug.disableTestCase();
                 Slimefun.getLocalization().sendMessage(sender, "commands.debug.disabled");
-            }
-            case "get_all_blocks" -> {
-                if (sender instanceof Player p) {
-                    var data = Slimefun.getDatabaseManager().getBlockDataController().getAllBlockData(p.getWorld());
-                    p.sendMessage("All block data in current world count: " + data.size());
-                    p.sendMessage("Raw block datas: " + data.stream().map(bd -> bd.getSfId() + ";" + LocationUtils.locationToString(bd.getLocation())).collect(Collectors.joining(", ")));
-                }
             }
             default -> {
                 Debug.addTestCase(test);

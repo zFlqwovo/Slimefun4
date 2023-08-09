@@ -86,9 +86,9 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
     }
 
     @Override
-    public List<RecordSet> getData(RecordKey key) {
+    public List<RecordSet> getData(RecordKey key, boolean distinct) {
         return executeQuery(
-                "SELECT " + SqlUtils.buildFieldStr(key.getFields()).orElse("*")
+                (distinct ? "SELECT DISTINCT " : "SELECT ") + SqlUtils.buildFieldStr(key.getFields()).orElse("*")
                         + " FROM " + mapTable(key.getScope())
                         + SqlUtils.buildConditionStr(key.getConditions()) + ";"
         );

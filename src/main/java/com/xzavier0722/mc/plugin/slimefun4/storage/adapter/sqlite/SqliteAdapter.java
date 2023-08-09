@@ -80,11 +80,11 @@ public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
     }
 
     @Override
-    public List<RecordSet> getData(RecordKey key) {
+    public List<RecordSet> getData(RecordKey key, boolean distinct) {
         return executeQuery(
-                "SELECT " + SqlUtils.buildFieldStr(key.getFields()).orElse("*")
-                +" FROM " + SqlUtils.mapTable(key.getScope())
-                + SqlUtils.buildConditionStr(key.getConditions()) + ";"
+                (distinct ? "SELECT DISTINCT " : "SELECT ") + SqlUtils.buildFieldStr(key.getFields()).orElse("*")
+                        +" FROM " + SqlUtils.mapTable(key.getScope())
+                        + SqlUtils.buildConditionStr(key.getConditions()) + ";"
         );
     }
 

@@ -110,7 +110,7 @@ public class SqlUtils {
     }
 
     public static String buildKvStr(FieldKey key, String val) {
-        return mapField(key) + "=" + toSqlValStr(key, val);
+        return mapField(key) + (isWildcardsMatching(val) ? " LIKE " : "=") + toSqlValStr(key, val);
     }
 
     public static String toSqlValStr(FieldKey key, String val) {
@@ -157,5 +157,9 @@ public class SqlUtils {
         try (var stmt = conn.createStatement()) {
             return stmt.executeUpdate(sql);
         }
+    }
+
+    private static boolean isWildcardsMatching(String val) {
+        return val.endsWith("%") || val.contains("%");
     }
 }

@@ -10,6 +10,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite.SqliteConfig;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ControllerHolder;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ChunkDataLoadMode;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ProfileDataController;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.StorageType;
 import io.github.bakedlibs.dough.config.Config;
@@ -47,6 +48,7 @@ public class SlimefunDatabaseManager {
     }
 
     public void init() {
+        initDefaultVal();
         try {
             blockDataStorageType = StorageType.valueOf(blockStorageConfig.getString("storageType"));
             var readExecutorThread = blockStorageConfig.getInt("readExecutorThread");
@@ -120,7 +122,6 @@ public class SlimefunDatabaseManager {
                         blockStorageAdapter = adapter;
                     }
                 }
-                databaseConfig.setDefaultValue("sqlite.maxConnection", 5);
                 adapter.prepare(new SqliteConfig(databasePath.getAbsolutePath(), databaseConfig.getInt("sqlite.maxConnection")));
             }
             case POSTGRESQL -> {
@@ -177,11 +178,20 @@ public class SlimefunDatabaseManager {
         return profileConfig.getBoolean("base64EncodeVal");
     }
 
+    public ChunkDataLoadMode getChunkDataLoadMode() {
+        return ChunkDataLoadMode.valueOf(blockStorageConfig.getString("dataLoadMode"));
+    }
+
     public StorageType getBlockDataStorageType() {
         return blockDataStorageType;
     }
 
     public StorageType getProfileStorageType() {
         return profileStorageType;
+    }
+
+    private void initDefaultVal() {
+        blockStorageConfig.setDefaultValue("sqlite.maxConnection", 5);
+        blockStorageConfig.setDefaultValue("dataLoadMode", "LOAD_WITH_CHUNK");
     }
 }

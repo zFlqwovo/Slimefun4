@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -31,6 +32,7 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -44,6 +46,7 @@ public class BlockDataController extends ADataController {
     private boolean enableDelayedSaving = false;
     private int delayedSecond = 0;
     private BukkitTask looperTask;
+    private ChunkDataLoadMode chunkDataLoadMode;
 
     BlockDataController() {
         super(DataType.BLOCK_STORAGE);
@@ -56,7 +59,27 @@ public class BlockDataController extends ADataController {
     @Override
     public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
         super.init(dataAdapter, maxReadThread, maxWriteThread);
-        loadLoadedChunks();
+        this.chunkDataLoadMode = Slimefun.getDatabaseManager().getChunkDataLoadMode();
+        initLoadData();
+    }
+
+    private void initLoadData() {
+        switch (chunkDataLoadMode) {
+            case LOAD_WITH_CHUNK -> loadLoadedChunks();
+            case LOAD_ON_STARTUP -> loadLoadedWorlds();
+        }
+    }
+
+    private void loadLoadedWorlds() {
+        Bukkit.getScheduler().runTaskLater(
+                Slimefun.instance(),
+                () -> {
+                    for (var world : Bukkit.getWorlds()) {
+                        loadWorld(world);
+                    }
+                },
+                1
+        );
     }
 
     private void loadLoadedChunks() {
@@ -181,6 +204,10 @@ public class BlockDataController extends ADataController {
     @ParametersAreNonnullByDefault
     public SlimefunBlockData getBlockData(Location l) {
         checkDestroy();
+        if (chunkDataLoadMode.readCacheOnly()) {
+            return getBlockDataFromCache(l);
+        }
+
         var chunk = l.getChunk();
         var chunkData = getChunkDataCache(chunk, false);
         var lKey = LocationUtils.getLocKey(l);
@@ -344,6 +371,21 @@ public class BlockDataController extends ADataController {
         });
     }
 
+    public void loadWorld(World world) {
+        var chunkKeys = new HashSet<String>();
+        var key = new RecordKey(DataScope.CHUNK_DATA);
+        key.addField(FieldKey.CHUNK);
+        key.addCondition(FieldKey.CHUNK, world.getName() + ";%");
+        getData(key).forEach(data -> chunkKeys.add(data.get(FieldKey.CHUNK)));
+
+        key = new RecordKey(DataScope.BLOCK_RECORD);
+        key.addField(FieldKey.CHUNK);
+        key.addCondition(FieldKey.CHUNK, world.getName() + ";%");
+        getData(key).forEach(data -> chunkKeys.add(data.get(FieldKey.CHUNK)));
+
+        chunkKeys.forEach(cKey -> loadChunk(LocationUtils.toChunk(world, cKey), false));
+    }
+
     private void loadChunkData(SlimefunChunkData chunkData) {
         if (chunkData.isDataLoaded()) {
             return;
@@ -472,6 +514,10 @@ public class BlockDataController extends ADataController {
         changed.forEach(slot -> scheduleDelayedBlockInvUpdate(blockData, slot));
     }
 
+    public Set<SlimefunChunkData> getAllLoadedChunkData() {
+        return new HashSet<>(loadedChunk.values());
+    }
+
     private void scheduleDelayedBlockInvUpdate(SlimefunBlockData blockData, int slot) {
         var scopeKey = new LocationKey(DataScope.NONE, blockData.getLocation());
         var reqKey = new RecordKey(DataScope.BLOCK_INVENTORY);
@@ -596,8 +642,13 @@ public class BlockDataController extends ADataController {
     }
 
     private SlimefunChunkData getChunkDataCache(Chunk chunk, boolean createOnNotExists) {
-        return createOnNotExists
-                ? loadedChunk.computeIfAbsent(LocationUtils.getChunkKey(chunk), k -> new SlimefunChunkData(chunk))
-                : loadedChunk.get(LocationUtils.getChunkKey(chunk));
+        return createOnNotExists ?
+                loadedChunk.computeIfAbsent(LocationUtils.getChunkKey(chunk), k -> {
+                    var re = new SlimefunChunkData(chunk);
+                    if (chunkDataLoadMode.readCacheOnly()) {
+                        re.setIsDataLoaded(true);
+                    }
+                    return re;
+                }) : loadedChunk.get(LocationUtils.getChunkKey(chunk));
     }
 }
