@@ -191,6 +191,7 @@ public class SlimefunDatabaseManager {
     }
 
     private void initDefaultVal() {
+        profileConfig.setDefaultValue("sqlite.maxConnection", 5);
         blockStorageConfig.setDefaultValue("sqlite.maxConnection", 5);
         blockStorageConfig.setDefaultValue("dataLoadMode", "LOAD_WITH_CHUNK");
     }
