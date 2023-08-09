@@ -6,6 +6,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
+import com.xzavier0722.mc.plugin.slimefun4.storage.task.DatabaseThreadFactory;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.QueuedWriteTask;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.List;
@@ -20,6 +21,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 public abstract class ADataController {
     private final Logger logger = Logger.getLogger("Slimefun-Data-Controller");
+    private final DatabaseThreadFactory threadFactory = new DatabaseThreadFactory();
     private final DataType dataType;
     private final Map<ScopeKey, QueuedWriteTask> scheduledWriteTasks;
     private final ScopedLock lock;
@@ -39,9 +41,9 @@ public abstract class ADataController {
     public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
         this.dataAdapter = dataAdapter;
         dataAdapter.initStorage(dataType);
-        readExecutor = Executors.newFixedThreadPool(maxReadThread, r -> new Thread(r, "Slimefun Database Reader"));
-        writeExecutor = Executors.newFixedThreadPool(maxWriteThread, r -> new Thread(r, "Slimefun Database Writer"));
-        callbackExecutor = Executors.newCachedThreadPool(r -> new Thread(r, "Slimefun Database Callback"));
+        readExecutor = Executors.newFixedThreadPool(maxReadThread, threadFactory);
+        writeExecutor = Executors.newFixedThreadPool(maxWriteThread, threadFactory);
+        callbackExecutor = Executors.newCachedThreadPool(threadFactory);
     }
 
     @OverridingMethodsMustInvokeSuper
