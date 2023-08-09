@@ -23,14 +23,6 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 
 public class MysqlAdapter extends SqlCommonAdapter<MysqlConfig> {
-    private MysqlConfig config;
-
-    @Override
-    public void prepare(MysqlConfig config) {
-        this.ds = config.createDataSource();
-        this.config = config;
-    }
-
     @Override
     public void initStorage(DataType type) {
         switch (type) {
@@ -49,20 +41,6 @@ public class MysqlAdapter extends SqlCommonAdapter<MysqlConfig> {
                 createBlockStorageTables();
             }
         }
-    }
-
-    @Override
-    public void shutdown() {
-        ds.close();
-        ds = null;
-        profileTable = null;
-        researchTable = null;
-        backpackTable = null;
-        bpInvTable = null;
-        blockDataTable = null;
-        blockRecordTable = null;
-        chunkDataTable = null;
-        blockInvTable = null;
     }
 
     @Override

@@ -1,17 +1,18 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.ISqlCommonConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-public record SqliteConfig(String path) {
+public record SqliteConfig(String path, int maxConnection) implements ISqlCommonConfig {
     public HikariDataSource createDataSource() {
         var config = new HikariConfig();
-        config.setDriverClassName("org.sqlite.JDBC");
-        config.setJdbcUrl("jdbc:sqlite:" + path + "?foreign_keys=on&journal_mode=WAL");
+        config.setDriverClassName(driver());
+        config.setJdbcUrl(jdbcUrl());
         config.setPoolName("SlimefunHikariPool");
-        config.setMaximumPoolSize(1);
+        config.setMaximumPoolSize(maxConnection);
 
         config.setMaxLifetime(TimeUnit.MINUTES.toMillis(10));
 
@@ -24,5 +25,13 @@ public record SqliteConfig(String path) {
         config.setDataSourceProperties(props);
 
         return new HikariDataSource(config);
+    }
+
+    public String jdbcUrl() {
+        return "jdbc:sqlite:" + path + "?foreign_keys=on&journal_mode=WAL";
+    }
+
+    public String driver() {
+        return "org.sqlite.JDBC";
     }
 }

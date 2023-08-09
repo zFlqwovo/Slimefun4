@@ -1,56 +1,24 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite;
 
-import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.IDataSourceAdapter;
+import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlCommonAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-import com.zaxxer.hikari.HikariDataSource;
-import java.sql.Connection;
+
 import java.sql.SQLException;
 import java.util.List;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_ID;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NAME;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NUM;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_SIZE;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_CHUNK;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_KEY;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_VALUE;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_ITEM;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_SLOT;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_LOCATION;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_NAME;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
 
-public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
-    private HikariDataSource ds;
-    private Connection conn;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.*;
 
-    @Override
-    public void prepare(SqliteConfig config) {
-        ds = config.createDataSource();
-        conn = createConn();
-    }
-
+public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
     @Override
     public void initStorage(DataType type) {
         switch (type) {
             case PLAYER_PROFILE -> createProfileTables();
             case BLOCK_STORAGE -> createBlockStorageTables();
         }
-    }
-
-    @Override
-    public void shutdown() {
-        try {
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        conn = null;
     }
 
     @Override
@@ -253,35 +221,15 @@ public class SqliteAdapter implements IDataSourceAdapter<SqliteConfig> {
         );
     }
 
-    private synchronized void executeSql(String sql) {
-        try {
-            SqlUtils.execSql(conn, sql);
-        } catch (SQLException e) {
-            throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
-        }
+    public synchronized void executeSql(String sql) {
+        super.executeSql(sql);
     }
 
     private synchronized int executeUpdate(String sql) {
-        try {
+        try(var conn = ds.getConnection()) {
             return SqlUtils.execUpdate(conn, sql);
         } catch (SQLException e) {
             throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
-        }
-    }
-
-    private synchronized List<RecordSet> executeQuery(String sql) {
-        try {
-            return SqlUtils.execQuery(conn, sql);
-        } catch (SQLException e) {
-            throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
-        }
-    }
-
-    private Connection createConn() {
-        try {
-            return ds.getConnection();
-        } catch (SQLException e) {
-            throw new IllegalStateException("Failed to create Sqlite connection: ", e);
         }
     }
 }

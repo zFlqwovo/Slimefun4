@@ -7,10 +7,17 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.sql.SQLException;
 import java.util.List;
 
-public abstract class SqlCommonAdapter<T> implements IDataSourceAdapter<T> {
+public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements IDataSourceAdapter<T> {
     protected HikariDataSource ds;
     protected String profileTable, researchTable, backpackTable, bpInvTable;
     protected String blockRecordTable, blockDataTable, chunkDataTable, blockInvTable;
+    protected T config;
+
+    @Override
+    public void prepare(T config) {
+        this.config = config;
+        ds = config.createDataSource();
+    }
 
     protected void executeSql(String sql) {
         try (var conn = ds.getConnection()) {
@@ -40,5 +47,19 @@ public abstract class SqlCommonAdapter<T> implements IDataSourceAdapter<T> {
             case BLOCK_RECORD -> blockRecordTable;
             case NONE -> throw new IllegalArgumentException("NONE cannot be a storage data scope!");
         };
+    }
+
+    @Override
+    public void shutdown() {
+        ds.close();
+        ds = null;
+        profileTable = null;
+        researchTable = null;
+        backpackTable = null;
+        bpInvTable = null;
+        blockDataTable = null;
+        blockRecordTable = null;
+        chunkDataTable = null;
+        blockInvTable = null;
     }
 }
