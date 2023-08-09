@@ -3,9 +3,7 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldMapper;
-import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldValue;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
-import com.xzavier0722.mc.plugin.slimefun4.storage.common.fields.CommonValue;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
 import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
@@ -98,8 +96,7 @@ public class SqlUtils {
         }
         return Optional.of(String.join(", ", fields.stream().map(SqlUtils::mapField).toList()));
     }
-
-    public static String buildConditionStr(List<Pair<FieldKey, FieldValue>> conditions) {
+    public static String buildConditionStr(List<Pair<FieldKey, String>> conditions) {
         if (conditions.isEmpty()) {
             return "";
         }
@@ -113,11 +110,7 @@ public class SqlUtils {
     }
 
     public static String buildKvStr(FieldKey key, String val) {
-        return buildKvStr(key, new CommonValue(val));
-    }
-
-    public static String buildKvStr(FieldKey key, FieldValue val) {
-        return mapField(key) + val.serializeToSql(key);
+        return mapField(key) + "=" + toSqlValStr(key, val);
     }
 
     public static String toSqlValStr(FieldKey key, String val) {

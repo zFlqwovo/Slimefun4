@@ -25,18 +25,6 @@ public class LocationUtils {
         );
     }
 
-    public static Chunk toChunk(String lKey) {
-        var strArr = lKey.split(";");
-        var loc = strArr[1].split(":");
-        var world = Bukkit.getWorld(strArr[0]);
-
-        if (world == null) {
-            return null;
-        }
-
-        return world.getChunkAt(Integer.parseInt(loc[0]), Integer.parseInt(loc[1]));
-    }
-
     public static boolean isSameChunk(Chunk c1, Chunk c2) {
         return c1 == c2 || (isSameWorld(c1.getWorld(), c2.getWorld()) && c1.getX() == c2.getX() && c1.getZ() == c2.getZ());
     }
