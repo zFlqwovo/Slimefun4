@@ -1,5 +1,6 @@
 package me.mrCookieSlime.CSCoreLibPlugin.general.Inventory;
 
+import city.norain.slimefun4.holder.SlimefunChestMenuHolder;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.AdvancedMenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
@@ -25,26 +26,28 @@ import java.util.logging.Level;
 @Deprecated
 public class MenuListener implements Listener {
 
-    static final Map<UUID, ChestMenu> menus = new HashMap<>();
-
     public MenuListener(Plugin plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
-        ChestMenu menu = menus.remove(e.getPlayer().getUniqueId());
+        var inv = e.getInventory();
+        var holder = inv.getHolder();
 
-        if (menu != null) {
-            menu.getMenuCloseHandler().onClose((Player) e.getPlayer());
+        if (holder instanceof SlimefunChestMenuHolder cmHolder) {
+            cmHolder.removeViewer(e.getPlayer().getUniqueId());
+            cmHolder.getChestMenu().getMenuCloseHandler().onClose((Player) e.getPlayer());
         }
     }
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
-        ChestMenu menu = menus.get(e.getWhoClicked().getUniqueId());
+        var holder = e.getInventory().getHolder();
 
-        if (menu != null) {
+        if (holder instanceof SlimefunChestMenuHolder cmHolder) {
+            ChestMenu menu = cmHolder.getChestMenu();
+
             if (e.getRawSlot() < e.getInventory().getSize()) {
                 MenuClickHandler handler = menu.getMenuClickHandler(e.getSlot());
 

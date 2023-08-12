@@ -1,5 +1,6 @@
 package me.mrCookieSlime.CSCoreLibPlugin.general.Inventory;
 
+import city.norain.slimefun4.holder.SlimefunChestMenuHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -29,6 +30,7 @@ public class ChestMenu {
     private MenuOpeningHandler open;
     private MenuCloseHandler close;
     private MenuClickHandler playerclick;
+    private final SlimefunChestMenuHolder holder = new SlimefunChestMenuHolder(this);
 
     /**
      * Creates a new ChestMenu with the specified
@@ -217,6 +219,8 @@ public class ChestMenu {
         for (int i = 0; i < this.items.size(); i++) {
             this.inv.setItem(i, this.items.get(i));
         }
+
+        holder.setInventory(inv);
     }
 
     /**
@@ -230,6 +234,8 @@ public class ChestMenu {
         for (int i = 0; i < this.items.size(); i++) {
             this.inv.setItem(i, this.items.get(i));
         }
+
+        holder.setInventory(inv);
     }
 
     /**
@@ -252,7 +258,7 @@ public class ChestMenu {
         setup();
         for (Player p : players) {
             p.openInventory(this.inv);
-            MenuListener.menus.put(p.getUniqueId(), this);
+            holder.addViewer(p.getUniqueId());
             if (open != null)
                 open.onOpen(p);
         }
