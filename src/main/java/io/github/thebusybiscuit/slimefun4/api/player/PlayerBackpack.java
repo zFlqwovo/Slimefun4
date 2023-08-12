@@ -1,6 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.api.player;
 
-import city.norain.slimefun4.holder.SlimefunBackpackHolder;
+import city.norain.slimefun4.holder.SlimefunInventoryHolder;
 import city.norain.slimefun4.utils.InventoryUtil;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import io.github.bakedlibs.dough.common.ChatColors;
@@ -36,7 +36,7 @@ import org.bukkit.persistence.PersistentDataType;
  * @see SlimefunBackpack
  * @see BackpackListener
  */
-public class PlayerBackpack {
+public class PlayerBackpack extends SlimefunInventoryHolder {
     public static final String LORE_OWNER = "&7所有者: ";
     private static final String COLORED_LORE_OWNER = ChatColors.color(LORE_OWNER);
     private static final NamespacedKey KEY_BACKPACK_UUID = new NamespacedKey(Slimefun.instance(), "B_UUID");
@@ -44,9 +44,7 @@ public class PlayerBackpack {
     private final OfflinePlayer owner;
     private final UUID uuid;
     private final int id;
-    private final SlimefunBackpackHolder holder;
     private String name;
-    private Inventory inventory;
     private int size;
     private boolean isInvalid = false;
 
@@ -207,8 +205,6 @@ public class PlayerBackpack {
         this.name = name;
         this.id = id;
         this.size = size;
-        this.holder = new SlimefunBackpackHolder();
-        this.holder.setBackpack(this);
         inventory = newInv();
 
         if (contents == null) {
@@ -314,8 +310,8 @@ public class PlayerBackpack {
     }
 
     private Inventory newInv() {
-        var re = Bukkit.createInventory(holder, size, (name.isEmpty() ? "背包" : ChatColors.color(name + "&r")) + " [大小 " + size + "]");
-        holder.setInventory(re);
+        var re = Bukkit.createInventory(this, size, (name.isEmpty() ? "背包" : ChatColors.color(name + "&r")) + " [大小 " + size + "]");
+        setInventory(re);
         return re;
     }
 

@@ -1,6 +1,5 @@
 package me.mrCookieSlime.CSCoreLibPlugin.general.Inventory;
 
-import city.norain.slimefun4.holder.SlimefunChestMenuHolder;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.AdvancedMenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
@@ -12,9 +11,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -32,12 +28,11 @@ public class MenuListener implements Listener {
 
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
-        var inv = e.getInventory();
-        var holder = inv.getHolder();
+        var holder = e.getInventory().getHolder();
 
-        if (holder instanceof SlimefunChestMenuHolder cmHolder) {
-            cmHolder.removeViewer(e.getPlayer().getUniqueId());
-            cmHolder.getChestMenu().getMenuCloseHandler().onClose((Player) e.getPlayer());
+        if (holder instanceof ChestMenu menu) {
+            menu.removeViewer(e.getPlayer().getUniqueId());
+            menu.getMenuCloseHandler().onClose((Player) e.getPlayer());
         }
     }
 
@@ -45,9 +40,7 @@ public class MenuListener implements Listener {
     public void onClick(InventoryClickEvent e) {
         var holder = e.getInventory().getHolder();
 
-        if (holder instanceof SlimefunChestMenuHolder cmHolder) {
-            ChestMenu menu = cmHolder.getChestMenu();
-
+        if (holder instanceof ChestMenu menu) {
             if (e.getRawSlot() < e.getInventory().getSize()) {
                 MenuClickHandler handler = menu.getMenuClickHandler(e.getSlot());
 
@@ -68,5 +61,4 @@ public class MenuListener implements Listener {
             }
         }
     }
-
 }
