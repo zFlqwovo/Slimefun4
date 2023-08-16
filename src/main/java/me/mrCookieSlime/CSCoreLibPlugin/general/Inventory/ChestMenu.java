@@ -230,7 +230,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
     private void setup() {
         if (this.inventory != null)
             return;
-        this.inventory = Bukkit.createInventory(null, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
+        this.inventory = Bukkit.createInventory(this, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
         for (int i = 0; i < this.items.size(); i++) {
             this.inventory.setItem(i, this.items.get(i));
         }
@@ -243,7 +243,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
         if (update)
             this.inventory.clear();
         else
-            this.inventory = Bukkit.createInventory(null, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
+            this.inventory = Bukkit.createInventory(this, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
         for (int i = 0; i < this.items.size(); i++) {
             this.inventory.setItem(i, this.items.get(i));
         }
