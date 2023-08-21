@@ -149,14 +149,16 @@ public class TickerTask {
             while (!plugin.isEnabled() || deadlineTime > System.nanoTime()) {
                 var task = syncTasks.poll(MAX_POLL_TIME, TimeUnit.NANOSECONDS);
 
+                if (asyncTaskIndicator.get()) {
+                    // Async task is finished, let move to next tick.
+                    nextTick();
+                    return;
+                }
+
                 if (task == null) {
                     if (!plugin.isEnabled()) {
                         break;
                     }
-                } else if (asyncTaskIndicator.get()) {
-                    // Async task is finished, let move to next tick.
-                    nextTick();
-                    return;
                 } else {
                     task.run();
                 }
