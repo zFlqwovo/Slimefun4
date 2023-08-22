@@ -19,7 +19,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
@@ -52,10 +51,10 @@ public class TickerTask {
     private static final long MAX_POLL_TIME = 250_000L;
 
     /**
-     * This remarks whether async task is in progress or finished.
-     * When is true, async task was finished.
+     * This represents an empty runnable task, for marking async task is completed.
      */
-    private static final AtomicBoolean asyncTaskIndicator = new AtomicBoolean(false);
+    private static final Runnable EMPTY_ELEMENT = () -> {
+    };
 
     /**
      * This collection holds all currently actively ticking locations.
@@ -113,7 +112,6 @@ public class TickerTask {
 
     public void nextTick() {
         activeAsyncTaskCount.getAndAdd(0);
-        asyncTaskIndicator.getAndSet(false);
 
         if (!plugin.isEnabled()) {
             return;
@@ -153,7 +151,7 @@ public class TickerTask {
                     if (!plugin.isEnabled()) {
                         break;
                     }
-                } else if (asyncTaskIndicator.get()) {
+                } else if (task == EMPTY_ELEMENT) {
                     // Async task is finished, let move to next tick.
                     nextTick();
                     return;
@@ -182,7 +180,7 @@ public class TickerTask {
             try {
                 SlimefunItem item = SlimefunItem.getById(blockData.getSfId());
 
-                if (item != null && item.getBlockTicker() != null && !item.isDisabledIn(l.getWorld())) {
+                if (item != null && item.getBlockTicker() != null) {
                     try {
                         var ticker = item.getBlockTicker();
                         if (!ticker.isSynchronized()) {
@@ -204,8 +202,12 @@ public class TickerTask {
             tickers.forEach(BlockTicker::startNewTick);
 
             Slimefun.getProfiler().stop();
-            // Notify the sync task processor that the end of the ticker list has been reached.
-            asyncTaskIndicator.getAndSet(true);
+            try {
+                // Notify the sync task processor that the end of the ticker list has been reached.
+                syncTasks.put(EMPTY_ELEMENT);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
