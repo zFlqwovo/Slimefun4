@@ -112,7 +112,7 @@ public class TickerTask {
     }
 
     public void nextTick() {
-        activeAsyncTaskCount.getAndSet(0);
+        activeAsyncTaskCount.getAndAdd(0);
         asyncTaskIndicator.getAndSet(false);
 
         if (!plugin.isEnabled()) {
