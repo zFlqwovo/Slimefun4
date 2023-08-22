@@ -52,12 +52,6 @@ public class TickerTask {
     private static final long MAX_POLL_TIME = 250_000L;
 
     /**
-     * This remarks whether async task is in progress or finished.
-     * When is true, async task was finished.
-     */
-    private static final AtomicBoolean asyncTaskIndicator = new AtomicBoolean(false);
-
-    /**
      * This collection holds all currently actively ticking locations.
      */
     private final TickerCollection tickerCollection = new TickerCollection();
@@ -113,7 +107,6 @@ public class TickerTask {
 
     public void nextTick() {
         activeAsyncTaskCount.getAndSet(0);
-        asyncTaskIndicator.getAndSet(false);
 
         if (!plugin.isEnabled()) {
             return;
@@ -149,7 +142,7 @@ public class TickerTask {
             while (!plugin.isEnabled() || deadlineTime > System.nanoTime()) {
                 var task = syncTasks.poll(MAX_POLL_TIME, TimeUnit.NANOSECONDS);
 
-                if (asyncTaskIndicator.get()) {
+                if (activeAsyncTaskCount.get() == 0) {
                     // Async task is finished, let move to next tick.
                     nextTick();
                     return;
@@ -206,8 +199,6 @@ public class TickerTask {
             tickers.forEach(BlockTicker::startNewTick);
 
             Slimefun.getProfiler().stop();
-            // Notify the sync task processor that the end of the ticker list has been reached.
-            asyncTaskIndicator.getAndSet(true);
         }
     }
 
