@@ -3,29 +3,20 @@ package io.github.thebusybiscuit.slimefun4.implementation.tasks;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
+import io.github.bakedlibs.dough.blocks.ChunkPosition;
 import io.github.thebusybiscuit.slimefun4.api.ErrorReport;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.core.thread.TickerThreadFactory;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.tasks.ticker.TickerCollection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -34,219 +25,139 @@ import org.bukkit.scheduler.BukkitScheduler;
 /**
  * The {@link TickerTask} is responsible for ticking every {@link BlockTicker},
  * synchronous or not.
- *
+ * 
  * @author TheBusyBiscuit
+ * 
  * @see BlockTicker
+ *
  */
-public class TickerTask {
-    /**
-     * This is the maximum time we wait a sync task to finished.
-     * If overtime, the task will be re-executed in next tick.
-     */
-    private static final long MAX_WAIT_TIME = 1_250_000L;
+public class TickerTask implements Runnable {
 
     /**
-     * This is the maximum time we poll out a task.
+     * This Map holds all currently actively ticking locations.
      */
-    private static final long MAX_POLL_TIME = 250_000L;
-
-    /**
-     * This represents an empty runnable task, for marking async task is completed.
-     */
-    private static final Runnable EMPTY_ELEMENT = () -> {
-    };
-
-    /**
-     * This collection holds all currently actively ticking locations.
-     */
-    private final TickerCollection tickerCollection = new TickerCollection();
+    private final Map<ChunkPosition, Set<Location>> tickingLocations = new ConcurrentHashMap<>();
 
     /**
      * This Map tracks how many bugs have occurred in a given Location .
      * If too many bugs happen, we delete that Location.
      */
     private final Map<BlockPosition, Integer> bugs = new ConcurrentHashMap<>();
-    private final BlockingQueue<Runnable> syncTasks = new ArrayBlockingQueue<>(48);
-    private final TickerThreadFactory tickerThreadFactory = new TickerThreadFactory();
-    private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), tickerThreadFactory);
 
-    private Slimefun plugin;
     private int tickRate;
-    private final AtomicInteger activeAsyncTaskCount = new AtomicInteger(0);
-
     private boolean halted = false;
+    private boolean running = false;
+
     private volatile boolean paused = false;
 
     /**
      * This method starts the {@link TickerTask} on an asynchronous schedule.
-     *
+     * 
      * @param plugin
      *            The instance of our {@link Slimefun}
      */
     public void start(@Nonnull Slimefun plugin) {
         this.tickRate = Slimefun.getCfg().getInt("URID.custom-ticker-delay");
-        this.plugin = plugin;
 
         BukkitScheduler scheduler = plugin.getServer().getScheduler();
-        scheduler.runTaskLater(plugin, this::tick, 100L);
+        scheduler.runTaskTimerAsynchronously(plugin, this, 100L, tickRate);
     }
 
-    public void tick() {
-        // Ticker is paused, let wait until it started.
+    /**
+     * This method resets this {@link TickerTask} to run again.
+     */
+    private void reset() {
+        running = false;
+    }
+
+    @Override
+    public void run() {
         if (paused) {
             return;
         }
 
-        if (activeAsyncTaskCount.get() > 0) {
-            processSyncTasks();
-            return;
-        }
-
-        if (!Bukkit.isPrimaryThread()) {
-            return;
-        }
-
-        processAsyncTasks();
-        processSyncTasks();
-    }
-
-    public void nextTick() {
-        activeAsyncTaskCount.getAndAdd(0);
-
-        if (!plugin.isEnabled()) {
-            return;
-        }
-
-        Bukkit.getScheduler().runTaskLater(plugin, this::tick, tickRate);
-    }
-
-    private void processAsyncTasks() {
         try {
-            Slimefun.getProfiler().start();
-
-            Set<BlockTicker> tickers = new CopyOnWriteArraySet<>();
-
-            if (!halted) {
-                var tickerBlocks = tickerCollection.getBlocksLocation();
-                activeAsyncTaskCount.getAndSet(tickerBlocks.size());
-                tickLocations(tickers, tickerBlocks);
+            // If this method is actually still running... DON'T
+            if (running) {
+                return;
             }
+
+            running = true;
+            Slimefun.getProfiler().start();
+            Set<BlockTicker> tickers = new HashSet<>();
+
+            // Run our ticker code
+            if (!halted) {
+                Set<Map.Entry<ChunkPosition, Set<Location>>> loc;
+
+                synchronized (tickingLocations) {
+                    loc = new HashSet<>(tickingLocations.entrySet());
+                }
+
+                for (Map.Entry<ChunkPosition, Set<Location>> entry : loc) {
+                    tickChunk(entry.getKey(), tickers, new HashSet<>(entry.getValue()));
+                }
+            }
+
+            // Start a new tick cycle for every BlockTicker
+            for (BlockTicker ticker : tickers) {
+                ticker.startNewTick();
+            }
+
+            reset();
+            Slimefun.getProfiler().stop();
         } catch (Exception | LinkageError x) {
             Slimefun.logger().log(Level.SEVERE, x, () -> "An Exception was caught while ticking the Block Tickers Task for Slimefun v" + Slimefun.getVersion());
-        }
-    }
-
-    private void processSyncTasks() {
-        if (!Bukkit.isPrimaryThread()) {
-            return;
-        }
-
-        long deadlineTime = System.nanoTime() + MAX_WAIT_TIME;
-
-        try {
-            while (!plugin.isEnabled() || deadlineTime > System.nanoTime()) {
-                var task = syncTasks.poll(MAX_POLL_TIME, TimeUnit.NANOSECONDS);
-
-                if (task == null) {
-                    if (!plugin.isEnabled()) {
-                        break;
-                    }
-                } else if (task == EMPTY_ELEMENT) {
-                    // Async task is finished, let move to next tick.
-                    nextTick();
-                    return;
-                } else {
-                    task.run();
-                }
-            }
-        } catch (InterruptedException x) {
-            Thread.currentThread().interrupt();
-            return;
-        }
-
-        if (!isHalted()) {
-            Bukkit.getScheduler().runTaskLater(plugin, this::processSyncTasks, 4L);
-        }
-    }
-
-    private void tickLocations(@Nonnull Set<BlockTicker> tickers, @Nonnull Set<Location> locations) {
-        for (Location l : locations) {
-            var blockData = StorageCacheUtils.getBlock(l);
-
-            if (blockData == null || !blockData.isDataLoaded() || blockData.isPendingRemove()) {
-                continue;
-            }
-
-            try {
-                SlimefunItem item = SlimefunItem.getById(blockData.getSfId());
-
-                if (item != null && item.getBlockTicker() != null) {
-                    try {
-                        var ticker = item.getBlockTicker();
-                        if (!ticker.isSynchronized()) {
-                            tickers.add(item.getBlockTicker());
-                        }
-                        runTask(tickers, l, blockData, item);
-                    } catch (Exception x) {
-                        reportErrors(l, item, x);
-                    }
-                }
-            } catch (Exception | LinkageError x) {
-                Slimefun.logger().log(Level.SEVERE, x, () -> "An Exception was caught while ticking the Block Tickers Task for Slimefun v" + Slimefun.getVersion());
-            }
-        }
-    }
-
-    private void finishTickLocation(@Nonnull Set<BlockTicker> tickers) {
-        if (activeAsyncTaskCount.decrementAndGet() == 0) {
-            tickers.forEach(BlockTicker::startNewTick);
-
-            Slimefun.getProfiler().stop();
-            try {
-                // Notify the sync task processor that the end of the ticker list has been reached.
-                syncTasks.put(EMPTY_ELEMENT);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            reset();
         }
     }
 
     @ParametersAreNonnullByDefault
-    private void runTask(@Nonnull Set<BlockTicker> tickers, Location l, SlimefunBlockData data, SlimefunItem item) {
-        BlockTicker ticker = item.getBlockTicker();
-
-        // Check on which Thread to run this.
-        if (ticker.isSynchronized()) {
-            // Inform our profiler that we will be scheduling a task.
-            Slimefun.getProfiler().scheduleEntries(1);
-
-            // Start a new iteration for our block ticker
-            ticker.update();
-
-            /*
-             * We are inserting a new timestamp because synchronized
-             * actions are always ran with a 50ms delay (1 game tick).
-             */
-            try {
-                syncTasks.put(() -> {
-                    Block b = l.getBlock();
-                    tickBlock(l, b, item, data, System.nanoTime());
-                    ticker.startNewTick();
-                });
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+    private void tickChunk(ChunkPosition chunk, Set<BlockTicker> tickers, Set<Location> locations) {
+        try {
+            // Only continue if the Chunk is actually loaded
+            if (chunk.isLoaded()) {
+                for (Location l : locations) {
+                    tickLocation(tickers, l);
+                }
             }
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException x) {
+            Slimefun.logger().log(Level.SEVERE, x, () -> "An Exception has occurred while trying to resolve Chunk: " + chunk);
+        }
+    }
 
-            // Manually ignore sync ticker
-            activeAsyncTaskCount.decrementAndGet();
-        } else {
-            asyncExecutor.submit(() -> {
-                long timestamp = Slimefun.getProfiler().newEntry();
-                ticker.update();
-                Block b = l.getBlock();
-                tickBlock(l, b, item, data, timestamp);
-                finishTickLocation(tickers);
-            });
+    private void tickLocation(@Nonnull Set<BlockTicker> tickers, @Nonnull Location l) {
+        var blockData = StorageCacheUtils.getBlock(l);
+        if (blockData == null || !blockData.isDataLoaded() || blockData.isPendingRemove()) {
+            return;
+        }
+        SlimefunItem item = SlimefunItem.getById(blockData.getSfId());
+
+        if (item != null && item.getBlockTicker() != null) {
+            try {
+                if (item.getBlockTicker().isSynchronized()) {
+                    Slimefun.getProfiler().scheduleEntries(1);
+                    item.getBlockTicker().update();
+
+                    /**
+                     * We are inserting a new timestamp because synchronized actions
+                     * are always ran with a 50ms delay (1 game tick)
+                     */
+                    Slimefun.runSync(() -> {
+                        Block b = l.getBlock();
+                        tickBlock(l, b, item, blockData, System.nanoTime());
+                    });
+                } else {
+                    long timestamp = Slimefun.getProfiler().newEntry();
+                    item.getBlockTicker().update();
+                    Block b = l.getBlock();
+                    tickBlock(l, b, item, blockData, timestamp);
+                }
+
+                tickers.add(item.getBlockTicker());
+            } catch (Exception x) {
+                reportErrors(l, item, x);
+            }
         }
     }
 
@@ -288,31 +199,7 @@ public class TickerTask {
     }
 
     public void halt() {
-        Slimefun.logger().info("正在处理未完成工作的机器, 这可能需要一点时间...");
         halted = true;
-        tick();
-
-        activeAsyncTaskCount.getAndSet(0);
-
-        asyncExecutor.shutdown();
-
-        try {
-            if (!asyncExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
-                Slimefun.logger().log(Level.SEVERE, "处理机器工作超时!");
-            }
-        } catch (InterruptedException ex) {
-            Slimefun.logger().log(Level.SEVERE, ex, () -> "关闭异步执行器时出现问题");
-            /*
-             * When the exception is fired, the Thread is un-marked as interrupted, so we re-mark it.
-             */
-            Thread.currentThread().interrupt();
-        }
-
-        while (!syncTasks.isEmpty()) {
-            syncTasks.poll().run();
-        }
-
-        Slimefun.logger().info("成功完成剩余任务.");
     }
 
     /**
@@ -322,6 +209,20 @@ public class TickerTask {
      */
     public int getTickRate() {
         return tickRate;
+    }
+
+    /**
+     * This method returns a <strong>read-only</strong> {@link Map}
+     * representation of every {@link ChunkPosition} and its corresponding
+     * {@link Set} of ticking {@link Location Locations}.
+     * 
+     * This does include any {@link Location} from an unloaded {@link Chunk} too!
+     * 
+     * @return A {@link Map} representation of all ticking {@link Location Locations}
+     */
+    @Nonnull
+    public Map<ChunkPosition, Set<Location>> getLocations() {
+        return Collections.unmodifiableMap(tickingLocations);
     }
 
     /**
@@ -339,7 +240,7 @@ public class TickerTask {
     public Set<Location> getLocations(@Nonnull Chunk chunk) {
         Validate.notNull(chunk, "The Chunk cannot be null!");
 
-        Set<Location> locations = tickerCollection.getBlocksLocation();
+        Set<Location> locations = tickingLocations.getOrDefault(new ChunkPosition(chunk), new HashSet<>());
         return Collections.unmodifiableSet(locations);
     }
 
@@ -352,8 +253,11 @@ public class TickerTask {
     public void enableTicker(@Nonnull Location l) {
         Validate.notNull(l, "Location cannot be null!");
 
-        synchronized (tickerCollection) {
-            tickerCollection.tickBlock(l);
+        synchronized (tickingLocations) {
+            tickingLocations.computeIfAbsent(
+                    new ChunkPosition(l.getWorld(), l.getBlockX() >> 4, l.getBlockZ() >> 4),
+                    k -> new HashSet<>()
+            ).add(l);
         }
     }
 
@@ -367,8 +271,17 @@ public class TickerTask {
     public void disableTicker(@Nonnull Location l) {
         Validate.notNull(l, "Location cannot be null!");
 
-        synchronized (tickerCollection) {
-            tickerCollection.removeBlock(l);
+        synchronized (tickingLocations) {
+            ChunkPosition chunk = new ChunkPosition(l.getWorld(), l.getBlockX() >> 4, l.getBlockZ() >> 4);
+            Set<Location> locations = tickingLocations.get(chunk);
+
+            if (locations != null) {
+                locations.remove(l);
+
+                if (locations.isEmpty()) {
+                    tickingLocations.remove(chunk);
+                }
+            }
         }
     }
 

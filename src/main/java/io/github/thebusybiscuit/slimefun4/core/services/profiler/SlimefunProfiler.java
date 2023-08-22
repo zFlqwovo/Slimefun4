@@ -1,11 +1,5 @@
 package io.github.thebusybiscuit.slimefun4.core.services.profiler;
 
-import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.core.thread.ProfilerThreadFactory;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.tasks.TickerTask;
-import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,13 +12,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
+
 import javax.annotation.Nonnull;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitScheduler;
+
+import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.tasks.TickerTask;
+import io.github.thebusybiscuit.slimefun4.utils.NumberUtils;
 
 /**
  * The {@link SlimefunProfiler} works closely to the {@link TickerTask} and is
@@ -47,10 +49,10 @@ public class SlimefunProfiler {
     private static final int MAX_TICK_DURATION = 100;
 
     /**
-     * Our internal instance of {@link ProfilerThreadFactory}, it provides the naming
+     * Our internal instance of {@link SlimefunThreadFactory}, it provides the naming
      * convention for our {@link Thread} pool and also the count of this pool.
      */
-    private final ProfilerThreadFactory threadFactory = new ProfilerThreadFactory(2);
+    private final SlimefunThreadFactory threadFactory = new SlimefunThreadFactory(2);
 
     /**
      * This is our {@link Thread} pool to evaluate timings data.
@@ -58,7 +60,7 @@ public class SlimefunProfiler {
      * this data in split seconds.
      * So we cannot simply wait until the next server tick for this.
      */
-    private final ExecutorService executor = Executors.newFixedThreadPool(threadFactory.threadCount(), threadFactory);
+    private final ExecutorService executor = Executors.newFixedThreadPool(threadFactory.getThreadCount(), threadFactory);
 
     /**
      * All possible values of {@link PerformanceRating}.

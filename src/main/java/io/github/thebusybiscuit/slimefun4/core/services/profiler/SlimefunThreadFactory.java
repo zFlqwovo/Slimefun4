@@ -1,8 +1,7 @@
-package io.github.thebusybiscuit.slimefun4.core.thread;
+package io.github.thebusybiscuit.slimefun4.core.services.profiler;
 
-import io.github.thebusybiscuit.slimefun4.core.services.profiler.SlimefunProfiler;
-import java.util.concurrent.ThreadFactory;
 import javax.annotation.Nonnull;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * This is our {@link ThreadFactory} for the {@link SlimefunProfiler}.
@@ -10,17 +9,30 @@ import javax.annotation.Nonnull;
  * and provides a naming convention for our {@link Thread Threads}.
  *
  * @author TheBusyBiscuit
+ *
  * @see SlimefunProfiler
+ *
  */
-public record ProfilerThreadFactory(int threadCount) implements ThreadFactory {
+final class SlimefunThreadFactory implements ThreadFactory {
+
+    private final int threadCount;
+
+    /**
+     * This constructs a new {@link SlimefunThreadFactory} with the given {@link Thread} count.
+     *
+     * @param threadCount The amount of {@link Thread Threads} to provide to the {@link SlimefunProfiler}
+     */
+    SlimefunThreadFactory(int threadCount) {
+        this.threadCount = threadCount;
+    }
+
     /**
      * This returns the amount of {@link Thread Threads} we dedicate towards
      * the {@link SlimefunProfiler}.
      *
      * @return The {@link Thread} count
      */
-    @Override
-    public int threadCount() {
+    int getThreadCount() {
         return threadCount;
     }
 
