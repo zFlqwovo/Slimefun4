@@ -14,20 +14,24 @@ public class InventoryUtil {
      * @param inventory {@link Inventory}
      */
     public static void closeInventory(Inventory inventory) {
-        if (inventory != null) {
+        if (inventory == null) {
+            return;
+        }
+
+        if (Bukkit.isPrimaryThread()) {
             new LinkedList<>(inventory.getViewers()).forEach(HumanEntity::closeInventory);
+        } else {
+            Slimefun.runSync(() -> new LinkedList<>(inventory.getViewers()).forEach(HumanEntity::closeInventory));
         }
     }
 
     public static void closeInventory(Inventory inventory, Runnable callback) {
+        closeInventory(inventory);
+
         if (Bukkit.isPrimaryThread()) {
-            closeInventory(inventory);
             callback.run();
         } else {
-            Slimefun.runSync(() -> {
-                closeInventory(inventory);
-                callback.run();
-            });
+            Slimefun.runSync(callback);
         }
     }
 }
