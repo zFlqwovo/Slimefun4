@@ -301,7 +301,7 @@ public class BlockDataController extends ADataController {
 
         var menu = blockData.getBlockMenu();
         if (menu != null) {
-            newBlockData.setBlockMenu(new BlockMenu(menu.getPreset(), target, blockData.getMenuContents()));
+            newBlockData.setBlockMenu(new BlockMenu(menu.getPreset(), target, menu.getInventory()));
         }
 
         key.addField(FieldKey.LOCATION);
