@@ -128,14 +128,14 @@ public class BlockListener implements Listener {
             return;
         }
 
-        var item = e.getPlayer().getInventory().getItemInMainHand();
+        var heldItem = e.getPlayer().getInventory().getItemInMainHand();
         var block = e.getBlock();
         var blockData = StorageCacheUtils.getBlock(block.getLocation());
 
         // If there is a Slimefun Block here, call our BreakEvent and, if cancelled, cancel this event and return
         if (blockData != null) {
             var sfItem = SlimefunItem.getById(blockData.getSfId());
-            SlimefunBlockBreakEvent breakEvent = new SlimefunBlockBreakEvent(e.getPlayer(), item, e.getBlock(), sfItem);
+            SlimefunBlockBreakEvent breakEvent = new SlimefunBlockBreakEvent(e.getPlayer(), heldItem, e.getBlock(), sfItem);
             Bukkit.getPluginManager().callEvent(breakEvent);
 
             if (breakEvent.isCancelled()) {
@@ -145,12 +145,12 @@ public class BlockListener implements Listener {
         }
 
         if (!e.isCancelled()) {
-            int fortune = getBonusDropsWithFortune(item, e.getBlock());
+            int fortune = getBonusDropsWithFortune(heldItem, e.getBlock());
             List<ItemStack> drops = new ArrayList<>();
-            checkForSensitiveBlockAbove(e.getPlayer(), e.getBlock(), item);
+            checkForSensitiveBlockAbove(e.getPlayer(), e.getBlock(), heldItem);
 
-            if (!item.getType().isAir()) {
-                callToolHandler(e, item, fortune, drops);
+            if (!heldItem.getType().isAir()) {
+                callToolHandler(e, heldItem, fortune, drops);
             }
 
             if (blockData == null || blockData.isPendingRemove()) {
@@ -163,7 +163,7 @@ public class BlockListener implements Listener {
                 e.setDropItems(false);
                 var type = block.getType();
                 StorageCacheUtils.executeAfterLoad(blockData, () -> {
-                    callBlockHandler(e, item, drops);
+                    callBlockHandler(e, heldItem, drops);
                     if (e.isCancelled()) {
                         block.setType(type);
                         blockData.setPendingRemove(false);
@@ -175,7 +175,7 @@ public class BlockListener implements Listener {
                 return;
             }
 
-            callBlockHandler(e, item, drops);
+            callBlockHandler(e, heldItem, drops);
             if (e.isCancelled()) {
                 blockData.setPendingRemove(false);
             }
