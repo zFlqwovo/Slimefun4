@@ -309,10 +309,15 @@ public class PlayerBackpack extends SlimefunInventoryHolder {
         return isInvalid;
     }
 
+    /**
+     * Construct a new backpack inventory.
+     * <p>
+     * Warning: You should **manually** update inventory contents!
+     *
+     * @return new {@link Inventory}
+     */
     private Inventory newInv() {
-        var re = Bukkit.createInventory(this, size, (name.isEmpty() ? "背包" : ChatColors.color(name + "&r")) + " [大小 " + size + "]");
-        setInventory(re);
-        return re;
+        return Bukkit.createInventory(this, size, (name.isEmpty() ? "背包" : ChatColors.color(name + "&r")) + " [大小 " + size + "]");
     }
 
     private void updateInv() {
@@ -321,6 +326,7 @@ public class PlayerBackpack extends SlimefunInventoryHolder {
         inv.setContents(this.inventory.getContents());
         this.inventory.clear();
         this.inventory = inv;
+        setInventory(inv);
     }
 
 }
