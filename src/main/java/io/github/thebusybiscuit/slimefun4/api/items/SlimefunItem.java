@@ -540,7 +540,7 @@ public class SlimefunItem implements Placeable {
      *
      * <strong>This method is for internal purposes, like {@link ItemGroup} registration only</strong>
      */
-    protected void onEnable() {
+    private final void onEnable() {
         // Register the ItemGroup too if it hasn't been registered yet
         if (!itemGroup.isRegistered()) {
             itemGroup.register(addon);

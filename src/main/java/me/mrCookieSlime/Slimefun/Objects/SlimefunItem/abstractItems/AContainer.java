@@ -454,8 +454,9 @@ public abstract class AContainer extends SlimefunItem implements InventoryBlock,
     }
 
     @Override
-    public void onEnable() {
-        super.onEnable();
-        registerDefaultRecipes();
+    public void postRegister() {
+        if(getState() == ItemState.ENABLED){
+            registerDefaultRecipes();
+        }
     }
 }
