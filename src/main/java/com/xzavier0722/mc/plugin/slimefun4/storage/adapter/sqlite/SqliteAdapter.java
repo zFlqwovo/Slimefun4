@@ -58,7 +58,7 @@ public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
         var table = SqlUtils.mapTable(key.getScope());
 
         if (!updateFields.isEmpty()) {
-            if (!key.getConditions().isEmpty()) {
+            if (key.getConditions().isEmpty()) {
                 throw new IllegalArgumentException("Condition is required for update statement!");
             }
 
