@@ -8,6 +8,8 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DatabaseThreadFactory;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.QueuedWriteTask;
+import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
+import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.List;
 import java.util.Map;
@@ -74,11 +76,22 @@ public abstract class ADataController {
     }
 
     protected void scheduleDeleteTask(ScopeKey scopeKey, RecordKey key, boolean forceScopeKey) {
-        scheduleWriteTask(scopeKey, key, () -> dataAdapter.deleteData(key), forceScopeKey);
+        Debug.log(TestCase.DATABASE, "Scheduled remove task for key = {}", key);
+
+        scheduleWriteTask(scopeKey, key, () -> {
+            dataAdapter.deleteData(key);
+            Debug.log(TestCase.DATABASE, "Data from key {} deleted.", key);
+        }, forceScopeKey);
     }
 
     protected void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, RecordSet data, boolean forceScopeKey) {
-        scheduleWriteTask(scopeKey, key, () -> dataAdapter.setData(key, data), forceScopeKey);
+        Debug.log(TestCase.DATABASE, "Scheduled write task for key = {}, record set = {}", key, data.getAll());
+
+        scheduleWriteTask(scopeKey, key, () -> {
+            dataAdapter.setData(key, data);
+            Debug.log(TestCase.DATABASE, "Data from key {} set, with record set {}", key, data.getAll());
+        }, forceScopeKey);
+
     }
 
     protected void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, Runnable task, boolean forceScopeKey) {
