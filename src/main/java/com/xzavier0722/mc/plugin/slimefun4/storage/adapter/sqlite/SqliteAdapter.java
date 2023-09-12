@@ -58,7 +58,7 @@ public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
         var table = SqlUtils.mapTable(key.getScope());
 
 
-        if (!updateFields.isEmpty()) {
+        if (!updateFields.isEmpty() && !key.getConditions().isEmpty()) {
             var row = executeUpdate(
                     "UPDATE " + table + " SET "
                             + String.join(", ", updateFields.stream().map(field -> {
