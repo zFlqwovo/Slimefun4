@@ -64,6 +64,11 @@ public class MysqlAdapter extends SqlCommonAdapter<MysqlConfig> {
         }
 
         var updateFields = key.getFields();
+
+        if (!updateFields.isEmpty() && key.getConditions().isEmpty()) {
+            throw new IllegalArgumentException("Condition is required for update statement!");
+        }
+
         executeSql(
                 "INSERT INTO " + mapTable(key.getScope()) + " (" + fieldStr.get() + ") "
                 + "VALUES (" + valStr + ")"

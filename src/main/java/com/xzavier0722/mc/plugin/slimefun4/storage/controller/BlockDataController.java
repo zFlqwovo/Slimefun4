@@ -155,7 +155,7 @@ public class BlockDataController extends ADataController {
         var lKey = LocationUtils.getLocKey(l);
 
         var key = new RecordKey(DataScope.BLOCK_RECORD);
-        key.addCondition(FieldKey.LOCATION, lKey);
+        //key.addCondition(FieldKey.LOCATION, lKey);
 
         var data = new RecordSet();
         data.put(FieldKey.LOCATION, lKey);

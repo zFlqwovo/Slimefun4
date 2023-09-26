@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -145,15 +147,17 @@ public class BlockListener implements Listener {
         }
 
         if (!e.isCancelled()) {
+            checkForSensitiveBlockAbove(e.getPlayer(), e.getBlock(), heldItem);
+
             int fortune = getBonusDropsWithFortune(heldItem, e.getBlock());
             List<ItemStack> drops = new ArrayList<>();
-            checkForSensitiveBlockAbove(e.getPlayer(), e.getBlock(), heldItem);
 
             if (!heldItem.getType().isAir()) {
                 callToolHandler(e, heldItem, fortune, drops);
             }
 
             if (blockData == null || blockData.isPendingRemove()) {
+                dropItems(e, drops);
                 return;
             }
 
@@ -229,10 +233,12 @@ public class BlockListener implements Listener {
 
                 for (ItemStack drop : drops) {
                     // Prevent null or air from being dropped
-                    if (drop != null && drop.getType() != Material.AIR) {
+                    if (drop != null && !drop.getType().isAir()) {
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(), drop);
                     }
                 }
+            } else {
+                System.out.println("fu we have been cancelled");
             }
         }
     }
@@ -242,12 +248,9 @@ public class BlockListener implements Listener {
      * Sensitive {@link Block Blocks} are pressure plates or saplings, which should be broken
      * when the block beneath is broken as well.
      *
-     * @param player
-     *            The {@link Player} who broke this {@link Block}
-     * @param block
-     *            The {@link Block} that was broken
-     * @param item
-     *            The {@link ItemStack} that was used to break the {@link Block}
+     * @param player The {@link Player} who broke this {@link Block}
+     * @param block  The {@link Block} that was broken
+     * @param item   The {@link ItemStack} that was used to break the {@link Block}
      */
     @ParametersAreNonnullByDefault
     private void checkForSensitiveBlockAbove(Player player, Block block, ItemStack item) {

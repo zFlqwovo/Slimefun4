@@ -68,6 +68,11 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
         }
 
         var updateFields = key.getFields();
+
+        if (!updateFields.isEmpty() && key.getConditions().isEmpty()) {
+            throw new IllegalArgumentException("Condition is required for update statement!");
+        }
+
         var contrastStr = Arrays.stream(key.getScope().getPrimaryKeys()).map(SqlUtils::mapField).collect(Collectors.joining(", "));
 
         executeSql(

@@ -28,7 +28,11 @@ public record SqliteConfig(String path, int maxConnection) implements ISqlCommon
     }
 
     public String jdbcUrl() {
-        return "jdbc:sqlite:" + path + "?foreign_keys=on&journal_mode=WAL";
+        return "jdbc:sqlite:" + path +
+                "?foreign_keys=on" +
+                "&journal_mode=WAL" +
+                "&synchronous=NORMAL" +
+                "&locking_mode=NORMAL";
     }
 
     public String driver() {
