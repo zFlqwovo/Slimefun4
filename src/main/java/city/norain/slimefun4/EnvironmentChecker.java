@@ -13,7 +13,13 @@ class EnvironmentChecker {
     static boolean checkIncompatiblePlugins(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         for (String name : UNSUPPORTED_PLUGINS) {
             if (sf.getServer().getPluginManager().getPlugin(name) != null) {
+                printBorder(logger);
+                logger.log(Level.WARNING, "");
+                logger.log(Level.WARNING, "");
                 logger.log(Level.WARNING, "检测到安装了 {0}, 该插件已不再兼容新版 Slimefun, 可能会带来不良效果!", name);
+                logger.log(Level.WARNING, "");
+                logger.log(Level.WARNING, "");
+                printBorder(logger);
                 Bukkit.getPluginManager().disablePlugin(sf);
                 return true;
             }
@@ -25,7 +31,15 @@ class EnvironmentChecker {
     static boolean checkHybridServer(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         try {
             Class.forName("net.minecraftforge.common.MinecraftForge");
+
+            printBorder(logger);
+            logger.log(Level.WARNING, "");
+            logger.log(Level.WARNING, "");
             logger.log(Level.WARNING, "检测到正在使用混合端, Slimefun 将会被禁用!");
+            logger.log(Level.WARNING, "");
+            logger.log(Level.WARNING, "");
+            printBorder(logger);
+
             Bukkit.getPluginManager().disablePlugin(sf);
 
             return true;
@@ -41,5 +55,9 @@ class EnvironmentChecker {
                 logger.log(Level.WARNING, "下载: https://github.com/Xzavier0722/SlimeGlue");
             }
         }, 300); // 15s
+    }
+
+    private static void printBorder(@Nonnull Logger logger) {
+        logger.log(Level.WARNING, "#######################################################");
     }
 }
