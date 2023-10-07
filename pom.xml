@@ -232,7 +232,7 @@
         <dependency>
             <groupId>com.github.StarWishsama.dough</groupId>
             <artifactId>dough-api</artifactId>
-            <version>9e25b14cb7</version>
+            <version>5a1fd9633b</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
