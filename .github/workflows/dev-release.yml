@@ -32,9 +32,6 @@ jobs:
         run: mvn -B package -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - if: github.event_name != 'pull_request'
-        name: Update maven setting
-        run: echo ""
       - name: Publish Slimefun
         if: github.event_name != 'pull_request'
         run: mvn deploy --file pom-github-package.xml --errors
