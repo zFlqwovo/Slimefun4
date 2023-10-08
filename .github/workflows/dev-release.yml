@@ -29,7 +29,10 @@ jobs:
           cache: maven
       - name: Build Slimefun
         if: github.event_name != 'pull_request'
-        run: mvn -B package --file pom.xml --errors
+        run: mvn -B package -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
+      - if: github.event_name != 'pull_request'
+        name: Update maven setting
+        run: echo ""
       - name: Publish Slimefun
         if: github.event_name != 'pull_request'
         run: mvn deploy --file pom-github-package.xml --errors
