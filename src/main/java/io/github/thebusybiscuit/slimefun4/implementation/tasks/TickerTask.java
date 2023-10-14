@@ -25,9 +25,9 @@ import org.bukkit.scheduler.BukkitScheduler;
 /**
  * The {@link TickerTask} is responsible for ticking every {@link BlockTicker},
  * synchronous or not.
- * 
+ *
  * @author TheBusyBiscuit
- * 
+ *
  * @see BlockTicker
  *
  */
@@ -52,7 +52,7 @@ public class TickerTask implements Runnable {
 
     /**
      * This method starts the {@link TickerTask} on an asynchronous schedule.
-     * 
+     *
      * @param plugin
      *            The instance of our {@link Slimefun}
      */
@@ -107,7 +107,12 @@ public class TickerTask implements Runnable {
             reset();
             Slimefun.getProfiler().stop();
         } catch (Exception | LinkageError x) {
-            Slimefun.logger().log(Level.SEVERE, x, () -> "An Exception was caught while ticking the Block Tickers Task for Slimefun v" + Slimefun.getVersion());
+            Slimefun.logger()
+                    .log(
+                            Level.SEVERE,
+                            x,
+                            () -> "An Exception was caught while ticking the Block Tickers Task for Slimefun v"
+                                    + Slimefun.getVersion());
             reset();
         }
     }
@@ -122,7 +127,8 @@ public class TickerTask implements Runnable {
                 }
             }
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException x) {
-            Slimefun.logger().log(Level.SEVERE, x, () -> "An Exception has occurred while trying to resolve Chunk: " + chunk);
+            Slimefun.logger()
+                    .log(Level.SEVERE, x, () -> "An Exception has occurred while trying to resolve Chunk: " + chunk);
         }
     }
 
@@ -182,7 +188,9 @@ public class TickerTask implements Runnable {
             new ErrorReport<>(x, l, item);
             bugs.put(position, errors);
         } else if (errors == 4) {
-            Slimefun.logger().log(Level.SEVERE, "X: {0} Y: {1} Z: {2} ({3})", new Object[]{l.getBlockX(), l.getBlockY(), l.getBlockZ(), item.getId()});
+            Slimefun.logger().log(Level.SEVERE, "X: {0} Y: {1} Z: {2} ({3})", new Object[] {
+                l.getBlockX(), l.getBlockY(), l.getBlockZ(), item.getId()
+            });
             Slimefun.logger().log(Level.SEVERE, "在过去的 4 个 Tick 中发生多次错误，该方块对应的机器已被停用。");
             Slimefun.logger().log(Level.SEVERE, "请在 /plugins/Slimefun/error-reports/ 文件夹中查看错误详情。");
             Slimefun.logger().log(Level.SEVERE, " ");
@@ -204,7 +212,7 @@ public class TickerTask implements Runnable {
 
     /**
      * This returns the delay between ticks
-     * 
+     *
      * @return The tick delay
      */
     public int getTickRate() {
@@ -215,9 +223,9 @@ public class TickerTask implements Runnable {
      * This method returns a <strong>read-only</strong> {@link Map}
      * representation of every {@link ChunkPosition} and its corresponding
      * {@link Set} of ticking {@link Location Locations}.
-     * 
+     *
      * This does include any {@link Location} from an unloaded {@link Chunk} too!
-     * 
+     *
      * @return A {@link Map} representation of all ticking {@link Location Locations}
      */
     @Nonnull
@@ -230,10 +238,10 @@ public class TickerTask implements Runnable {
      * of all ticking {@link Location Locations} in a given {@link Chunk}.
      * The {@link Chunk} does not have to be loaded.
      * If no {@link Location} is present, the returned {@link Set} will be empty.
-     * 
+     *
      * @param chunk
      *            The {@link Chunk}
-     * 
+     *
      * @return A {@link Set} of all ticking {@link Location Locations}
      */
     @Nonnull
@@ -246,7 +254,7 @@ public class TickerTask implements Runnable {
 
     /**
      * This enables the ticker at the given {@link Location} and adds it to our "queue".
-     * 
+     *
      * @param l
      *            The {@link Location} to activate
      */
@@ -254,17 +262,18 @@ public class TickerTask implements Runnable {
         Validate.notNull(l, "Location cannot be null!");
 
         synchronized (tickingLocations) {
-            tickingLocations.computeIfAbsent(
-                    new ChunkPosition(l.getWorld(), l.getBlockX() >> 4, l.getBlockZ() >> 4),
-                    k -> new HashSet<>()
-            ).add(l);
+            tickingLocations
+                    .computeIfAbsent(
+                            new ChunkPosition(l.getWorld(), l.getBlockX() >> 4, l.getBlockZ() >> 4),
+                            k -> new HashSet<>())
+                    .add(l);
         }
     }
 
     /**
      * This method disables the ticker at the given {@link Location} and removes it from our internal
      * "queue".
-     * 
+     *
      * @param l
      *            The {@link Location} to remove
      */
@@ -288,5 +297,4 @@ public class TickerTask implements Runnable {
     public void setPaused(boolean isPaused) {
         paused = isPaused;
     }
-
 }

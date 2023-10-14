@@ -18,16 +18,12 @@ import io.github.thebusybiscuit.slimefun4.core.SlimefunRegistry;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotConfigurable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.Placeable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.Radioactive;
-import io.github.thebusybiscuit.slimefun4.core.attributes.Rechargeable;
 import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuide;
 import io.github.thebusybiscuit.slimefun4.core.handlers.GlobalItemHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.VanillaItem;
-import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines.enchanting.AutoDisenchanter;
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.machines.enchanting.AutoEnchanter;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
-import io.github.thebusybiscuit.slimefun4.utils.itemstack.ItemStackWrapper;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,13 +52,13 @@ import org.bukkit.permissions.Permission;
  * This class defines the behaviours of the item, you can assign an {@link ItemHandler}
  * to give the item functionality.
  * In contrast to that the {@link SlimefunItemStack} defines the look and feel of the item.
- * 
+ *
  * Remember to call {@link #register(SlimefunAddon)} on your {@link SlimefunItem} for it
  * to appear in the {@link SlimefunGuide}.
- * 
+ *
  * @author TheBusyBiscuit
  * @author Poslovitch
- * 
+ *
  * @see SlimefunItemStack
  * @see SlimefunAddon
  *
@@ -120,7 +116,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This creates a new {@link SlimefunItem} from the given arguments.
-     * 
+     *
      * @param itemGroup
      *            The {@link ItemGroup} this {@link SlimefunItem} belongs to
      * @param item
@@ -137,7 +133,7 @@ public class SlimefunItem implements Placeable {
 
     /**
      * This creates a new {@link SlimefunItem} from the given arguments.
-     * 
+     *
      * @param itemGroup
      *            The {@link ItemGroup} this {@link SlimefunItem} belongs to
      * @param item
@@ -150,7 +146,12 @@ public class SlimefunItem implements Placeable {
      *            The result of crafting this item
      */
     @ParametersAreNonnullByDefault
-    public SlimefunItem(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, @Nullable ItemStack recipeOutput) {
+    public SlimefunItem(
+            ItemGroup itemGroup,
+            SlimefunItemStack item,
+            RecipeType recipeType,
+            ItemStack[] recipe,
+            @Nullable ItemStack recipeOutput) {
         Validate.notNull(itemGroup, "'itemGroup' is not allowed to be null!");
         Validate.notNull(item, "'item' is not allowed to be null!");
         Validate.notNull(recipeType, "'recipeType' is not allowed to be null!");
@@ -371,7 +372,9 @@ public class SlimefunItem implements Placeable {
      */
     public boolean isDisabledIn(@Nonnull World world) {
         if (state == ItemState.UNREGISTERED) {
-            error("isDisabled(World) cannot be called before registering the item", new UnregisteredItemException(this));
+            error(
+                    "isDisabled(World) cannot be called before registering the item",
+                    new UnregisteredItemException(this));
             return false;
         }
 
@@ -545,8 +548,10 @@ public class SlimefunItem implements Placeable {
         // Check for an illegal stack size
         if (itemStackTemplate.getAmount() != 1) {
             // @formatter:off
-            warn("This item has an illegal stack size: " + itemStackTemplate.getAmount()
-                    + ". An Item size of 1 is recommended. Please inform the author(s) of " + addon.getName()
+            warn("This item has an illegal stack size: "
+                    + itemStackTemplate.getAmount()
+                    + ". An Item size of 1 is recommended. Please inform the author(s) of "
+                    + addon.getName()
                     + " to fix this. Crafting Results with amounts of higher should be handled"
                     + " via the recipeOutput parameter!");
             // @formatter:on
@@ -654,13 +659,17 @@ public class SlimefunItem implements Placeable {
         if (c != null) {
             // Check if this Class is deprecated
             if (c.isAnnotationPresent(Deprecated.class)) {
-                warn("The inherited Class \"" + c.getName() + "\" has been deprecated. Check the documentation for more details!");
+                warn("The inherited Class \""
+                        + c.getName()
+                        + "\" has been deprecated. Check the documentation for more details!");
             }
 
             for (Class<?> parent : c.getInterfaces()) {
                 // Check if this Interface is deprecated
                 if (parent.isAnnotationPresent(Deprecated.class)) {
-                    warn("The implemented Interface \"" + parent.getName() + "\" has been deprecated. Check the documentation for more details!");
+                    warn("The implemented Interface \""
+                            + parent.getName()
+                            + "\" has been deprecated. Check the documentation for more details!");
                 }
             }
 
@@ -823,7 +832,8 @@ public class SlimefunItem implements Placeable {
 
         // Make sure they are added before the item was registered.
         if (state != ItemState.UNREGISTERED) {
-            throw new UnsupportedOperationException("You cannot add an ItemHandler after the SlimefunItem was registered.");
+            throw new UnsupportedOperationException(
+                    "You cannot add an ItemHandler after the SlimefunItem was registered.");
         }
 
         for (ItemHandler handler : handlers) {
@@ -850,11 +860,13 @@ public class SlimefunItem implements Placeable {
         Validate.noNullElements(settings, "You cannot add any 'null' ItemSettings!");
 
         if (state != ItemState.UNREGISTERED) {
-            throw new UnsupportedOperationException("You cannot add an ItemSetting after the SlimefunItem was registered.");
+            throw new UnsupportedOperationException(
+                    "You cannot add an ItemSetting after the SlimefunItem was registered.");
         }
 
         if (this instanceof NotConfigurable) {
-            throw new UnsupportedOperationException("This Item has been marked as NotConfigurable and cannot accept Item Settings!");
+            throw new UnsupportedOperationException(
+                    "This Item has been marked as NotConfigurable and cannot accept Item Settings!");
         }
 
         for (ItemSetting<?> setting : settings) {
@@ -862,7 +874,8 @@ public class SlimefunItem implements Placeable {
                 // Prevent two Item Settings with the same key
                 for (ItemSetting<?> existingSetting : itemSettings) {
                     if (existingSetting.getKey().equals(setting.getKey())) {
-                        throw new IllegalArgumentException("This Item has already an ItemSetting with this key: " + setting.getKey());
+                        throw new IllegalArgumentException(
+                                "This Item has already an ItemSetting with this key: " + setting.getKey());
                     }
                 }
 
@@ -946,7 +959,9 @@ public class SlimefunItem implements Placeable {
      */
     public final @Nonnull String getItemName() {
         if (itemStackTemplate instanceof SlimefunItemStack) {
-            Optional<String> name = ((SlimefunItemStack) itemStackTemplate).getItemMetaSnapshot().getDisplayName();
+            Optional<String> name = ((SlimefunItemStack) itemStackTemplate)
+                    .getItemMetaSnapshot()
+                    .getDisplayName();
 
             if (name.isPresent()) {
                 return name.get();
@@ -1009,7 +1024,14 @@ public class SlimefunItem implements Placeable {
         if (addon == null) {
             return getClass().getSimpleName() + " - '" + id + "'";
         } else {
-            return getClass().getSimpleName() + " - '" + id + "' (" + addon.getName() + " v" + addon.getPluginVersion() + ')';
+            return getClass().getSimpleName()
+                    + " - '"
+                    + id
+                    + "' ("
+                    + addon.getName()
+                    + " v"
+                    + addon.getPluginVersion()
+                    + ')';
         }
     }
 
@@ -1072,7 +1094,9 @@ public class SlimefunItem implements Placeable {
     @ParametersAreNonnullByDefault
     public void error(String message, Throwable throwable) {
         Validate.notNull(addon, "Cannot send an error for an unregistered item!");
-        addon.getLogger().log(Level.SEVERE, "Item \"{0}\" from {1} v{2} has caused an Error!", new Object[] { id, addon.getName(), addon.getPluginVersion() });
+        addon.getLogger().log(Level.SEVERE, "Item \"{0}\" from {1} v{2} has caused an Error!", new Object[] {
+            id, addon.getName(), addon.getPluginVersion()
+        });
 
         if (addon.getBugTrackerURL() != null) {
             // We can prompt the server operator to report it to the addon's bug tracker
@@ -1165,7 +1189,8 @@ public class SlimefunItem implements Placeable {
                  * required Research to use this SlimefunItem.
                  */
                 if (sendMessage && !(this instanceof VanillaItem)) {
-                    Slimefun.getLocalization().sendMessage(p, "messages.not-researched", true, s -> s.replace("%item%", getItemName()));
+                    Slimefun.getLocalization()
+                            .sendMessage(p, "messages.not-researched", true, s -> s.replace("%item%", getItemName()));
                 }
 
                 return false;

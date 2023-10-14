@@ -28,7 +28,8 @@ jobs:
           java-version: 17
           java-package: jdk
           architecture: x64
-      - run: mvn -B test --file pom.xml --errors
+      - name: Codestyle Check
+        run: mvn -B spotless:check package --file pom.xml --errors
       - uses: actions/cache@v2
         if: github.event_name != 'pull_request'
         with:

@@ -1,6 +1,10 @@
 package me.mrCookieSlime.CSCoreLibPlugin.general.Inventory;
 
 import city.norain.slimefun4.holder.SlimefunInventoryHolder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -11,11 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * An old remnant of CS-CoreLib.
@@ -48,10 +47,8 @@ public class ChestMenu extends SlimefunInventoryHolder {
         this.items = new ArrayList<>();
         this.handlers = new HashMap<>();
 
-        this.open = p -> {
-        };
-        this.close = p -> {
-        };
+        this.open = p -> {};
+        this.close = p -> {};
         this.playerclick = (p, slot, item, action) -> isPlayerInventoryClickable();
     }
 
@@ -120,8 +117,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
      */
     public ChestMenu addItem(int slot, ItemStack item) {
         final int size = this.items.size();
-        if (size > slot)
-            this.items.set(slot, item);
+        if (size > slot) this.items.set(slot, item);
         else {
             for (int i = 0; i < slot - size; i++) {
                 this.items.add(null);
@@ -228,8 +224,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
     }
 
     private void setup() {
-        if (this.inventory != null)
-            return;
+        if (this.inventory != null) return;
         this.inventory = Bukkit.createInventory(this, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
         for (int i = 0; i < this.items.size(); i++) {
             this.inventory.setItem(i, this.items.get(i));
@@ -240,10 +235,8 @@ public class ChestMenu extends SlimefunInventoryHolder {
      * Resets this ChestMenu to a Point BEFORE the User interacted with it
      */
     public void reset(boolean update) {
-        if (update)
-            this.inventory.clear();
-        else
-            this.inventory = Bukkit.createInventory(this, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
+        if (update) this.inventory.clear();
+        else this.inventory = Bukkit.createInventory(this, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
         for (int i = 0; i < this.items.size(); i++) {
             this.inventory.setItem(i, this.items.get(i));
         }
@@ -270,8 +263,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
         for (Player p : players) {
             p.openInventory(this.inventory);
             addViewer(p.getUniqueId());
-            if (open != null)
-                open.onOpen(p);
+            if (open != null) open.onOpen(p);
         }
     }
 

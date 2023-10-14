@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
  * This class holds the implementations of every {@link SubCommand}.
  * The implementations themselves are package-private, this class only provides
  * a static setup method
- * 
+ *
  * @author TheBusyBiscuit
  *
  */

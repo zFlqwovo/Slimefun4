@@ -34,7 +34,8 @@ public final class PostSetup {
     }
 
     public static void loadItems() {
-        Iterator<SlimefunItem> iterator = Slimefun.getRegistry().getEnabledSlimefunItems().iterator();
+        Iterator<SlimefunItem> iterator =
+                Slimefun.getRegistry().getEnabledSlimefunItems().iterator();
 
         while (iterator.hasNext()) {
             SlimefunItem item = iterator.next();
@@ -60,10 +61,25 @@ public final class PostSetup {
         int slimefunOnly = countNonAddonItems();
 
         sender.sendMessage("");
-        sender.sendMessage(ChatColor.GREEN + "######################### - Slimefun v" + Slimefun.getVersion() + " - #########################");
+        sender.sendMessage(ChatColor.GREEN
+                + "######################### - Slimefun v"
+                + Slimefun.getVersion()
+                + " - #########################");
         sender.sendMessage("");
-        sender.sendMessage(ChatColor.GREEN + "成功加载了 " + total + " 个物品和 " + Slimefun.getRegistry().getResearches().size() + " 个研究");
-        sender.sendMessage(ChatColor.GREEN + "( " + slimefunOnly + " 物品来自本体, " + (total - slimefunOnly) + " 个物品来自 " + Slimefun.getInstalledAddons().size() + " 扩展 )");
+        sender.sendMessage(ChatColor.GREEN
+                + "成功加载了 "
+                + total
+                + " 个物品和 "
+                + Slimefun.getRegistry().getResearches().size()
+                + " 个研究");
+        sender.sendMessage(ChatColor.GREEN
+                + "( "
+                + slimefunOnly
+                + " 物品来自本体, "
+                + (total - slimefunOnly)
+                + " 个物品来自 "
+                + Slimefun.getInstalledAddons().size()
+                + " 扩展 )");
         sender.sendMessage("");
 
         sender.sendMessage("");
@@ -80,14 +96,14 @@ public final class PostSetup {
     /**
      * This method counts the amount of {@link SlimefunItem SlimefunItems} registered
      * by Slimefun itself and not by any addons.
-     * 
+     *
      * @return The amount of {@link SlimefunItem SlimefunItems} added by Slimefun itself
      */
     private static int countNonAddonItems() {
         // @formatter:off
         return (int) Slimefun.getRegistry().getEnabledSlimefunItems().stream()
-                        .filter(item -> item.getAddon() instanceof Slimefun)
-                        .count();
+                .filter(item -> item.getAddon() instanceof Slimefun)
+                .count();
         // @formatter:on
     }
 
@@ -103,7 +119,7 @@ public final class PostSetup {
                     input = recipe;
                 } else {
                     if (input[0] != null && recipe[0] != null) {
-                        grinderRecipes.add(new ItemStack[] { input[0], recipe[0] });
+                        grinderRecipes.add(new ItemStack[] {input[0], recipe[0]});
                     }
 
                     input = null;
@@ -120,7 +136,7 @@ public final class PostSetup {
                     input = recipe;
                 } else {
                     if (input[0] != null && recipe[0] != null) {
-                        grinderRecipes.add(new ItemStack[] { input[0], recipe[0] });
+                        grinderRecipes.add(new ItemStack[] {input[0], recipe[0]});
                     }
 
                     input = null;
@@ -135,7 +151,8 @@ public final class PostSetup {
             stream = stream.sorted((a, b) -> Integer.compare(b[0].getAmount(), a[0].getAmount()));
         }
 
-        stream.forEach(recipe -> registerMachineRecipe("ELECTRIC_ORE_GRINDER", 4, new ItemStack[] { recipe[0] }, new ItemStack[] { recipe[1] }));
+        stream.forEach(recipe -> registerMachineRecipe(
+                "ELECTRIC_ORE_GRINDER", 4, new ItemStack[] {recipe[0]}, new ItemStack[] {recipe[1]}));
     }
 
     private static void loadSmelteryRecipes() {
@@ -161,7 +178,9 @@ public final class PostSetup {
                 if (item instanceof AContainer machine) {
                     if (machine.getMachineIdentifier().equals("ELECTRIC_SMELTERY")) {
                         List<MachineRecipe> recipes = machine.getMachineRecipes();
-                        Collections.sort(recipes, Comparator.comparingInt(recipe -> recipe == null ? 0 : -recipe.getInput().length));
+                        Collections.sort(
+                                recipes,
+                                Comparator.comparingInt(recipe -> recipe == null ? 0 : -recipe.getInput().length));
                     }
                 }
             }
@@ -180,12 +199,15 @@ public final class PostSetup {
 
         // We want to redirect Dust to Ingot Recipes
         if (ingredients.size() == 1 && isDust(ingredients.get(0))) {
-            makeshiftSmeltery.addRecipe(new ItemStack[] { ingredients.get(0) }, output[0]);
+            makeshiftSmeltery.addRecipe(new ItemStack[] {ingredients.get(0)}, output[0]);
 
-            registerMachineRecipe("ELECTRIC_INGOT_FACTORY", 8, new ItemStack[] { ingredients.get(0) }, new ItemStack[] { output[0] });
-            registerMachineRecipe("ELECTRIC_INGOT_PULVERIZER", 3, new ItemStack[] { output[0] }, new ItemStack[] { ingredients.get(0) });
+            registerMachineRecipe(
+                    "ELECTRIC_INGOT_FACTORY", 8, new ItemStack[] {ingredients.get(0)}, new ItemStack[] {output[0]});
+            registerMachineRecipe(
+                    "ELECTRIC_INGOT_PULVERIZER", 3, new ItemStack[] {output[0]}, new ItemStack[] {ingredients.get(0)});
         } else {
-            registerMachineRecipe("ELECTRIC_SMELTERY", 12, ingredients.toArray(new ItemStack[0]), new ItemStack[] { output[0] });
+            registerMachineRecipe(
+                    "ELECTRIC_SMELTERY", 12, ingredients.toArray(new ItemStack[0]), new ItemStack[] {output[0]});
         }
     }
 
@@ -196,7 +218,8 @@ public final class PostSetup {
 
     private static void registerMachineRecipe(String machine, int seconds, ItemStack[] input, ItemStack[] output) {
         for (SlimefunItem item : Slimefun.getRegistry().getEnabledSlimefunItems()) {
-            if (item instanceof AContainer container && container.getMachineIdentifier().equals(machine)) {
+            if (item instanceof AContainer container
+                    && container.getMachineIdentifier().equals(machine)) {
                 container.registerRecipe(seconds, input, output);
             }
         }
