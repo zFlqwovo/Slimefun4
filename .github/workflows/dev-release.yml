@@ -29,9 +29,13 @@ jobs:
           cache: maven
       - name: Spotless Check
         run: mvn -B spotless:check --file pom.xml --errors
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Build Slimefun
         if: github.event_name != 'pull_request'
         run: mvn -B package --file pom.xml --errors
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Publish Slimefun
         if: github.event_name != 'pull_request'
         run: mvn deploy --file pom.xml --errors
