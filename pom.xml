@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.slimefun</groupId>
-    <artifactId>Slimefun</artifactId>
+    <artifactId>slimefun</artifactId>
 
     <!-- Our default version will be UNOFFICIAL, this will prevent auto updates -->
     <!-- from overriding our local test file -->
@@ -29,6 +29,12 @@
         <spigot.version>1.20</spigot.version>
         <spigot.javadocs>https://hub.spigotmc.org/javadocs/spigot/</spigot.javadocs>
     </properties>
+
+    <issueManagement>
+        <!-- Bug Tracker -->
+        <system>GitHub Issues</system>
+        <url>https://github.com/Slimefun/Slimefun4/issues</url>
+    </issueManagement>
 
     <issueManagement>
         <!-- Bug Tracker -->
