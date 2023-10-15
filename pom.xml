@@ -36,6 +36,14 @@
         <url>https://github.com/Slimefun/Slimefun4/issues</url>
     </issueManagement>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub StarWishsama Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/StarWishsama/Slimefun-Secret</url>
+        </repository>
+    </distributionManagement>
+
     <licenses>
         <license>
             <!-- License -->
