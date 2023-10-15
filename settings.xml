@@ -30,7 +30,7 @@
         <server>
             <id>dough</id>
             <username>StarWishsama</username>
-            <password>${env.GITHUB_TOKEN}</password>
+            <password>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</password>
         </server>
     </servers>
 </settings>
