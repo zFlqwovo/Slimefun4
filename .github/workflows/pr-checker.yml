@@ -22,4 +22,4 @@ jobs:
           java-package: jdk
           architecture: x64
       - name: Codestyle Check
-        run: mvn -B spotless:check package -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
+        run: mvn -B spotless:check build -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
