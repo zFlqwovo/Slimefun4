@@ -76,12 +76,9 @@ public class MultiTool extends SlimefunItem implements Rechargeable {
             ItemStack item = e.getItem();
             e.cancel();
 
-            var pdc = item.getItemMeta().getPersistentDataContainer();
-            int index = 0;
-
-            if (pdc != null) {
-                index = pdc.getOrDefault(multiToolMode, PersistentDataType.INTEGER, 0);
-            }
+            var im = item.getItemMeta();
+            var pdc = im.getPersistentDataContainer();
+            int index = pdc.getOrDefault(multiToolMode, PersistentDataType.INTEGER, 0);
 
             if (!p.isSneaking()) {
                 if (removeItemCharge(item, COST)) {
@@ -97,9 +94,11 @@ public class MultiTool extends SlimefunItem implements Rechargeable {
                 SlimefunItem selectedItem = modes.get(index).getItem();
                 String itemName = selectedItem != null ? selectedItem.getItemName() : "Unknown";
                 Slimefun.getLocalization().sendMessage(p, "messages.multi-tool.mode-change", true, msg -> msg.replace(
-                                "%device%", "Multi Tool")
+                                "%device%", "多功能工具")
                         .replace("%mode%", ChatColor.stripColor(itemName)));
+
                 pdc.set(multiToolMode, PersistentDataType.INTEGER, index);
+                item.setItemMeta(im);
             }
         };
     }
