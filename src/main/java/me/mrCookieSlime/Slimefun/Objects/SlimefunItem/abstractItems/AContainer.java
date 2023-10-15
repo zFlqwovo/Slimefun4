@@ -265,7 +265,6 @@ public abstract class AContainer extends SlimefunItem
         if (getCapacity() > 0 && getEnergyConsumption() > 0 && getSpeed() > 0) {
             super.register(addon);
         }
-
     }
 
     /**
@@ -465,7 +464,7 @@ public abstract class AContainer extends SlimefunItem
 
     @Override
     public void postRegister() {
-        if(getState() == ItemState.ENABLED){
+        if (getState() == ItemState.ENABLED) {
             registerDefaultRecipes();
         }
     }
