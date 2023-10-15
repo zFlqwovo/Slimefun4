@@ -1,18 +1,13 @@
 # This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
-name: Slimefun Build Test
+name: Slimefun Builder
 
 on:
   push:
     branches:
       - master
     paths:
-      - 'src/**'
-      - 'pom.xml'
-  pull_request:
-    paths:
-      - '.github/workflows/**'
       - 'src/**'
       - 'pom.xml'
   workflow_dispatch:
@@ -29,21 +24,23 @@ jobs:
           java-package: jdk
           architecture: x64
       - name: Codestyle Check
-        run: mvn -B spotless:check package --file pom.xml --errors
+        run: mvn -B spotless:check -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
+      - name: Build Slimefun
+        run: mvn -B package -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
       - uses: actions/cache@v2
-        if: github.event_name != 'pull_request'
+        name: Cache dependencies
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - uses: actions/upload-artifact@v2
-        if: github.event_name != 'pull_request'
+        name: Upload Beta artifact
         with:
           name: Slimefun Beta Build
           path: staging
       - name: Automatic Releases
         uses: marvinpinto/action-automatic-releases@v1.2.1
-        if: github.event_name != 'pull_request' && github.ref_name == 'master'
+        if: github.ref_name == 'master'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "exp"
