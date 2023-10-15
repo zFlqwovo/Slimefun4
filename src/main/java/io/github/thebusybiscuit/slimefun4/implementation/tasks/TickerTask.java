@@ -137,12 +137,16 @@ public class TickerTask implements Runnable {
         if (blockData == null
                 || !blockData.isDataLoaded()
                 || blockData.isPendingRemove()
-                || SlimefunItem.getById(blockData.getSfId()).isDisabledIn(l.getWorld())) {
+        ) {
             return;
         }
         SlimefunItem item = SlimefunItem.getById(blockData.getSfId());
 
         if (item != null && item.getBlockTicker() != null) {
+            if (item.isDisabledIn(l.getWorld())) {
+                return;
+            }
+
             try {
                 if (item.getBlockTicker().isSynchronized()) {
                     Slimefun.getProfiler().scheduleEntries(1);
