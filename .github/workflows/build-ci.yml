@@ -39,7 +39,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: github.event_name != 'pull_request'
         with:
-          name: Slimefun.jar
+          name: Slimefun Beta Build
           path: staging
       - name: Automatic Releases
         uses: marvinpinto/action-automatic-releases@v1.2.1
