@@ -5,7 +5,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.slimefun</groupId>
-    <artifactId>Slimefun</artifactId>
+    <artifactId>slimefun</artifactId>
 
     <!-- Our default version will be UNOFFICIAL, this will prevent auto updates -->
     <!-- from overriding our local test file -->
