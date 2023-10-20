@@ -15,9 +15,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -28,15 +25,9 @@ jobs:
           architecture: x64
           cache: maven
       - name: Codestyle check
-        run: mvn -B spotless:check --file pom.xml --errors
+        run: mvn -B spotless:check --errors
       - name: Build Slimefun
-        run: mvn -B package -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-      - name: Publish Slimefun
-        run: mvn -B deploy --file pom.xml --errors
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        run: mvn -B package --errors
       - name: Mask Output
         run: |
           echo "::add-mask::$CF_API_TOKEN"
@@ -44,7 +35,7 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
       - name: Get build artifact filename
         run: |
-          cd target && FILENAME=$(find . -maxdepth 1 -mindepth 1 -name "slimefun-*" | cut -d'/' -f 2)
+          cd target && FILENAME=$(find . -maxdepth 1 -mindepth 1 -name "Slimefun-*" | cut -d'/' -f 2)
           echo "slimefun-artifact-name=$FILENAME" >> "$GITHUB_ENV"
           cd ..
       - name: Upload Build to R2
