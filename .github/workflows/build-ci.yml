@@ -28,9 +28,9 @@ jobs:
           architecture: x64
           cache: maven
       - name: Codestyle Check
-        run: mvn -B spotless:check -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
+        run: mvn -B spotless:check --errors
       - name: Build Slimefun
-        run: mvn -B package -s $GITHUB_WORKSPACE/settings.xml --file pom.xml --errors
+        run: mvn -B package --errors
       - uses: actions/upload-artifact@v2
         name: Upload Beta artifact
         with:
