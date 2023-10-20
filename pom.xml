@@ -9,7 +9,7 @@
 
     <!-- Our default version will be UNOFFICIAL, this will prevent auto updates -->
     <!-- from overriding our local test file -->
-    <version>5.0-SNAPSHOT</version>
+    <version>2023.2.1</version>
     <inceptionYear>2013</inceptionYear>
     <packaging>jar</packaging>
 
