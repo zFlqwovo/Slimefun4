@@ -34,7 +34,9 @@ class SlimefunTabCompleter implements TabCompleter {
             if (args[0].equalsIgnoreCase("banitem")) {
                 return createReturnList(getSlimefunItems(), args[1]);
             } else if (args[0].equalsIgnoreCase("unbanitem")) {
-                List<String> list = Slimefun.getRegistry().getDisabledSlimefunItems().stream().map(SlimefunItem::getId).collect(Collectors.toList());
+                List<String> list = Slimefun.getRegistry().getDisabledSlimefunItems().stream()
+                        .map(SlimefunItem::getId)
+                        .collect(Collectors.toList());
                 return createReturnList(list, args[1]);
             }
             return null;
