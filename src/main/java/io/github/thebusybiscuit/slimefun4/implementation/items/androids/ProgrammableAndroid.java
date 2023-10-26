@@ -785,7 +785,6 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                     index = 0;
                 }
 
-                data.setData("fuel", String.valueOf(fuel - 1));
                 Instruction instruction = Instruction.getInstruction(script[index]);
 
                 if (instruction == null) {
@@ -798,7 +797,11 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                     return;
                 }
 
-                executeInstruction(instruction, b, menu, data, index);
+                if ("false".equals(data.getData("paused"))) {
+                    executeInstruction(instruction, b, menu, data, index);
+
+                    data.setData("fuel", String.valueOf(fuel - 1));
+                }
             }
         }
     }
@@ -806,6 +809,10 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
     @ParametersAreNonnullByDefault
     private void executeInstruction(
             Instruction instruction, Block b, BlockMenu inv, SlimefunBlockData data, int index) {
+        if ("true".equals(data.getData("paused"))) {
+            return;
+        }
+
         if (getAndroidType().isType(instruction.getRequiredType())) {
             String rotationData = data.getData("rotation");
             BlockFace face = rotationData == null ? BlockFace.NORTH : BlockFace.valueOf(rotationData);
