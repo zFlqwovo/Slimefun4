@@ -46,16 +46,22 @@ public class SlimefunConfigManager {
     private boolean disableLearningAnimation;
     private boolean logDuplicateBlockEntries;
     private boolean talismanActionBarMessages;
+
     @Getter
     private boolean useMoneyUnlock;
+
     @Getter
     private boolean showVanillaRecipes;
+
     @Getter
     private boolean showHiddenItemGroupsInSearch;
+
     @Getter
     private boolean autoUpdate;
+
     @Getter
     private double researchCurrencyCostConvertRate;
+
     @Getter
     private boolean researchAutoConvert;
 
@@ -140,7 +146,8 @@ public class SlimefunConfigManager {
                 if (researchAutoConvert) {
                     research.setCurrencyCost(researchCurrencyCostConvertRate * cost);
                 } else {
-                    research.setCurrencyCost(researchesConfig.getDouble(key.getNamespace() + '.' + key.getKey() + ".currency-cost"));
+                    research.setCurrencyCost(
+                            researchesConfig.getDouble(key.getNamespace() + '.' + key.getKey() + ".currency-cost"));
                 }
 
                 var status = researchesConfig.getBoolean(key.getNamespace() + '.' + key.getKey() + ".enabled");
@@ -268,5 +275,4 @@ public class SlimefunConfigManager {
     public void setShowHiddenItemGroupsInSearch(boolean enabled) {
         showHiddenItemGroupsInSearch = enabled;
     }
-
 }
