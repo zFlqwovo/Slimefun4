@@ -154,7 +154,6 @@ public class BlockListener implements Listener {
         if (!heldItem.getType().isAir()) {
             int fortune = getBonusDropsWithFortune(heldItem, e.getBlock());
             callToolHandler(e, heldItem, fortune, drops);
-            callToolHandler(e, heldItem, fortune, drops);
         }
 
         if (!e.isCancelled()) {
