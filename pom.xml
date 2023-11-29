@@ -210,7 +210,6 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>configure</goal>
                             <goal>install</goal>
                         </goals>
                     </execution>
@@ -463,7 +462,7 @@
         <dependency>
             <groupId>net.guizhanss</groupId>
             <artifactId>GuizhanLib-common</artifactId>
-            <version>1.5.0</version>
+            <version>1.6.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
