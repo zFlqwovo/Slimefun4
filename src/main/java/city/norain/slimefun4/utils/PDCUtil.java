@@ -18,14 +18,22 @@ public class PDCUtil {
         throw new IllegalAccessException("Utility Class");
     }
 
-    public static <T,Z> void setValue(@Nonnull Block block, @Nonnull PersistentDataType<T, Z> type, @Nonnull NamespacedKey key, @Nonnull Z value) {
+    public static <T, Z> void setValue(
+            @Nonnull Block block,
+            @Nonnull PersistentDataType<T, Z> type,
+            @Nonnull NamespacedKey key,
+            @Nonnull Z value) {
         var state = (TileState) PaperLib.getBlockState(block, false);
         var container = state.getPersistentDataContainer();
 
         setValue(container, type, key, value);
     }
 
-    public static <T,Z> void setValue(@Nonnull PersistentDataContainer container, @Nonnull PersistentDataType<T, Z> type, @Nonnull NamespacedKey key, @Nonnull Z value) {
+    public static <T, Z> void setValue(
+            @Nonnull PersistentDataContainer container,
+            @Nonnull PersistentDataType<T, Z> type,
+            @Nonnull NamespacedKey key,
+            @Nonnull Z value) {
         Preconditions.checkArgument(container != null, "Container cannot be null!");
         Preconditions.checkArgument(type != null, "PDC type cannot be null!");
         Preconditions.checkArgument(key != null, "PDC key cannot be null!");
@@ -33,14 +41,18 @@ public class PDCUtil {
         container.set(key, type, value);
     }
 
-    public static <T,Z> Z getValue(@Nonnull Block block, @Nonnull PersistentDataType<T, Z> type, @Nonnull NamespacedKey key) {
+    public static <T, Z> Z getValue(
+            @Nonnull Block block, @Nonnull PersistentDataType<T, Z> type, @Nonnull NamespacedKey key) {
         var state = (TileState) PaperLib.getBlockState(block, false);
         var container = state.getPersistentDataContainer();
 
         return getValue(container, type, key);
     }
 
-    public static <T,Z> Z getValue(@Nonnull PersistentDataContainer container, @Nonnull PersistentDataType<T, Z> type, @Nonnull NamespacedKey key) {
+    public static <T, Z> Z getValue(
+            @Nonnull PersistentDataContainer container,
+            @Nonnull PersistentDataType<T, Z> type,
+            @Nonnull NamespacedKey key) {
         Preconditions.checkArgument(container != null, "Container cannot be null!");
         Preconditions.checkArgument(type != null, "PDC type cannot be null!");
         Preconditions.checkArgument(key != null, "PDC key cannot be null!");

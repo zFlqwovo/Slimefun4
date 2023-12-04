@@ -22,7 +22,7 @@ public class UUIDType implements PersistentDataType<byte[], UUID> {
 
     @Nonnull
     @Override
-    public byte [] toPrimitive(final UUID complex, @Nonnull final PersistentDataAdapterContext context) {
+    public byte[] toPrimitive(final UUID complex, @Nonnull final PersistentDataAdapterContext context) {
         var bb = ByteBuffer.wrap(new byte[16]);
         bb.putLong(complex.getMostSignificantBits());
         bb.putLong(complex.getLeastSignificantBits());

@@ -1,7 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.androids;
 
 import city.norain.slimefun4.utils.PDCUtil;
-import city.norain.slimefun4.utils.pdctype.UUIDType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.chat.ChatInput;
@@ -129,7 +128,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                 menu.addMenuClickHandler(15, (p, slot, item, action) -> {
                     Slimefun.getLocalization().sendMessage(p, "android.started", true);
                     PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, true);
-                    //StorageCacheUtils.setData(b.getLocation(), "paused", "false");
+                    // StorageCacheUtils.setData(b.getLocation(), "paused", "false");
                     p.closeInventory();
                     return false;
                 });
@@ -137,7 +136,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                 menu.replaceExistingItem(17, new CustomItemStack(HeadTexture.SCRIPT_PAUSE.getAsItemStack(), "&4暂停运行"));
                 menu.addMenuClickHandler(17, (p, slot, item, action) -> {
                     PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
-                    //StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    // StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     return false;
                 });
@@ -148,7 +147,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                                 HeadTexture.ENERGY_REGULATOR.getAsItemStack(), "&b内存核心", "", "&8\u21E8 &7单击打开脚本编辑器"));
                 menu.addMenuClickHandler(16, (p, slot, item, action) -> {
                     PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
-                    //StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    // StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     openScriptEditor(p, b);
                     return false;
@@ -163,7 +162,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                                 Slimefun.getLocalization().getMessage("android.access-manager.subtitle")));
                 menu.addMenuClickHandler(25, (p, slot, item, action) -> {
                     PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
-                    //StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    // StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     AndroidShareMenu.openShareMenu(p, b);
                     return false;
@@ -196,7 +195,11 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                 PDCUtil.setValue(b, PersistentDataType.STRING, SCRIPT_KEY, DEFAULT_SCRIPT);
                 PDCUtil.setValue(b, PersistentDataType.SHORT, SCRIPT_INDEX_KEY, (short) 0);
                 PDCUtil.setValue(b, PersistentDataType.INTEGER, FUEL_KEY, 0);
-                PDCUtil.setValue(b, PersistentDataType.STRING, ROTATION_KEY, p.getFacing().getOppositeFace().toString());
+                PDCUtil.setValue(
+                        b,
+                        PersistentDataType.STRING,
+                        ROTATION_KEY,
+                        p.getFacing().getOppositeFace().toString());
                 PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, true);
 
                 b.setBlockData(Material.PLAYER_HEAD.createBlockData(data -> {

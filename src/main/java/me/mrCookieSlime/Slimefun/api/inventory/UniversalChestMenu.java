@@ -2,10 +2,6 @@ package me.mrCookieSlime.Slimefun.api.inventory;
 
 import java.util.UUID;
 import javax.annotation.Nonnull;
-
-import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.inventory.DirtyChestMenu;
-import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 /**
