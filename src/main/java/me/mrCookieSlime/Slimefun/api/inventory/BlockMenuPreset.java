@@ -91,6 +91,10 @@ public abstract class BlockMenuPreset extends ChestMenu {
         // This method can optionally be overridden by implementations
     }
 
+    public void newInstance(@Nonnull UniversalChestMenu menu, @Nonnull Block b) {
+        // This method can optionally be overridden by implementations
+    }
+
     public int[] getSlotsAccessedByItemTransport(DirtyChestMenu menu, ItemTransportFlow flow, ItemStack item) {
         // This method will default to that method, it can be overridden by subclasses though
         return getSlotsAccessedByItemTransport(flow);

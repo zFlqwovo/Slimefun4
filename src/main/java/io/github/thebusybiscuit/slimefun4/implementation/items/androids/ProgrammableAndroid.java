@@ -1,5 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.androids;
 
+import city.norain.slimefun4.utils.PDCUtil;
+import city.norain.slimefun4.utils.pdctype.UUIDType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.chat.ChatInput;
@@ -43,12 +45,14 @@ import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import me.mrCookieSlime.Slimefun.api.inventory.UniversalChestMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -64,6 +68,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock, RecipeDisplayItem {
 
@@ -75,6 +80,14 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
     private static final int[] OUTPUT_BORDER = {10, 11, 12, 13, 14, 19, 23, 28, 32, 37, 38, 39, 40, 41};
     private static final String DEFAULT_SCRIPT = "START-TURN_LEFT-REPEAT";
     private static final int MAX_SCRIPT_LENGTH = 54;
+
+    private static final NamespacedKey OWNER_KEY = new NamespacedKey(Slimefun.instance(), "android_owner");
+    private static final NamespacedKey UUID_KEY = new NamespacedKey(Slimefun.instance(), "android_uuid");
+    private static final NamespacedKey SCRIPT_KEY = new NamespacedKey(Slimefun.instance(), "android_script");
+    private static final NamespacedKey SCRIPT_INDEX_KEY = new NamespacedKey(Slimefun.instance(), "android_script_step");
+    private static final NamespacedKey FUEL_KEY = new NamespacedKey(Slimefun.instance(), "android_fuel");
+    private static final NamespacedKey ROTATION_KEY = new NamespacedKey(Slimefun.instance(), "android_rotation");
+    private static final NamespacedKey STATUS_KEY = new NamespacedKey(Slimefun.instance(), "android_status");
 
     protected final List<MachineFuel> fuelTypes = new ArrayList<>();
     protected final String texture;
@@ -110,19 +123,21 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
             }
 
             @Override
-            public void newInstance(BlockMenu menu, Block b) {
+            public void newInstance(UniversalChestMenu menu, Block b) {
                 menu.replaceExistingItem(
                         15, new CustomItemStack(HeadTexture.SCRIPT_START.getAsItemStack(), "&a启动/继续运行"));
                 menu.addMenuClickHandler(15, (p, slot, item, action) -> {
                     Slimefun.getLocalization().sendMessage(p, "android.started", true);
-                    StorageCacheUtils.setData(b.getLocation(), "paused", "false");
+                    PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, true);
+                    //StorageCacheUtils.setData(b.getLocation(), "paused", "false");
                     p.closeInventory();
                     return false;
                 });
 
                 menu.replaceExistingItem(17, new CustomItemStack(HeadTexture.SCRIPT_PAUSE.getAsItemStack(), "&4暂停运行"));
                 menu.addMenuClickHandler(17, (p, slot, item, action) -> {
-                    StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
+                    //StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     return false;
                 });
@@ -132,7 +147,8 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                         new CustomItemStack(
                                 HeadTexture.ENERGY_REGULATOR.getAsItemStack(), "&b内存核心", "", "&8\u21E8 &7单击打开脚本编辑器"));
                 menu.addMenuClickHandler(16, (p, slot, item, action) -> {
-                    StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
+                    //StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     openScriptEditor(p, b);
                     return false;
@@ -146,7 +162,8 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                                 "",
                                 Slimefun.getLocalization().getMessage("android.access-manager.subtitle")));
                 menu.addMenuClickHandler(25, (p, slot, item, action) -> {
-                    StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
+                    //StorageCacheUtils.setData(b.getLocation(), "paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     AndroidShareMenu.openShareMenu(p, b);
                     return false;
@@ -170,14 +187,17 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
             public void onPlayerPlace(BlockPlaceEvent e) {
                 Player p = e.getPlayer();
                 Block b = e.getBlock();
+                UUID uuid = UUID.randomUUID();
 
-                var blockData = StorageCacheUtils.getBlock(b.getLocation());
-                blockData.setData("owner", p.getUniqueId().toString());
-                blockData.setData("script", DEFAULT_SCRIPT);
-                blockData.setData("index", "0");
-                blockData.setData("fuel", "0");
-                blockData.setData("rotation", p.getFacing().getOppositeFace().toString());
-                blockData.setData("paused", "true");
+                // FIXME: create universal inv
+
+                PDCUtil.setValue(b, PDCUtil.uuid, OWNER_KEY, p.getUniqueId());
+                PDCUtil.setValue(b, PDCUtil.uuid, UUID_KEY, uuid);
+                PDCUtil.setValue(b, PersistentDataType.STRING, SCRIPT_KEY, DEFAULT_SCRIPT);
+                PDCUtil.setValue(b, PersistentDataType.SHORT, SCRIPT_INDEX_KEY, (short) 0);
+                PDCUtil.setValue(b, PersistentDataType.INTEGER, FUEL_KEY, 0);
+                PDCUtil.setValue(b, PersistentDataType.STRING, ROTATION_KEY, p.getFacing().getOppositeFace().toString());
+                PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, true);
 
                 b.setBlockData(Material.PLAYER_HEAD.createBlockData(data -> {
                     if (data instanceof Rotatable rotatable) {
@@ -205,6 +225,7 @@ public class ProgrammableAndroid extends SlimefunItem implements InventoryBlock,
                     return;
                 }
 
+                // FIXME: use universal inv
                 BlockMenu inv = blockData.getBlockMenu();
 
                 if (inv != null) {
