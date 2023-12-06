@@ -1,5 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.util;
 
+import com.google.common.base.Preconditions;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -52,16 +53,9 @@ public class StorageCacheUtils {
     @ParametersAreNonnullByDefault
     public static void setData(Location loc, String key, String val) {
         var block = getBlock(loc);
+        Preconditions.checkNotNull(block);
 
-        if (block == null) {
-            Slimefun.logger()
-                    .log(
-                            Level.WARNING,
-                            "The specifiy location {0} doesn't have block data!",
-                            LocationUtils.locationToString(loc));
-        } else {
-            block.setData(key, val);
-        }
+        block.setData(key, val);
     }
 
     @ParametersAreNonnullByDefault
