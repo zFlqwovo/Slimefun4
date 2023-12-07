@@ -2591,7 +2591,7 @@ public final class SlimefunItems {
             LoreBuilder.powerPerSecond(30));
     public static final SlimefunItemStack FREEZER_3 = new SlimefunItemStack(
             "FREEZER_3",
-            Material.LIGHT_GRAY_STAINED_GLASS,
+            Material.LIGHT_BLUE_STAINED_GLASS,
             "&b冰箱 &7(&eIII&7)",
             "",
             LoreBuilder.machine(MachineTier.END_GAME, MachineType.MACHINE),
