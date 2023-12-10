@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
+import me.mrCookieSlime.Slimefun.api.inventory.UniversalChestMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -537,6 +539,37 @@ public class BlockDataController extends ADataController {
         return new HashSet<>(loadedChunk.values());
     }
 
+    public UniversalChestMenu createUniversalInventory() {
+        // TODO: Fill code
+        return null;
+    }
+
+    @Nullable
+    public UniversalChestMenu getUniversalInventory(@Nonnull UUID universalID) {
+        // TODO: Fill code
+        return null;
+    }
+
+    public void saveUniversalInventory(@Nonnull UUID universalID, UniversalChestMenu menu) {
+        var newInv = menu.getContents();
+        List<Pair<ItemStack, Integer>> lastSave;
+        if (newInv == null) {
+            lastSave = invSnapshots.remove(universalID.toString());
+            if (lastSave == null) {
+                return;
+            }
+        } else {
+            lastSave = invSnapshots.put(universalID.toString(), InvStorageUtils.getInvSnapshot(newInv));
+        }
+
+        var changed = InvStorageUtils.getChangedSlots(lastSave, newInv);
+        if (changed.isEmpty()) {
+            return;
+        }
+
+        changed.forEach(slot -> scheduleDelayedUniversalInvUpdate(universalID, menu, slot));
+    }
+
     private void scheduleDelayedBlockInvUpdate(SlimefunBlockData blockData, int slot) {
         var scopeKey = new LocationKey(DataScope.NONE, blockData.getLocation());
         var reqKey = new RecordKey(DataScope.BLOCK_INVENTORY);
@@ -567,6 +600,38 @@ public class BlockDataController extends ADataController {
             scheduleWriteTask(scopeKey, reqKey, data, true);
         }
     }
+
+    private void scheduleDelayedUniversalInvUpdate(UUID uuid, UniversalChestMenu menu, int slot) {
+        var scopeKey = new UUIDKey(DataScope.NONE, uuid);
+        var reqKey = new RecordKey(DataScope.UNIVERSAL_INVENTORY);
+        reqKey.addCondition(FieldKey.UNIVERSAL_UUID, uuid.toString());
+        reqKey.addCondition(FieldKey.INVENTORY_SLOT, slot + "");
+        reqKey.addField(FieldKey.INVENTORY_ITEM);
+
+        if (enableDelayedSaving) {
+            scheduleDelayedUpdateTask(
+                new LinkedKey(scopeKey, reqKey),
+                () -> scheduleUniversalInvUpdate(
+                    scopeKey, reqKey, uuid, menu.getContents(), slot));
+        } else {
+            scheduleUniversalInvUpdate(scopeKey, reqKey, uuid, menu.getContents(), slot);
+        }
+    }
+
+    private void scheduleUniversalInvUpdate(ScopeKey scopeKey, RecordKey reqKey, UUID uuid, ItemStack[] inv, int slot) {
+        var item = inv != null && slot < inv.length ? inv[slot] : null;
+
+        if (item == null) {
+            scheduleDeleteTask(scopeKey, reqKey, true);
+        } else {
+            var data = new RecordSet();
+            data.put(FieldKey.UNIVERSAL_UUID, uuid.toString());
+            data.put(FieldKey.INVENTORY_SLOT, slot + "");
+            data.put(FieldKey.INVENTORY_ITEM, item);
+            scheduleWriteTask(scopeKey, reqKey, data, true);
+        }
+    }
+
 
     @Override
     public void shutdown() {

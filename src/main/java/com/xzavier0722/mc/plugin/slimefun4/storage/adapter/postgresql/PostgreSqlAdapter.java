@@ -14,6 +14,7 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_UNIVERSAL_UUID;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlCommonAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
@@ -41,6 +42,7 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
                 blockDataTable = SqlUtils.mapTable(DataScope.BLOCK_DATA, config.tablePrefix());
                 blockInvTable = SqlUtils.mapTable(DataScope.BLOCK_INVENTORY, config.tablePrefix());
                 chunkDataTable = SqlUtils.mapTable(DataScope.CHUNK_DATA, config.tablePrefix());
+                universalInventoryTable = SqlUtils.mapTable(DataScope.UNIVERSAL_INVENTORY, config.tablePrefix());
                 createBlockStorageTables();
             }
         }
@@ -136,6 +138,7 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
         createBlockDataTable();
         createBlockInvTable();
         createChunkDataTable();
+        createUniversalInventoryTable();
     }
 
     private void createProfileTable() {
@@ -327,5 +330,24 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
                 + FIELD_INVENTORY_SLOT
                 + ")"
                 + ");");
+    }
+
+    private void createUniversalInventoryTable() {
+        executeSql("CREATE TABLE IF NOT EXISTS "
+            + universalInventoryTable
+            + "("
+            + FIELD_UNIVERSAL_UUID
+            + " UUID NOT NULL, "
+            + FIELD_INVENTORY_SLOT
+            + " TINYINT UNSIGNED NOT NULL, "
+            + FIELD_INVENTORY_ITEM
+            + " TEXT NOT NULL,"
+            + "PRIMARY KEY ("
+            + FIELD_UNIVERSAL_UUID
+            + ", "
+            + FIELD_INVENTORY_SLOT
+            + ")"
+            + ");"
+        );
     }
 }
