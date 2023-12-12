@@ -1,23 +1,16 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.magical.talismans;
 
-import io.github.bakedlibs.dough.items.CustomItemStack;
-import io.github.bakedlibs.dough.items.ItemUtils;
-import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
-import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.api.researches.Research;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
-import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+
 import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -32,6 +25,18 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+
+import io.github.bakedlibs.dough.items.CustomItemStack;
+import io.github.bakedlibs.dough.items.ItemUtils;
+import io.github.thebusybiscuit.slimefun4.api.events.TalismanActivateEvent;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.api.researches.Research;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 
 public class Talisman extends SlimefunItem {
 
@@ -216,11 +221,15 @@ public class Talisman extends SlimefunItem {
                 return false;
             }
         } else {
-            ItemStack enderTalisman = talisman.getEnderVariant();
+            SlimefunItemStack enderTalismanItem = talisman.getEnderVariant();
+            if (enderTalismanItem == null) {
+                return false;
+            }
 
-            if (SlimefunUtils.containsSimilarItem(p.getEnderChest(), enderTalisman, true)) {
+            EnderTalisman enderTalisman = enderTalismanItem.getItem(EnderTalisman.class);
+            if (enderTalisman != null && SlimefunUtils.containsSimilarItem(p.getEnderChest(), enderTalismanItem, true)) {
                 if (talisman.canUse(p, true)) {
-                    activateTalisman(e, p, p.getEnderChest(), talisman, enderTalisman, sendMessage);
+                    activateTalisman(e, p, p.getEnderChest(), enderTalisman, enderTalismanItem, sendMessage);
                     return true;
                 } else {
                     return false;
@@ -234,12 +243,19 @@ public class Talisman extends SlimefunItem {
     @ParametersAreNonnullByDefault
     private static void activateTalisman(
             Event e, Player p, Inventory inv, Talisman talisman, ItemStack talismanItem, boolean sendMessage) {
-        consumeItem(inv, talisman, talismanItem);
-        applyTalismanEffects(p, talisman);
-        cancelEvent(e, talisman);
+        TalismanActivateEvent talismanEvent = new TalismanActivateEvent(p, talisman, talismanItem);
+        Bukkit.getPluginManager().callEvent(talismanEvent);
+        if (!talismanEvent.isCancelled()) {
+            if (!talismanEvent.preventsConsumption()) {
+                consumeItem(inv, talisman, talismanItem);
+            }
 
-        if (sendMessage) {
-            talisman.sendMessage(p);
+            applyTalismanEffects(p, talisman);
+            cancelEvent(e, talisman);
+
+            if (sendMessage) {
+                talisman.sendMessage(p);
+            }
         }
     }
 
