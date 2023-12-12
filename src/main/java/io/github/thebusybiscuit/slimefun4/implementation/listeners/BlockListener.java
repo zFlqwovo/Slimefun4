@@ -4,6 +4,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
+import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
 import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockBreakEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockPlaceEvent;
@@ -50,7 +51,9 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class BlockListener implements Listener {
 
-    private static final BlockFace[] CARDINAL_BLOCKFACES = new BlockFace[]{BlockFace.WEST, BlockFace.EAST, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.DOWN, BlockFace.UP};
+    private static final BlockFace[] CARDINAL_BLOCKFACES = new BlockFace[] {
+        BlockFace.WEST, BlockFace.EAST, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.DOWN, BlockFace.UP
+    };
 
     public BlockListener(@Nonnull Slimefun plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -176,18 +179,18 @@ public class BlockListener implements Listener {
                 e.setDropItems(false);
                 var type = block.getType();
                 StorageCacheUtils.executeAfterLoad(
-                    blockData,
-                    () -> {
-                        callBlockHandler(e, heldItem, drops);
-                        if (e.isCancelled()) {
-                            block.setType(type);
-                            blockData.setPendingRemove(false);
-                            return;
-                        }
-                        e.setDropItems(true);
-                        dropItems(e, drops);
-                    },
-                    true);
+                        blockData,
+                        () -> {
+                            callBlockHandler(e, heldItem, drops);
+                            if (e.isCancelled()) {
+                                block.setType(type);
+                                blockData.setPendingRemove(false);
+                                return;
+                            }
+                            e.setDropItems(true);
+                            dropItems(e, drops);
+                        },
+                        true);
                 return;
             }
 
