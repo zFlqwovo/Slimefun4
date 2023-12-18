@@ -2,7 +2,6 @@ package io.github.thebusybiscuit.slimefun4.implementation.items.magical.talisman
 
 import io.github.bakedlibs.dough.items.CustomItemStack;
 import io.github.bakedlibs.dough.items.ItemUtils;
-import io.github.thebusybiscuit.slimefun4.api.events.TalismanActivateEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
@@ -19,7 +18,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -218,16 +216,11 @@ public class Talisman extends SlimefunItem {
                 return false;
             }
         } else {
-            SlimefunItemStack enderTalismanItem = talisman.getEnderVariant();
-            if (enderTalismanItem == null) {
-                return false;
-            }
+            ItemStack enderTalisman = talisman.getEnderVariant();
 
-            EnderTalisman enderTalisman = enderTalismanItem.getItem(EnderTalisman.class);
-            if (enderTalisman != null
-                    && SlimefunUtils.containsSimilarItem(p.getEnderChest(), enderTalismanItem, true)) {
+            if (SlimefunUtils.containsSimilarItem(p.getEnderChest(), enderTalisman, true)) {
                 if (talisman.canUse(p, true)) {
-                    activateTalisman(e, p, p.getEnderChest(), enderTalisman, enderTalismanItem, sendMessage);
+                    activateTalisman(e, p, p.getEnderChest(), talisman, enderTalisman, sendMessage);
                     return true;
                 } else {
                     return false;
@@ -241,19 +234,12 @@ public class Talisman extends SlimefunItem {
     @ParametersAreNonnullByDefault
     private static void activateTalisman(
             Event e, Player p, Inventory inv, Talisman talisman, ItemStack talismanItem, boolean sendMessage) {
-        TalismanActivateEvent talismanEvent = new TalismanActivateEvent(p, talisman, talismanItem);
-        Bukkit.getPluginManager().callEvent(talismanEvent);
-        if (!talismanEvent.isCancelled()) {
-            if (!talismanEvent.preventsConsumption()) {
-                consumeItem(inv, talisman, talismanItem);
-            }
+        consumeItem(inv, talisman, talismanItem);
+        applyTalismanEffects(p, talisman);
+        cancelEvent(e, talisman);
 
-            applyTalismanEffects(p, talisman);
-            cancelEvent(e, talisman);
-
-            if (sendMessage) {
-                talisman.sendMessage(p);
-            }
+        if (sendMessage) {
+            talisman.sendMessage(p);
         }
     }
 
