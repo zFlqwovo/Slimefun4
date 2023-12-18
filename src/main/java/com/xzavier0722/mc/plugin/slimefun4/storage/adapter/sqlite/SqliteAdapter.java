@@ -315,21 +315,20 @@ public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
 
     private void createUniversalInventoryTable() {
         executeSql("CREATE TABLE IF NOT EXISTS "
-            + SqlUtils.mapTable(DataScope.UNIVERSAL_INVENTORY)
-            + "("
-            + FIELD_UNIVERSAL_UUID
-            + " CHAR(64) NOT NULL, "
-            + FIELD_INVENTORY_SLOT
-            + " TINYINT UNSIGNED NOT NULL, "
-            + FIELD_INVENTORY_ITEM
-            + " TEXT NOT NULL,"
-            + "PRIMARY KEY ("
-            + FIELD_UNIVERSAL_UUID
-            + ", "
-            + FIELD_INVENTORY_SLOT
-            + ")"
-            + ");"
-        );
+                + SqlUtils.mapTable(DataScope.UNIVERSAL_INVENTORY)
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + " CHAR(64) NOT NULL, "
+                + FIELD_INVENTORY_SLOT
+                + " TINYINT UNSIGNED NOT NULL, "
+                + FIELD_INVENTORY_ITEM
+                + " TEXT NOT NULL,"
+                + "PRIMARY KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ", "
+                + FIELD_INVENTORY_SLOT
+                + ")"
+                + ");");
     }
 
     public synchronized void executeSql(String sql) {

@@ -334,20 +334,19 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
 
     private void createUniversalInventoryTable() {
         executeSql("CREATE TABLE IF NOT EXISTS "
-            + universalInventoryTable
-            + "("
-            + FIELD_UNIVERSAL_UUID
-            + " UUID NOT NULL, "
-            + FIELD_INVENTORY_SLOT
-            + " TINYINT UNSIGNED NOT NULL, "
-            + FIELD_INVENTORY_ITEM
-            + " TEXT NOT NULL,"
-            + "PRIMARY KEY ("
-            + FIELD_UNIVERSAL_UUID
-            + ", "
-            + FIELD_INVENTORY_SLOT
-            + ")"
-            + ");"
-        );
+                + universalInventoryTable
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + " UUID NOT NULL, "
+                + FIELD_INVENTORY_SLOT
+                + " TINYINT UNSIGNED NOT NULL, "
+                + FIELD_INVENTORY_ITEM
+                + " TEXT NOT NULL,"
+                + "PRIMARY KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ", "
+                + FIELD_INVENTORY_SLOT
+                + ")"
+                + ");");
     }
 }

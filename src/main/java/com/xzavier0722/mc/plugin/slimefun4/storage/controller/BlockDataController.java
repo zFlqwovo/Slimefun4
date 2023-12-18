@@ -544,8 +544,7 @@ public class BlockDataController extends ADataController {
         return null;
     }
 
-    @Nullable
-    public UniversalChestMenu getUniversalInventory(@Nonnull UUID universalID) {
+    @Nullable public UniversalChestMenu getUniversalInventory(@Nonnull UUID universalID) {
         // TODO: Fill code
         return null;
     }
@@ -610,9 +609,8 @@ public class BlockDataController extends ADataController {
 
         if (enableDelayedSaving) {
             scheduleDelayedUpdateTask(
-                new LinkedKey(scopeKey, reqKey),
-                () -> scheduleUniversalInvUpdate(
-                    scopeKey, reqKey, uuid, menu.getContents(), slot));
+                    new LinkedKey(scopeKey, reqKey),
+                    () -> scheduleUniversalInvUpdate(scopeKey, reqKey, uuid, menu.getContents(), slot));
         } else {
             scheduleUniversalInvUpdate(scopeKey, reqKey, uuid, menu.getContents(), slot);
         }
@@ -631,7 +629,6 @@ public class BlockDataController extends ADataController {
             scheduleWriteTask(scopeKey, reqKey, data, true);
         }
     }
-
 
     @Override
     public void shutdown() {
