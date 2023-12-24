@@ -31,6 +31,17 @@ public class StorageCacheUtils {
     }
 
     @ParametersAreNonnullByDefault
+    public static boolean isBlock(Location l, String id) {
+        var blockData = getBlock(l);
+        return blockData != null && id.equals(blockData.getSfId());
+    }
+
+    @ParametersAreNonnullByDefault
+    public static boolean isBlock(Block block, String id) {
+        return isBlock(block.getLocation(), id);
+    }
+
+    @ParametersAreNonnullByDefault
     @Nullable public static SlimefunBlockData getBlock(Location l) {
         return Slimefun.getDatabaseManager().getBlockDataController().getBlockDataFromCache(l);
     }
@@ -70,10 +81,10 @@ public class StorageCacheUtils {
 
         if (block == null) {
             Slimefun.logger()
-                .log(
-                    Level.WARNING,
-                    "The specifiy location {0} doesn't have block data!",
-                    LocationUtils.locationToString(loc));
+                    .log(
+                            Level.WARNING,
+                      "The specifiy location {0} doesn't have block data!",
+                            LocationUtils.locationToString(loc));
         } else {
             block.setData(key, val);
         }
@@ -160,13 +171,13 @@ public class StorageCacheUtils {
         }
 
         Slimefun.getDatabaseManager()
-            .getBlockDataController()
-            .loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
-                @Override
-                public void onResult(SlimefunBlockData result) {
-                    loadingData.remove(blockData);
-                }
-            });
+                .getBlockDataController()
+                .loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
+                    @Override
+                    public void onResult(SlimefunBlockData result) {
+                        loadingData.remove(blockData);
+                    }
+                });
     }
 
     public static void executeAfterLoad(SlimefunBlockData data, Runnable execute, boolean runOnMainThread) {
