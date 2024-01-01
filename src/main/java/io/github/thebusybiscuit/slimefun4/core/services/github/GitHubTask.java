@@ -139,11 +139,13 @@ class GitHubTask implements Runnable {
         return 0;
     }
 
-    private @Nullable String pullTexture(@Nonnull Contributor contributor, @Nonnull Map<String, String> skins) throws InterruptedException, ExecutionException, TimeoutException {
+    private @Nullable String pullTexture(@Nonnull Contributor contributor, @Nonnull Map<String, String> skins)
+            throws InterruptedException, ExecutionException, TimeoutException {
         Optional<UUID> uuid = contributor.getUniqueId();
 
         if (!uuid.isPresent()) {
-            CompletableFuture<UUID> future = UUIDLookup.getUuidFromUsername(Slimefun.instance(), contributor.getMinecraftName());
+            CompletableFuture<UUID> future =
+                    UUIDLookup.getUuidFromUsername(Slimefun.instance(), contributor.getMinecraftName());
 
             // Fixes #3241 - Do not wait for more than 30 seconds
             uuid = Optional.ofNullable(future.get(30, TimeUnit.SECONDS));
@@ -159,5 +161,4 @@ class GitHubTask implements Runnable {
             return null;
         }
     }
-
 }
