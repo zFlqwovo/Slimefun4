@@ -279,7 +279,7 @@
 
         <!-- Shaded packages -->
         <dependency>
-            <groupId>com.github.StarWishsama.dough</groupId>
+            <groupId>com.github.starwishsama.dough</groupId>
             <artifactId>dough-api</artifactId>
             <version>20dcab228c</version>
             <scope>compile</scope>
