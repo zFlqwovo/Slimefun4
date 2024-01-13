@@ -671,4 +671,49 @@ public class BlockDataController extends ADataController {
                 })
                 : loadedChunk.get(LocationUtils.getChunkKey(chunk));
     }
+    public Set<Location> getAllBlockLocations(){
+        Set<Location> toReturn = new HashSet<>();
+        var key = new RecordKey(DataScope.BLOCK_RECORD);
+        key.addField(FieldKey.LOCATION);
+        key.addField(FieldKey.SLIMEFUN_ID);
+
+        getData(key).forEach(block -> {
+            var lKey = block.get(FieldKey.LOCATION);
+            Location location = LocationUtils.toLocation(lKey);
+            toReturn.add(location);
+        });
+        return toReturn;
+    }
+
+    public Set<Location> getAllBlockLocations(World world){
+        Set<Location> toReturn = new HashSet<>();
+        var key = new RecordKey(DataScope.BLOCK_RECORD);
+        key.addField(FieldKey.LOCATION);
+        key.addField(FieldKey.SLIMEFUN_ID);
+
+        getData(key).forEach(block -> {
+            var lKey = block.get(FieldKey.LOCATION);
+            Location location = LocationUtils.toLocation(lKey);
+            if(location.getWorld() == world) toReturn.add(location);
+        });
+        return toReturn;
+    }
+
+    public Set<Chunk> getAllChunks(World world){
+        Set<Chunk> toReturn = new HashSet<>();
+        var key = new RecordKey(DataScope.CHUNK_DATA);
+        key.addField(FieldKey.CHUNK);
+        key.addCondition(FieldKey.CHUNK, world.getName() + ";%");
+        getData(key).forEach(result ->{
+            toReturn.add(LocationUtils.toChunk(world, result.get(FieldKey.CHUNK)));
+        });
+        return toReturn;
+    }
+
+    public Set<SlimefunChunkData> getAllChunkDatas(World world){
+        Set<Chunk> chunks = getAllChunks(world);
+        Set<SlimefunChunkData> toReturn = new HashSet<>();
+        chunks.forEach(x -> toReturn.add(getChunkData(x)));
+        return toReturn;
+    }
 }
