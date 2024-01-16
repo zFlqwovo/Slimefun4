@@ -537,9 +537,56 @@ public class BlockDataController extends ADataController {
         return new HashSet<>(loadedChunk.values());
     }
 
-    public void clearWorldData(World world) {
-        // 1. remove cache
+    public void removeAllDataInWorld(World world) {
+        // 1. remove block cache
+        var loadedBlockData = new HashSet<SlimefunBlockData>();
+        for (var chunkData : getAllLoadedChunkData(world)) {
+            loadedBlockData.addAll(chunkData.getAllBlockData());
+            chunkData.removeAllCacheInternal();
+        }
 
+        // 2. remove ticker and delayed tasks
+        for (var blockData : loadedBlockData) {
+            if (Slimefun.getRegistry().getTickerBlocks().contains(blockData.getSfId())) {
+                Slimefun.getTickerTask().disableTicker(blockData.getLocation());
+            }
+
+            var scopeKey = new LocationKey(DataScope.NONE, blockData.getLocation());
+            removeDelayedBlockDataUpdates(scopeKey);
+            abortScopeTask(scopeKey);
+        }
+
+        // 3. remove from database
+        var prefix = world.getName() + ";";
+        var condition = prefix + "%";
+        var req = new RecordKey(DataScope.BLOCK_DATA);
+        req.addCondition(FieldKey.CHUNK, condition);
+        deleteData(req);
+
+        req = new RecordKey(DataScope.CHUNK_DATA);
+        req.addCondition(FieldKey.CHUNK, condition);
+        deleteData(req);
+
+        // 4. remove chunk cache
+        loadedChunk.entrySet().removeIf(entry -> entry.getKey().startsWith(prefix));
+    }
+
+    public void removeAllDataInWorldAsync(World world, Runnable onFinishedCallback) {
+        scheduleWriteTask(() -> {
+            removeAllDataInWorld(world);
+            onFinishedCallback.run();
+        });
+    }
+
+    public Set<SlimefunChunkData> getAllLoadedChunkData(World world) {
+        var prefix = world.getName() + ";";
+        var re = new HashSet<SlimefunChunkData>();
+        loadedChunk.forEach((k, v) -> {
+            if (k.startsWith(prefix)) {
+                re.add(v);
+            }
+        });
+        return re;
     }
 
     private void scheduleDelayedBlockInvUpdate(SlimefunBlockData blockData, int slot) {

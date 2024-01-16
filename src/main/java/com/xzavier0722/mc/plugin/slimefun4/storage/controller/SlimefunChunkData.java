@@ -94,6 +94,10 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
         return re;
     }
 
+    void removeAllCacheInternal() {
+        sfBlocks.clear();
+    }
+
     boolean hasBlockCache(String lKey) {
         return sfBlocks.containsKey(lKey);
     }
