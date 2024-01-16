@@ -18,6 +18,17 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
@@ -27,18 +38,6 @@ import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 public class BlockDataController extends ADataController {
 
@@ -185,6 +184,10 @@ public class BlockDataController extends ADataController {
             return;
         }
 
+        if (!removed.isDataLoaded()) {
+            return;
+        }
+
         var menu = removed.getBlockMenu();
         if (menu != null) {
             InventoryUtil.closeInventory(menu.toInventory());
@@ -278,7 +281,7 @@ public class BlockDataController extends ADataController {
 
         var hasTicker = false;
 
-        if (Slimefun.getRegistry().getTickerBlocks().contains(blockData.getSfId())) {
+        if (blockData.isDataLoaded() && Slimefun.getRegistry().getTickerBlocks().contains(blockData.getSfId())) {
             Slimefun.getTickerTask().disableTicker(blockData.getLocation());
             hasTicker = true;
         }
@@ -547,11 +550,14 @@ public class BlockDataController extends ADataController {
 
         // 2. remove ticker and delayed tasks
         for (var blockData : loadedBlockData) {
-            if (Slimefun.getRegistry().getTickerBlocks().contains(blockData.getSfId())) {
-                Slimefun.getTickerTask().disableTicker(blockData.getLocation());
+            var l = blockData.getLocation();
+            if (blockData.isDataLoaded()
+                    && Slimefun.getRegistry().getTickerBlocks().contains(blockData.getSfId())) {
+                Slimefun.getTickerTask().disableTicker(l);
             }
+            Slimefun.getNetworkManager().updateAllNetworks(l);
 
-            var scopeKey = new LocationKey(DataScope.NONE, blockData.getLocation());
+            var scopeKey = new LocationKey(DataScope.NONE, l);
             removeDelayedBlockDataUpdates(scopeKey);
             abortScopeTask(scopeKey);
         }
