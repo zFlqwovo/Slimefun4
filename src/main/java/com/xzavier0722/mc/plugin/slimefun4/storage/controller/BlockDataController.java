@@ -18,17 +18,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
@@ -38,6 +27,18 @@ import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class BlockDataController extends ADataController {
 
@@ -178,9 +179,8 @@ public class BlockDataController extends ADataController {
     public void removeBlock(Location l) {
         checkDestroy();
 
-        Slimefun.getNetworkManager().updateAllNetworks(l);
-
         var removed = getChunkDataCache(l.getChunk(), true).removeBlockData(l);
+        Slimefun.getNetworkManager().updateAllNetworks(l);
         if (removed == null) {
             return;
         }
@@ -373,12 +373,7 @@ public class BlockDataController extends ADataController {
             chunkData.addBlockCacheInternal(blockData, false);
 
             if (sfItem.loadDataByDefault()) {
-                scheduleReadTask(() -> {
-                    loadBlockData(blockData);
-                    if (sfItem.isTicking()) {
-                        Slimefun.getTickerTask().enableTicker(blockData.getLocation());
-                    }
-                });
+                scheduleReadTask(() -> loadBlockData(blockData));
             }
         });
         Bukkit.getPluginManager().callEvent(new SlimefunChunkDataLoadEvent(chunkData));
@@ -470,6 +465,11 @@ public class BlockDataController extends ADataController {
                     invSnapshots.put(blockData.getKey(), InvStorageUtils.getInvSnapshot(content));
                 }
             }
+
+            var sfItem = SlimefunItem.getById(blockData.getSfId());
+            if (sfItem != null && sfItem.isTicking()) {
+                Slimefun.getTickerTask().enableTicker(blockData.getLocation());
+            }
         } finally {
             lock.unlock(key);
         }
@@ -535,6 +535,11 @@ public class BlockDataController extends ADataController {
 
     public Set<SlimefunChunkData> getAllLoadedChunkData() {
         return new HashSet<>(loadedChunk.values());
+    }
+
+    public void clearWorldData(World world) {
+        // 1. remove cache
+
     }
 
     private void scheduleDelayedBlockInvUpdate(SlimefunBlockData blockData, int slot) {
