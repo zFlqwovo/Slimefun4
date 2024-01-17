@@ -320,7 +320,13 @@ public class ProfileDataController extends ADataController {
         if (removed != null) {
             removed.markInvalid();
         }
-        backpackCache.invalidate(pUuid);
+        scheduleWriteTask(() -> {
+            if (Bukkit.getOfflinePlayer(UUID.fromString(pUuid)).isOnline()) {
+                return;
+            }
+
+            backpackCache.invalidate(pUuid);
+        });
     }
 
     @Override
