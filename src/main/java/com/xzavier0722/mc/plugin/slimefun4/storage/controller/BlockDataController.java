@@ -585,12 +585,12 @@ public class BlockDataController extends ADataController {
         });
     }
 
-    public UniversalChestMenu createUniversalInventory() {
+    public UniversalChestMenu createUniversalInventory(@Nonnull UUID uuid) {
         // TODO: Fill code
         return null;
     }
 
-    @Nullable public UniversalChestMenu getUniversalInventory(@Nonnull UUID universalID) {
+    @Nullable public UniversalChestMenu getUniversalInventory(@Nonnull UUID uuid) {
         // TODO: Fill code
         return null;
     }

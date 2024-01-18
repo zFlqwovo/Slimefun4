@@ -7,9 +7,11 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import me.mrCookieSlime.Slimefun.api.inventory.UniversalChestMenu;
 import org.bukkit.Location;
 
 /**
@@ -75,6 +77,11 @@ public class StorageCacheUtils {
         }
 
         return blockData.getBlockMenu();
+    }
+
+    @ParametersAreNonnullByDefault
+    @Nullable public static UniversalChestMenu getUniversalMenu(UUID uuid) {
+        return Slimefun.getDatabaseManager().getBlockDataController().getUniversalInventory(uuid);
     }
 
     public static void requestLoad(SlimefunBlockData blockData) {

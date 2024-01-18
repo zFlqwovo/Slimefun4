@@ -2,6 +2,8 @@ package me.mrCookieSlime.Slimefun.api.inventory;
 
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -11,13 +13,12 @@ import org.bukkit.inventory.ItemStack;
 public class UniversalChestMenu extends DirtyChestMenu {
     private final UUID uuid;
 
-    public UniversalChestMenu(@Nonnull BlockMenuPreset preset, @Nonnull UUID uuid) {
+    public UniversalChestMenu(@Nonnull UniversalMenuPreset preset, @Nonnull UUID uuid) {
         super(preset);
-
         this.uuid = uuid;
     }
 
-    public UniversalChestMenu(BlockMenuPreset preset, @Nonnull UUID uuid, ItemStack[] contents) {
+    public UniversalChestMenu(@Nonnull UniversalMenuPreset preset, @Nonnull UUID uuid, ItemStack[] contents) {
         super(preset);
         this.uuid = uuid;
 
@@ -30,6 +31,25 @@ public class UniversalChestMenu extends DirtyChestMenu {
         }
 
         preset.clone(this);
-        this.getContents();
+    }
+
+    /**
+     * This method drops the contents of this {@link BlockMenu} on the ground at the given
+     * {@link Location}.
+     *
+     * @param l
+     *            Where to drop these items
+     * @param slots
+     *            The slots of items that should be dropped
+     */
+    public void dropItems(Location l, int... slots) {
+        for (int slot : slots) {
+            ItemStack item = getItemInSlot(slot);
+
+            if (item != null) {
+                l.getWorld().dropItemNaturally(l, item);
+                replaceExistingItem(slot, null);
+            }
+        }
     }
 }
