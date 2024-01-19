@@ -550,16 +550,6 @@ public class BlockDataController extends ADataController {
         deleteChunkAndBlockDataDirectly(cKey);
     }
 
-    /**
-     * 移除指定数据
-     */
-    public void removeDataInChunk(Chunk chunk, String key) {
-        var cKey = LocationUtils.getChunkKey(chunk);
-        var cache = loadedChunk.remove(cKey);
-
-        deleteChunkDataDirectly(cKey, key);
-    }
-
     public void removeAllDataInChunkAsync(Chunk chunk, Runnable onFinishedCallback) {
         scheduleWriteTask(() -> {
             removeAllDataInChunk(chunk);
@@ -764,13 +754,6 @@ public class BlockDataController extends ADataController {
         deleteData(req);
     }
 
-    private void deleteChunkDataDirectly(String cKey, String key) {
-        var req = new RecordKey(DataScope.CHUNK_DATA);
-        req.addCondition(FieldKey.CHUNK, cKey);
-        req.addCondition(FieldKey.DATA_KEY, key);
-        deleteData(req);
-    }
-
     private void clearBlockCacheAndTasks(SlimefunBlockData blockData) {
         var l = blockData.getLocation();
         if (blockData.isDataLoaded() && Slimefun.getRegistry().getTickerBlocks().contains(blockData.getSfId())) {
@@ -781,50 +764,5 @@ public class BlockDataController extends ADataController {
         var scopeKey = new LocationKey(DataScope.NONE, l);
         removeDelayedBlockDataUpdates(scopeKey);
         abortScopeTask(scopeKey);
-    }
-    public Set<Location> getAllBlockLocations(){
-        Set<Location> toReturn = new HashSet<>();
-        var key = new RecordKey(DataScope.BLOCK_RECORD);
-        key.addField(FieldKey.LOCATION);
-        key.addField(FieldKey.SLIMEFUN_ID);
-
-        getData(key).forEach(block -> {
-            var lKey = block.get(FieldKey.LOCATION);
-            Location location = LocationUtils.toLocation(lKey);
-            toReturn.add(location);
-        });
-        return toReturn;
-    }
-
-    public Set<Location> getAllBlockLocations(World world){
-        Set<Location> toReturn = new HashSet<>();
-        var key = new RecordKey(DataScope.BLOCK_RECORD);
-        key.addField(FieldKey.LOCATION);
-        key.addField(FieldKey.SLIMEFUN_ID);
-
-        getData(key).forEach(block -> {
-            var lKey = block.get(FieldKey.LOCATION);
-            Location location = LocationUtils.toLocation(lKey);
-            if(location.getWorld() == world) toReturn.add(location);
-        });
-        return toReturn;
-    }
-
-    public Set<Chunk> getAllChunks(World world){
-        Set<Chunk> toReturn = new HashSet<>();
-        var key = new RecordKey(DataScope.CHUNK_DATA);
-        key.addField(FieldKey.CHUNK);
-        key.addCondition(FieldKey.CHUNK, world.getName() + ";%");
-        getData(key).forEach(result ->{
-            toReturn.add(LocationUtils.toChunk(world, result.get(FieldKey.CHUNK)));
-        });
-        return toReturn;
-    }
-
-    public Set<SlimefunChunkData> getAllChunkDatas(World world){
-        Set<Chunk> chunks = getAllChunks(world);
-        Set<SlimefunChunkData> toReturn = new HashSet<>();
-        chunks.forEach(x -> toReturn.add(getChunkData(x)));
-        return toReturn;
     }
 }
