@@ -82,8 +82,7 @@ public class ClearDataCommand extends SubCommand {
                         }
                     }
                 }
-            }
-            else if (args.length == 3){
+            } else if (args.length == 3) {
                 Slimefun.getLocalization().sendMessage(sender, "commands.cleardata.confirm", true);
                 return;
             }
