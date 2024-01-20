@@ -29,6 +29,8 @@ public class ClearDataCommand extends SubCommand {
                 List<World> worlds = new ArrayList<>();
                 List<String> availableClearTypes = List.of("block", "oil");
                 List<String> clearTypes = new ArrayList<>();
+                String block = Slimefun.getLocalization().getMessage("commands.cleardata.block");
+                String oil = Slimefun.getLocalization().getMessage("commands.cleardata.oil");
                 SlimefunDatabaseManager database = Slimefun.getDatabaseManager();
                 BlockDataController controller = database.getBlockDataController();
                 if (arg1.equals("*")) {
@@ -36,7 +38,7 @@ public class ClearDataCommand extends SubCommand {
                 } else {
                     World toAdd = Bukkit.getWorld(arg1);
                     if (toAdd == null) {
-                        sender.sendMessage(ChatColor.RED + "未找到世界", arg1);
+                        Slimefun.getLocalization().sendMessage(sender, "commands.cleardata.worldNotFound", true);
                         return;
                     }
                 }
@@ -52,23 +54,31 @@ public class ClearDataCommand extends SubCommand {
                         if (cleartype.equals("block")) {
                             controller.removeAllDataInWorldAsync(
                                     world,
-                                    () -> Slimefun.runSync(() -> sender.sendMessage(ChatColor.GREEN + "已清除"
-                                            + ChatColor.YELLOW + world.getName() + ChatColor.GREEN + "的方块数据")));
+                                    () -> Slimefun.runSync(() -> Slimefun.getLocalization()
+                                            .sendMessage(
+                                                    sender,
+                                                    "commands.cleardata.success",
+                                                    true,
+                                                    msg -> String.format(msg, world.getName(), block))));
                         } else if (cleartype.equals("oil")) {
-                            GEOResource oil = null;
+                            GEOResource oilresource = null;
                             for (GEOResource resource :
                                     Slimefun.getRegistry().getGEOResources().values()) {
                                 if (resource.getKey()
                                         .toString()
                                         .equals(new NamespacedKey(Slimefun.instance(), "oil").toString())) {
-                                    oil = resource;
+                                    oilresource = resource;
                                 }
                             }
                             controller.removeDataInWorldAsync(
                                     world,
-                                    oil.getKey().toString().replace(":", "-"),
-                                    () -> Slimefun.runSync(() -> sender.sendMessage(ChatColor.GREEN + "已清除"
-                                            + ChatColor.YELLOW + world.getName() + ChatColor.GREEN + "的石油数据")));
+                                    oilresource.getKey().toString().replace(":", "-"),
+                                    () -> Slimefun.runSync(() -> Slimefun.getLocalization()
+                                            .sendMessage(
+                                                    sender,
+                                                    "commands.cleardata.success",
+                                                    true,
+                                                    msg -> String.format(msg, world.getName(), oil))));
                         }
                     }
                 }
