@@ -93,4 +93,9 @@ public class ClearDataCommand extends SubCommand {
             Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
         }
     }
+    @Nonnull
+    @Override
+    public String getDescription(){
+        return "commands.cleardata.description";
+    }
 }
