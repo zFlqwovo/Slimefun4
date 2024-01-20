@@ -59,7 +59,7 @@ public class ClearDataCommand extends SubCommand {
                                                     sender,
                                                     "commands.cleardata.success",
                                                     true,
-                                                    msg -> String.format(msg, world.getName(), block))));
+                                                    msg -> msg.replace("{0}", world.getName()).replace("{1}", block))));
                         } else if (cleartype.equals("oil")) {
                             GEOResource oilresource = null;
                             for (GEOResource resource :
@@ -78,7 +78,7 @@ public class ClearDataCommand extends SubCommand {
                                                     sender,
                                                     "commands.cleardata.success",
                                                     true,
-                                                    msg -> String.format(msg, world.getName(), oil))));
+                                                    msg -> msg.replace("{0}", world.getName()).replace("{1}", oil))));
                         }
                     }
                 }
