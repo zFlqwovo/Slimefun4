@@ -41,8 +41,8 @@ class SlimefunTabCompleter implements TabCompleter {
                         .collect(Collectors.toList());
                 return createReturnList(list, args[1]);
             } else if (args[0].equalsIgnoreCase("cleardata")) {
-                List<String> list =
-                    new ArrayList<>(Bukkit.getWorlds().stream().map(WorldInfo::getName).toList());
+                List<String> list = new ArrayList<>(
+                        Bukkit.getWorlds().stream().map(WorldInfo::getName).toList());
                 list.add("*");
                 return createReturnList(list, args[1]);
             }
