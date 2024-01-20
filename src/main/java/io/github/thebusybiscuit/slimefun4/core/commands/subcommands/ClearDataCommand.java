@@ -23,7 +23,7 @@ public class ClearDataCommand extends SubCommand {
     @Override
     public void onExecute(@Nonnull CommandSender sender, @Nonnull String[] args) {
         if (sender.hasPermission("slimefun.command.cleardata") || sender instanceof ConsoleCommandSender) {
-            if (args.length == 3) {
+            if (args.length == 4 && args[3].equalsIgnoreCase("confirm")) {
                 String arg1 = args[1];
                 String arg2 = args[2];
                 List<World> worlds = new ArrayList<>();
@@ -83,6 +83,10 @@ public class ClearDataCommand extends SubCommand {
                     }
                 }
             }
+            else if (args.length == 3){
+                Slimefun.getLocalization().sendMessage(sender, "commands.cleardata.confirm", true);
+                return;
+            }
             Slimefun.getLocalization()
                     .sendMessage(
                             sender,
@@ -93,9 +97,10 @@ public class ClearDataCommand extends SubCommand {
             Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
         }
     }
+
     @Nonnull
     @Override
-    public String getDescription(){
+    public String getDescription() {
         return "commands.cleardata.description";
     }
 }
