@@ -51,9 +51,9 @@ public class LegacyStorage implements Storage {
                     items.put(i, playerFile.getItem("backpacks." + key + ".contents." + i));
                 }
 
-                PlayerBackpack backpack = PlayerBackpack.load(uuid, id, size, items);
+                //PlayerBackpack backpack = PlayerBackpack.load(uuid, id, size, items);
 
-                backpacks.put(id, backpack);
+                // backpacks.put(id, backpack);
             } catch (Exception x) {
                 Slimefun.logger().log(Level.WARNING, x, () -> "Could not load Backpack \"" + key + "\" for Player \"" + uuid + '"');
             }

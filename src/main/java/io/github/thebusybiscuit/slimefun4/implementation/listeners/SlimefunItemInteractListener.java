@@ -54,13 +54,6 @@ public class SlimefunItemInteractListener implements Listener {
                 return;
             }
 
-            // Fixes #4087 - Prevents players from interacting with a block that is about to be deleted
-            // We especially don't want to open inventories as that can cause duplication
-            if (e.getClickedBlock() != null && Slimefun.getTickerTask().isDeletedSoon(e.getClickedBlock().getLocation())) {
-                e.setCancelled(true);
-                return;
-            }
-
             // Fire our custom Event
             PlayerRightClickEvent event = new PlayerRightClickEvent(e);
             Bukkit.getPluginManager().callEvent(event);
@@ -122,7 +115,7 @@ public class SlimefunItemInteractListener implements Listener {
             }
 
             boolean interactable =
-                    sfItem.callItemHandler(BlockUseHandler.class, handler -> handler.onRightClick(event));
+                sfItem.callItemHandler(BlockUseHandler.class, handler -> handler.onRightClick(event));
 
             if (!interactable) {
                 Player p = event.getPlayer();
@@ -152,22 +145,22 @@ public class SlimefunItemInteractListener implements Listener {
                     openMenu(blockData.getBlockMenu(), clickedBlock, p);
                 } else {
                     Slimefun.getDatabaseManager()
-                            .getBlockDataController()
-                            .loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
-                                @Override
-                                public boolean runOnMainThread() {
-                                    return true;
+                        .getBlockDataController()
+                        .loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
+                            @Override
+                            public boolean runOnMainThread() {
+                                return true;
+                            }
+
+                            @Override
+                            public void onResult(SlimefunBlockData result) {
+                                if (!p.isOnline()) {
+                                    return;
                                 }
 
-                                @Override
-                                public void onResult(SlimefunBlockData result) {
-                                    if (!p.isOnline()) {
-                                        return;
-                                    }
-
-                                    openMenu(result.getBlockMenu(), clickedBlock, p);
-                                }
-                            });
+                                openMenu(result.getBlockMenu(), clickedBlock, p);
+                            }
+                        });
                 }
             }
         } catch (Exception | LinkageError x) {

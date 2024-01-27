@@ -281,7 +281,7 @@
         <dependency>
             <groupId>com.github.starwishsama.dough</groupId>
             <artifactId>dough-api</artifactId>
-            <version>20dcab228c</version>
+            <version>f266e39d48</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -445,8 +445,15 @@
         <dependency>
             <groupId>com.mojang</groupId>
             <artifactId>authlib</artifactId>
-            <version>1.5.25</version>
+            <version>6.0.52</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <!-- We don't need any of the dependencies -->
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- TODO: Remove this dependency -->
