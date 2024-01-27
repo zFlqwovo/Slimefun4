@@ -52,6 +52,8 @@ public final class PostSetup {
             }
         }
 
+        Bukkit.getPluginManager().callEvent(new SlimefunItemRegistryFinalizedEvent());
+
         loadOreGrinderRecipes();
         loadSmelteryRecipes();
 
