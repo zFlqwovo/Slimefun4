@@ -9,12 +9,12 @@ import org.bukkit.Bukkit;
 
 class EnvironmentChecker {
     private static final List<String> UNSUPPORTED_PLUGINS =
-            List.of("BedrockTechnology", "SlimefunFix", "SlimefunBugFixer", "Slimefunbookfix", "MiraiMC");
+        List.of("BedrockTechnology", "SlimefunFix", "SlimefunBugFixer", "Slimefunbookfix", "MiraiMC");
 
     static boolean checkIncompatiblePlugins(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         List<String> plugins = UNSUPPORTED_PLUGINS.stream()
-                .filter(name -> Bukkit.getServer().getPluginManager().isPluginEnabled(name))
-                .toList();
+            .filter(name -> Bukkit.getServer().getPluginManager().isPluginEnabled(name))
+            .toList();
 
         if (plugins.isEmpty()) {
             return false;
@@ -28,7 +28,6 @@ class EnvironmentChecker {
         logger.log(Level.WARNING, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         logger.log(Level.WARNING, "");
         printBorder(logger);
-        Bukkit.getPluginManager().disablePlugin(sf);
 
         return true;
     }
@@ -46,25 +45,29 @@ class EnvironmentChecker {
             logger.log(Level.WARNING, "");
             printBorder(logger);
 
-            Bukkit.getPluginManager().disablePlugin(sf);
-
             return true;
         } catch (ClassNotFoundException ignored) {
-            return false;
+            if (Bukkit.getPluginCommand("mohist") != null) {
+                return true;
+            }
+
+            var serverVer = Bukkit.getVersion().toLowerCase();
+
+            return serverVer.contains("arclight") || serverVer.contains("mohist");
         }
     }
 
     static void scheduleSlimeGlueCheck(@Nonnull Slimefun sf, @Nonnull Logger logger) {
         Bukkit.getScheduler()
-                .runTaskLater(
-                        sf,
-                        () -> {
-                            if (Bukkit.getPluginManager().getPlugin("SlimeGlue") == null) {
-                                logger.log(Level.WARNING, "检测到没有安装 SlimeGlue (粘液胶), 你将缺失对一些插件的额外保护检查!");
-                                logger.log(Level.WARNING, "下载: https://github.com/Xzavier0722/SlimeGlue");
-                            }
-                        },
-                        300); // 15s
+            .runTaskLater(
+                sf,
+                () -> {
+                    if (Bukkit.getPluginManager().getPlugin("SlimeGlue") == null) {
+                        logger.log(Level.WARNING, "检测到没有安装 SlimeGlue (粘液胶), 你将缺失对一些插件的额外保护检查!");
+                        logger.log(Level.WARNING, "下载: https://github.com/Xzavier0722/SlimeGlue");
+                    }
+                },
+                300); // 15s
     }
 
     private static void printBorder(@Nonnull Logger logger) {
