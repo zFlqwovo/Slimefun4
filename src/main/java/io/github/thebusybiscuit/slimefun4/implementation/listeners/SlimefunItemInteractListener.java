@@ -56,7 +56,10 @@ public class SlimefunItemInteractListener implements Listener {
 
             // Fixes #4087 - Prevents players from interacting with a block that is about to be deleted
             // We especially don't want to open inventories as that can cause duplication
-            if (e.getClickedBlock() != null && StorageCacheUtils.hasBlock(e.getClickedBlock().getLocation()) && StorageCacheUtils.getBlock(e.getClickedBlock().getLocation()).isPendingRemove()) {
+            if (e.getClickedBlock() != null
+                    && StorageCacheUtils.hasBlock(e.getClickedBlock().getLocation())
+                    && StorageCacheUtils.getBlock(e.getClickedBlock().getLocation())
+                            .isPendingRemove()) {
                 e.setCancelled(true);
                 return;
             }
@@ -122,7 +125,7 @@ public class SlimefunItemInteractListener implements Listener {
             }
 
             boolean interactable =
-                sfItem.callItemHandler(BlockUseHandler.class, handler -> handler.onRightClick(event));
+                    sfItem.callItemHandler(BlockUseHandler.class, handler -> handler.onRightClick(event));
 
             if (!interactable) {
                 Player p = event.getPlayer();
@@ -152,22 +155,22 @@ public class SlimefunItemInteractListener implements Listener {
                     openMenu(blockData.getBlockMenu(), clickedBlock, p);
                 } else {
                     Slimefun.getDatabaseManager()
-                        .getBlockDataController()
-                        .loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
-                            @Override
-                            public boolean runOnMainThread() {
-                                return true;
-                            }
-
-                            @Override
-                            public void onResult(SlimefunBlockData result) {
-                                if (!p.isOnline()) {
-                                    return;
+                            .getBlockDataController()
+                            .loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
+                                @Override
+                                public boolean runOnMainThread() {
+                                    return true;
                                 }
 
-                                openMenu(result.getBlockMenu(), clickedBlock, p);
-                            }
-                        });
+                                @Override
+                                public void onResult(SlimefunBlockData result) {
+                                    if (!p.isOnline()) {
+                                        return;
+                                    }
+
+                                    openMenu(result.getBlockMenu(), clickedBlock, p);
+                                }
+                            });
                 }
             }
         } catch (Exception | LinkageError x) {
