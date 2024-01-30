@@ -162,25 +162,7 @@ public class EnergyNet extends Network implements HologramOwner {
 
                 var data = StorageCacheUtils.getBlock(loc);
                 if (data == null || data.isPendingRemove()) {
-                    markDirty(loc);
                     continue;
-                }
-
-                EnergyNetComponent component = entry.getValue();
-                if (!((SlimefunItem) component).getId().equals(data.getSfId())) {
-                    var newItem = SlimefunItem.getById(data.getSfId());
-                    if (!(newItem instanceof EnergyNetComponent newComponent)) {
-                        markDirty(loc);
-                        continue;
-                    }
-
-                    if (newComponent.getEnergyComponentType() == EnergyNetComponentType.CONSUMER) {
-                        consumers.put(loc, newComponent);
-                        component = newComponent;
-                    } else {
-                        markDirty(loc);
-                        continue;
-                    }
                 }
 
                 if (!data.isDataLoaded()) {
@@ -188,6 +170,7 @@ public class EnergyNet extends Network implements HologramOwner {
                     continue;
                 }
 
+                EnergyNetComponent component = entry.getValue();
                 int capacity = component.getCapacity();
                 int charge = component.getCharge(loc);
 
@@ -279,19 +262,7 @@ public class EnergyNet extends Network implements HologramOwner {
             try {
                 var data = StorageCacheUtils.getBlock(loc);
                 if (data == null || data.isPendingRemove()) {
-                    markDirty(loc);
                     continue;
-                }
-
-                if (!item.getId().equals(data.getSfId())) {
-                    var newItem = SlimefunItem.getById(data.getSfId());
-                    if (newItem instanceof EnergyNetProvider newProvider) {
-                        generators.put(loc, newProvider);
-                        provider = newProvider;
-                    } else {
-                        markDirty(loc);
-                        continue;
-                    }
                 }
 
                 if (!data.isDataLoaded()) {
