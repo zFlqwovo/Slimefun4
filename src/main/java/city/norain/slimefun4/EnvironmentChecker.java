@@ -24,7 +24,11 @@ class EnvironmentChecker {
         logger.log(Level.WARNING, "");
         logger.log(Level.WARNING, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         logger.log(Level.WARNING, "检测到不兼容的插件, 已自动禁用 Slimefun!");
-        logger.log(Level.WARNING, "插件列表: ", String.join(", ", plugins));
+        logger.log(Level.WARNING, "不兼容插件列表: ", String.join(", ", plugins));
+        logger.log(Level.WARNING, "这些插件出现在这里是因为它们已不兼容现有");
+        logger.log(Level.WARNING, "Slimefun 版本或是与 Slimefun 冲突.");
+        logger.log(Level.WARNING, "如果你觉得这些插件能够与 Slimefun 并存,");
+        logger.log(Level.WARNING, "请联系我们修改.");
         logger.log(Level.WARNING, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         logger.log(Level.WARNING, "");
         printBorder(logger);
@@ -32,20 +36,10 @@ class EnvironmentChecker {
         return true;
     }
 
-    static boolean checkHybridServer(@Nonnull Logger logger) {
+    static boolean checkHybridServer() {
         try {
             Class.forName("cpw.mods.modlauncher.Launcher");
             Class.forName("net.minecraftforge.server.console.TerminalHandler");
-
-            printBorder(logger);
-            logger.log(Level.WARNING, "");
-            logger.log(Level.WARNING, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            logger.log(Level.WARNING, "检测到正在使用混合端, Slimefun 将会被禁用!");
-            logger.log(Level.WARNING, "混合端已被多个用户报告有使用问题, ");
-            logger.log(Level.WARNING, "强制绕过检测将不受任何反馈支持. ");
-            logger.log(Level.WARNING, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            logger.log(Level.WARNING, "");
-            printBorder(logger);
 
             return true;
         } catch (ClassNotFoundException ignored) {
