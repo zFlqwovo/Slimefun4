@@ -2,15 +2,19 @@ package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.bakedlibs.dough.skins.PlayerHead;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.api.network.Network;
 import io.github.thebusybiscuit.slimefun4.core.attributes.EnergyNetComponent;
 import io.github.thebusybiscuit.slimefun4.core.attributes.EnergyNetProvider;
+import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNet;
 import io.github.thebusybiscuit.slimefun4.core.services.sounds.SoundEffect;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.implementation.items.electric.EnergyRegulator;
 import io.github.thebusybiscuit.slimefun4.utils.HeadTexture;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
@@ -19,6 +23,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import net.milkbowl.vault.chat.Chat;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -206,6 +211,19 @@ public class DebugFishListener implements Listener {
                     "  &dTotal Timings: &e" + Slimefun.getProfiler().getTime(item)));
             p.sendMessage(ChatColors.color(
                     "  &dChunk Timings: &e" + Slimefun.getProfiler().getTime(b.getChunk())));
+        }
+
+        if (item instanceof EnergyRegulator) {
+            p.sendMessage(ChatColors.color("&dEnergy Regulator"));
+            EnergyNet network = EnergyNet.getNetworkFromLocationOrCreate(b.getLocation());
+            p.sendMessage(ChatColors.color("&dNetwork range: " + network.getRange()));
+            p.sendMessage(ChatColors.color("&dNetwork components:"));
+            p.sendMessage(ChatColors.color("  &d- Network capacitors:"));
+            network.getCapacitors().forEach((loc, component) -> p.sendMessage(ChatColors.color("&d " + component.getId() + " - " + LocationUtils.locationToString(loc))));
+            p.sendMessage(ChatColors.color("  &d- Network consumers:"));
+            network.getConsumers().forEach((loc, component) -> p.sendMessage(ChatColors.color("&d " + component.getId() + " - " + LocationUtils.locationToString(loc))));
+            p.sendMessage(ChatColors.color("  &d- Network generators:"));
+            network.getGenerators().forEach((loc, component) -> p.sendMessage(ChatColors.color("&d " + component.getId() + " - " + LocationUtils.locationToString(loc))));
         }
 
         if (item instanceof EnergyNetComponent component) {
