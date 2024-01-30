@@ -166,12 +166,22 @@ public class EnergyNet extends Network implements HologramOwner {
                     continue;
                 }
 
+                EnergyNetComponent component = entry.getValue();
+                if (!((SlimefunItem) component).getId().equals(data.getSfId())) {
+                    var newItem = SlimefunItem.getById(data.getSfId());
+                    if (!(newItem instanceof EnergyNetComponent newComponent)
+                            || newComponent.getEnergyComponentType() != EnergyNetComponentType.CONSUMER) {
+                        continue;
+                    }
+                    consumers.put(loc, newComponent);
+                    component = newComponent;
+                }
+
                 if (!data.isDataLoaded()) {
                     StorageCacheUtils.requestLoad(data);
                     continue;
                 }
 
-                EnergyNetComponent component = entry.getValue();
                 int capacity = component.getCapacity();
                 int charge = component.getCharge(loc);
 
@@ -264,6 +274,15 @@ public class EnergyNet extends Network implements HologramOwner {
                 var data = StorageCacheUtils.getBlock(loc);
                 if (data == null || data.isPendingRemove()) {
                     continue;
+                }
+
+                if (!item.getId().equals(data.getSfId())) {
+                    var newItem = SlimefunItem.getById(data.getSfId());
+                    if (!(newItem instanceof EnergyNetProvider newProvider)) {
+                        continue;
+                    }
+                    generators.put(loc, newProvider);
+                    provider = newProvider;
                 }
 
                 if (!data.isDataLoaded()) {
