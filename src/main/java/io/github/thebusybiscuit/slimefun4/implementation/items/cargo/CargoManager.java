@@ -48,7 +48,7 @@ public class CargoManager extends SlimefunItem implements HologramOwner {
 
                     @Override
                     public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
-                        CargoNet.getNetworkFromLocationOrCreate(b.getLocation()).tick(b);
+                        CargoNet.getNetworkFromLocationOrCreate(b.getLocation()).tick(b, data);
                     }
 
                     @Override

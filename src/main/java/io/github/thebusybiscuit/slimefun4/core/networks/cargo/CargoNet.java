@@ -1,5 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.core.networks.cargo;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import com.xzavier0722.mc.plugin.slimefuncomplib.event.cargo.CargoTickEvent;
 import io.github.bakedlibs.dough.common.CommonPatterns;
@@ -120,18 +121,18 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
         }
     }
 
-    public void tick(@Nonnull Block b) {
+    public void tick(@Nonnull Block b, SlimefunBlockData blockData) {
         if (!regulator.equals(b.getLocation())) {
-            updateHologram(b, "&4发现附近有多个货运网络调节机");
+            updateHologram(b, "&4发现附近有多个货运网络调节机", blockData::isPendingRemove);
             return;
         }
 
         super.tick();
 
         if (connectorNodes.isEmpty() && terminusNodes.isEmpty()) {
-            updateHologram(b, "&c找不到附近的货运网络节点");
+            updateHologram(b, "&c找不到附近的货运网络节点", blockData::isPendingRemove);
         } else {
-            updateHologram(b, "&7状态: &a&l已连接");
+            updateHologram(b, "&7状态: &a&l已连接", blockData::isPendingRemove);
 
             // Skip ticking if the threshold is not reached. The delay is not same as minecraft tick,
             // but it's based on 'custom-ticker-delay' config.
@@ -151,6 +152,9 @@ public class CargoNet extends AbstractItemNetwork implements HologramOwner {
             }
 
             Slimefun.runSync(() -> {
+                if (blockData.isPendingRemove()) {
+                    return;
+                }
                 var event = new CargoTickEvent(inputs, outputs);
                 Bukkit.getPluginManager().callEvent(event);
                 event.getHologramMsg().ifPresent(msg -> updateHologram(b, msg));
