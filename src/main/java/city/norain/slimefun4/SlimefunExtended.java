@@ -7,25 +7,18 @@ import javax.annotation.Nonnull;
 import lombok.Getter;
 
 public final class SlimefunExtended {
-    @Getter
-    private static Logger logger = null;
-
     private static SlimefunMigrateListener migrateListener = new SlimefunMigrateListener();
 
     public static boolean checkEnvironment(@Nonnull Slimefun sf) {
-        logger = sf.getLogger();
-
-        if (EnvironmentChecker.checkHybridServer(sf, logger)) {
+        if (EnvironmentChecker.checkHybridServer(sf.getLogger())) {
             return false;
         }
 
-        return !EnvironmentChecker.checkIncompatiblePlugins(sf, logger);
+        return !EnvironmentChecker.checkIncompatiblePlugins(sf.getLogger());
     }
 
     public static void register(@Nonnull Slimefun sf) {
-        logger = sf.getLogger();
-
-        EnvironmentChecker.scheduleSlimeGlueCheck(sf, logger);
+        EnvironmentChecker.scheduleSlimeGlueCheck(sf);
 
         VaultIntegration.register(sf);
 
@@ -33,7 +26,6 @@ public final class SlimefunExtended {
     }
 
     public static void shutdown() {
-        logger = null;
         migrateListener = null;
 
         VaultIntegration.cleanup();

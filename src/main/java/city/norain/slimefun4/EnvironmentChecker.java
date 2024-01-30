@@ -11,7 +11,7 @@ class EnvironmentChecker {
     private static final List<String> UNSUPPORTED_PLUGINS =
         List.of("BedrockTechnology", "SlimefunFix", "SlimefunBugFixer", "Slimefunbookfix", "MiraiMC");
 
-    static boolean checkIncompatiblePlugins(@Nonnull Slimefun sf, @Nonnull Logger logger) {
+    static boolean checkIncompatiblePlugins(@Nonnull Logger logger) {
         List<String> plugins = UNSUPPORTED_PLUGINS.stream()
             .filter(name -> Bukkit.getServer().getPluginManager().isPluginEnabled(name))
             .toList();
@@ -32,15 +32,17 @@ class EnvironmentChecker {
         return true;
     }
 
-    static boolean checkHybridServer(@Nonnull Slimefun sf, @Nonnull Logger logger) {
+    static boolean checkHybridServer(@Nonnull Logger logger) {
         try {
-            Class.forName("net.minecraftforge.common.MinecraftForge");
-            Class.forName("net.fabricmc.loader.impl.launch.server.FabricServerLauncher");
+            Class.forName("cpw.mods.modlauncher.Launcher");
+            Class.forName("net.minecraftforge.server.console.TerminalHandler");
 
             printBorder(logger);
             logger.log(Level.WARNING, "");
             logger.log(Level.WARNING, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             logger.log(Level.WARNING, "检测到正在使用混合端, Slimefun 将会被禁用!");
+            logger.log(Level.WARNING, "混合端已被多个用户报告有使用问题, ");
+            logger.log(Level.WARNING, "强制绕过检测将不受任何反馈支持. ");
             logger.log(Level.WARNING, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             logger.log(Level.WARNING, "");
             printBorder(logger);
@@ -57,14 +59,14 @@ class EnvironmentChecker {
         }
     }
 
-    static void scheduleSlimeGlueCheck(@Nonnull Slimefun sf, @Nonnull Logger logger) {
+    static void scheduleSlimeGlueCheck(@Nonnull Slimefun sf) {
         Bukkit.getScheduler()
             .runTaskLater(
                 sf,
                 () -> {
                     if (Bukkit.getPluginManager().getPlugin("SlimeGlue") == null) {
-                        logger.log(Level.WARNING, "检测到没有安装 SlimeGlue (粘液胶), 你将缺失对一些插件的额外保护检查!");
-                        logger.log(Level.WARNING, "下载: https://github.com/Xzavier0722/SlimeGlue");
+                        sf.getLogger().log(Level.WARNING, "检测到没有安装 SlimeGlue (粘液胶), 你将缺失对一些插件的额外保护检查!");
+                        sf.getLogger().log(Level.WARNING, "下载: https://github.com/Xzavier0722/SlimeGlue");
                     }
                 },
                 300); // 15s
