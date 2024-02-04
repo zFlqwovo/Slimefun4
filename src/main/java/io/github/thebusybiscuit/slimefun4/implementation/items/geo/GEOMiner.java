@@ -372,6 +372,6 @@ public class GEOMiner extends SlimefunItem
             }
         }
 
-        updateHologram(b, "&7Finished");
+        updateHologram(b, "&7开采完成");
     }
 }

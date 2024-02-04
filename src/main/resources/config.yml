@@ -34,6 +34,7 @@ options:
   burn-players-when-radioactive: true
   drop-excess-sf-give-items: false
   backup-data: true
+  drop-block-creative: true
 
 guide:
   # 是否在指南中展示原版物品合成配方

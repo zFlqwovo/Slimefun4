@@ -1,10 +1,8 @@
 package io.github.thebusybiscuit.slimefun4.core.networks;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
-import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
 import io.github.bakedlibs.dough.config.Config;
-import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
 import io.github.thebusybiscuit.slimefun4.api.network.Network;
 import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
 import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
@@ -203,17 +201,6 @@ public class NetworkManager {
              * there aren't even any networks on the server.
              */
             if (networks.isEmpty()) {
-                return;
-            }
-
-            /*
-             * Only a Slimefun block can be part of a Network.
-             * This check helps to speed up performance.
-             *
-             * (Skip for Unit Tests as they don't support block info yet)
-             */
-            if (!StorageCacheUtils.hasBlock(l) && Slimefun.getMinecraftVersion() != MinecraftVersion.UNIT_TEST) {
-                Debug.log(TestCase.ENERGYNET, "No block data at " + LocationUtils.locationToString(l) + ", skipped.");
                 return;
             }
 
