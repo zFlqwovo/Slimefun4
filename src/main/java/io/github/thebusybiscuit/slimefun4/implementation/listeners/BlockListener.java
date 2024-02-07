@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
@@ -9,7 +10,10 @@ import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEve
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockBreakEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockPlaceEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.core.attributes.Not90DegreeRotatable;
+import io.github.thebusybiscuit.slimefun4.core.attributes.NotDiagonallyRotatable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
+import io.github.thebusybiscuit.slimefun4.core.attributes.NotRotatable;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ToolUseHandler;
@@ -28,6 +32,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -115,6 +120,24 @@ public class BlockListener implements Listener {
             if (!sfItem.canUse(e.getPlayer(), true)) {
                 e.setCancelled(true);
             } else {
+                if (e.getBlock().getBlockData() instanceof Rotatable rotatable
+                        && !(rotatable.getRotation() == BlockFace.UP || rotatable.getRotation() == BlockFace.DOWN)) {
+                    if (sfItem instanceof Not90DegreeRotatable && sfItem instanceof NotDiagonallyRotatable) {
+                        rotatable.setRotation(BlockFace.NORTH);
+                        e.getBlock().setBlockData(rotatable);
+                    } else if (sfItem instanceof NotRotatable notRotatable) {
+                        rotatable.setRotation(notRotatable.getRotation());
+                        e.getBlock().setBlockData(rotatable);
+                    } else if (sfItem instanceof Not90DegreeRotatable) {
+                        rotatable.setRotation(LocationUtils.angelToNot90DegreeBlockFace(
+                                e.getPlayer().getLocation().getYaw()));
+                        e.getBlock().setBlockData(rotatable);
+                    } else if (sfItem instanceof NotDiagonallyRotatable) {
+                        rotatable.setRotation(LocationUtils.angelToNotDiagonallyBlockFace(
+                                e.getPlayer().getLocation().getYaw()));
+                        e.getBlock().setBlockData(rotatable);
+                    }
+                }
                 var placeEvent = new SlimefunBlockPlaceEvent(e.getPlayer(), item, e.getBlock(), sfItem);
                 Bukkit.getPluginManager().callEvent(placeEvent);
 
