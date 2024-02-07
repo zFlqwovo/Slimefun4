@@ -579,7 +579,7 @@ public class BlockDataController extends ADataController {
     public void removeDataInWorld(World world, String key) {
         // remove data in cache
         for (SlimefunChunkData data : loadedChunk.values()) {
-            data.removeData(key);
+            if (LocationUtils.isSameWorld(data.getChunk().getWorld(), world)) data.removeData(key);
         }
         var re = new RecordKey(DataScope.CHUNK_DATA);
         re.addCondition(FieldKey.CHUNK, world.getName() + ";%");
