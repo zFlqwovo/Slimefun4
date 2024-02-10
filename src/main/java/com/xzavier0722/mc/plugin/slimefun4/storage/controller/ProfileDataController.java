@@ -27,11 +27,13 @@ import org.bukkit.inventory.ItemStack;
 public class ProfileDataController extends ADataController {
     private final BackpackCache backpackCache;
     private final Map<String, PlayerProfile> profileCache;
+    private final Map<String, Runnable> invalidingBackpackTasks;
 
     ProfileDataController() {
         super(DataType.PLAYER_PROFILE);
         backpackCache = new BackpackCache();
         profileCache = new ConcurrentHashMap<>();
+        invalidingBackpackTasks = new ConcurrentHashMap<>();
     }
 
     @Nullable public PlayerProfile getProfile(OfflinePlayer p) {
@@ -320,7 +322,23 @@ public class ProfileDataController extends ADataController {
         if (removed != null) {
             removed.markInvalid();
         }
-        backpackCache.invalidate(pUuid);
+
+        var task = new Runnable() {
+            @Override
+            public void run() {
+                if (invalidingBackpackTasks.remove(pUuid) != this) {
+                    return;
+                }
+
+                if (Bukkit.getOfflinePlayer(UUID.fromString(pUuid)).isOnline()) {
+                    return;
+                }
+
+                backpackCache.invalidate(pUuid);
+            }
+        };
+        invalidingBackpackTasks.put(pUuid, task);
+        scheduleWriteTask(task);
     }
 
     @Override

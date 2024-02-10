@@ -4,6 +4,7 @@ import city.norain.slimefun4.VaultIntegration;
 import io.github.thebusybiscuit.slimefun4.api.events.PlayerPreResearchEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.ResearchUnlockEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemState;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.core.guide.SlimefunGuideImplementation;
@@ -253,6 +254,22 @@ public class Research implements Keyed {
     }
 
     /**
+     * This method checks whether there is at least one enabled {@link SlimefunItem}
+     * included in this {@link Research}.
+     *
+     * @return whether there is at least one enabled {@link SlimefunItem}
+     * included in this {@link Research}.
+     */
+    public boolean hasEnabledItems() {
+        for (SlimefunItem item : items) {
+            if (item.getState() == ItemState.ENABLED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Handle what to do when a {@link Player} clicks on an un-researched item in
      * a {@link SlimefunGuideImplementation}.
      *
@@ -373,7 +390,12 @@ public class Research implements Keyed {
         Slimefun.getResearchCfg().setDefaultValue(path + ".enabled", true);
 
         setLevelCost(Slimefun.getResearchCfg().getInt(path + ".cost"));
-        setCurrencyCost(Slimefun.getResearchCfg().getInt(path + ".currency-cost"));
+
+        if (Slimefun.getConfigManager().isResearchAutoConvert()) {
+            setCurrencyCost(getLevelCost() * Slimefun.getConfigManager().getResearchCurrencyCostConvertRate());
+        } else {
+            setCurrencyCost(Slimefun.getResearchCfg().getInt(path + ".currency-cost"));
+        }
         enabled = true;
 
         Slimefun.getRegistry().getResearches().add(this);

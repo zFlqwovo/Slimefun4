@@ -154,6 +154,9 @@ public class TickerTask implements Runnable {
                      * are always ran with a 50ms delay (1 game tick)
                      */
                     Slimefun.runSync(() -> {
+                        if (blockData.isPendingRemove()) {
+                            return;
+                        }
                         Block b = l.getBlock();
                         tickBlock(l, b, item, blockData, System.nanoTime());
                     });
