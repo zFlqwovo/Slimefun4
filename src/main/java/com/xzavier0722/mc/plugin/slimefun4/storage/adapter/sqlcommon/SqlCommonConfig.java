@@ -49,27 +49,8 @@ public abstract class SqlCommonConfig implements ISqlCommonConfig {
         }
 
         config.setMaximumPoolSize(Math.max(Runtime.getRuntime().availableProcessors(), maxConnection));
-        config.setMaxLifetime(TimeUnit.MINUTES.toMillis(10));
-        config.setLeakDetectionThreshold(TimeUnit.MINUTES.toMillis(1));
-
-        config.setDataSourceProperties(getProperties());
 
         return new HikariDataSource(config);
-    }
-
-    private static Properties getProperties() {
-        var props = new Properties();
-        props.setProperty("dataSource.cachePrepStmts", "true");
-        props.setProperty("dataSource.prepStmtCacheSize", "250");
-        props.setProperty("dataSource.prepStmtCacheSqlLimit", "2048");
-        props.setProperty("dataSource.useServerPrepStmts", "true");
-        props.setProperty("dataSource.useLocalSessionState", "true");
-        props.setProperty("dataSource.rewriteBatchedStatements", "true");
-        props.setProperty("dataSource.cacheResultSetMetadata", "true");
-        props.setProperty("dataSource.cacheServerConfiguration", "true");
-        props.setProperty("dataSource.elideSetAutoCommits", "true");
-        props.setProperty("dataSource.maintainTimeStats", "false");
-        return props;
     }
 
     public String tablePrefix() {

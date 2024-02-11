@@ -14,16 +14,6 @@ public record SqliteConfig(String path, int maxConnection) implements ISqlCommon
         config.setPoolName("SlimefunHikariPool");
         config.setMaximumPoolSize(maxConnection);
 
-        config.setMaxLifetime(TimeUnit.MINUTES.toMillis(10));
-
-        var props = new Properties();
-        props.setProperty("dataSource.cachePrepStmts", "true");
-        props.setProperty("dataSource.prepStmtCacheSize", "250");
-        props.setProperty("dataSource.prepStmtCacheSqlLimit", "2048");
-        props.setProperty("dataSource.maintainTimeStats", "false");
-
-        config.setDataSourceProperties(props);
-
         return new HikariDataSource(config);
     }
 
