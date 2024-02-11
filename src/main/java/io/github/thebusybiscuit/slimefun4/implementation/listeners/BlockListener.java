@@ -10,7 +10,7 @@ import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEve
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockBreakEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockPlaceEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.core.attributes.Not90DegreeRotatable;
+import io.github.thebusybiscuit.slimefun4.core.attributes.NotCardinallyRotatable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotDiagonallyRotatable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotRotatable;
@@ -122,18 +122,18 @@ public class BlockListener implements Listener {
             } else {
                 if (e.getBlock().getBlockData() instanceof Rotatable rotatable
                         && !(rotatable.getRotation() == BlockFace.UP || rotatable.getRotation() == BlockFace.DOWN)) {
-                    if (sfItem instanceof Not90DegreeRotatable && sfItem instanceof NotDiagonallyRotatable) {
+                    if (sfItem instanceof NotCardinallyRotatable && sfItem instanceof NotDiagonallyRotatable) {
                         rotatable.setRotation(BlockFace.NORTH);
                         e.getBlock().setBlockData(rotatable);
                     } else if (sfItem instanceof NotRotatable notRotatable) {
                         rotatable.setRotation(notRotatable.getRotation());
                         e.getBlock().setBlockData(rotatable);
-                    } else if (sfItem instanceof Not90DegreeRotatable) {
-                        rotatable.setRotation(LocationUtils.angelToNot90DegreeBlockFace(
+                    } else if (sfItem instanceof NotCardinallyRotatable) {
+                        rotatable.setRotation(LocationUtils.angleToNot90DegreeBlockFace(
                                 e.getPlayer().getLocation().getYaw()));
                         e.getBlock().setBlockData(rotatable);
                     } else if (sfItem instanceof NotDiagonallyRotatable) {
-                        rotatable.setRotation(LocationUtils.angelToNotDiagonallyBlockFace(
+                        rotatable.setRotation(LocationUtils.angleToNotDiagonallyBlockFace(
                                 e.getPlayer().getLocation().getYaw()));
                         e.getBlock().setBlockData(rotatable);
                     }

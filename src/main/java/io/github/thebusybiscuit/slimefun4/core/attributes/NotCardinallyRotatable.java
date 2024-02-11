@@ -6,12 +6,12 @@ import org.bukkit.block.BlockFace;
 /**
  * Implement this interface for any {@link SlimefunItem} to prevent
  * that {@link SlimefunItem} from being rotated to
- * {@link BlockFace}.NORTH_EAST
- * {@link BlockFace}.NORTH_WEST
- * {@link BlockFace}.SOUTH_EAST
- * {@link BlockFace}.SOUTH_WEST
+ * {@link BlockFace}.NORTH
+ * {@link BlockFace}.EAST
+ * {@link BlockFace}.SOUTH
+ * {@link BlockFace}.WEST
  *
  * @author Ddggdd135
  *
  */
-public interface NotDiagonallyRotatable extends ItemAttribute {}
+public interface NotCardinallyRotatable extends ItemAttribute {}
