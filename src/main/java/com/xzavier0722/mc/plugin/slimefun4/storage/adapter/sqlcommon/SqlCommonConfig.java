@@ -2,6 +2,7 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import java.sql.Time;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +50,7 @@ public abstract class SqlCommonConfig implements ISqlCommonConfig {
         }
 
         config.setMaximumPoolSize(Math.max(Runtime.getRuntime().availableProcessors(), maxConnection));
+        config.setLeakDetectionThreshold(5000);
 
         config.setDataSourceProperties(getProperties());
 
