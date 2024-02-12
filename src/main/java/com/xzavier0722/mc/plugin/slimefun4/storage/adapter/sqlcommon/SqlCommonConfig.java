@@ -49,7 +49,7 @@ public abstract class SqlCommonConfig implements ISqlCommonConfig {
             config.setPassword(passwd);
         }
 
-        config.setMaximumPoolSize(Math.max(Runtime.getRuntime().availableProcessors(), maxConnection));
+        config.setMaximumPoolSize(maxConnection);
         config.setLeakDetectionThreshold(5000);
         config.addDataSourceProperty("useLocalSessionState", "true");
         config.addDataSourceProperty("rewriteBatchedStatements", "true");
