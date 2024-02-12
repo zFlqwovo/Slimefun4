@@ -50,6 +50,7 @@ public abstract class SqlCommonConfig implements ISqlCommonConfig {
         }
 
         config.setMaximumPoolSize(maxConnection);
+        config.setConnectionTimeout(29000); // set below 30s to avoid paper watchdog
         config.setLeakDetectionThreshold(5000);
         config.addDataSourceProperty("useLocalSessionState", "true");
         config.addDataSourceProperty("rewriteBatchedStatements", "true");
