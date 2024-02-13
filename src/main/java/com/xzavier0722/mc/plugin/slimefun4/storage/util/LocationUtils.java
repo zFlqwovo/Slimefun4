@@ -68,7 +68,7 @@ public class LocationUtils {
         else if (90 < angle && angle <= 180) return BlockFace.NORTH_WEST;
         else if (-180 <= angle && angle <= -90) return BlockFace.NORTH_EAST;
         else if (-90 < angle && angle <= 0) return BlockFace.SOUTH_EAST;
-        throw new IllegalArgumentException("angel is a number between -180 to 180");
+        throw new IllegalArgumentException("angle must be number from -180 to 180");
     }
 
     public static BlockFace angleToNotDiagonallyBlockFace(double angle) {
@@ -76,6 +76,6 @@ public class LocationUtils {
         else if (45 < angle && angle <= 135) return BlockFace.WEST;
         else if ((135 < angle && angle <= 180) || (-180 <= angle && angle <= -135)) return BlockFace.NORTH;
         else if (-135 < angle && angle <= -45) return BlockFace.EAST;
-        throw new IllegalArgumentException("angel is a number between -180 to 180");
+        throw new IllegalArgumentException("angle must be number from -180 to 180");
     }
 }
