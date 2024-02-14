@@ -3,8 +3,6 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.ISqlCommonConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 public record SqliteConfig(String path, int maxConnection) implements ISqlCommonConfig {
     public HikariDataSource createDataSource() {
