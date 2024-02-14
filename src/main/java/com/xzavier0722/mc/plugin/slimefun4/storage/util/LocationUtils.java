@@ -74,7 +74,7 @@ public class LocationUtils {
     public static BlockFace angleToNotDiagonallyBlockFace(double angle) {
         if (-45 < angle && angle <= 45) return BlockFace.SOUTH;
         else if (45 < angle && angle <= 135) return BlockFace.WEST;
-        else if ((135 < angle && angle <= 180) || (-180 <= angle && angle <= -135)) return BlockFace.NORTH;
+        else if (135 < Math.abs(angle) && Math.abs(angle) <= 180) return BlockFace.NORTH;
         else if (-135 < angle && angle <= -45) return BlockFace.EAST;
         throw new IllegalArgumentException("angle must be number from -180 to 180");
     }
