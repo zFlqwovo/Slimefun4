@@ -124,19 +124,16 @@ public class BlockListener implements Listener {
                         && !(rotatable.getRotation() == BlockFace.UP || rotatable.getRotation() == BlockFace.DOWN)) {
                     if (sfItem instanceof NotCardinallyRotatable && sfItem instanceof NotDiagonallyRotatable) {
                         rotatable.setRotation(BlockFace.NORTH);
-                        e.getBlock().setBlockData(rotatable);
                     } else if (sfItem instanceof NotRotatable notRotatable) {
                         rotatable.setRotation(notRotatable.getRotation());
-                        e.getBlock().setBlockData(rotatable);
                     } else if (sfItem instanceof NotCardinallyRotatable) {
                         rotatable.setRotation(LocationUtils.angleToNot90DegreeBlockFace(
                                 e.getPlayer().getLocation().getYaw()));
-                        e.getBlock().setBlockData(rotatable);
                     } else if (sfItem instanceof NotDiagonallyRotatable) {
                         rotatable.setRotation(LocationUtils.angleToNotDiagonallyBlockFace(
                                 e.getPlayer().getLocation().getYaw()));
-                        e.getBlock().setBlockData(rotatable);
                     }
+                    e.getBlock().setBlockData(rotatable);
                 }
                 var placeEvent = new SlimefunBlockPlaceEvent(e.getPlayer(), item, e.getBlock(), sfItem);
                 Bukkit.getPluginManager().callEvent(placeEvent);
