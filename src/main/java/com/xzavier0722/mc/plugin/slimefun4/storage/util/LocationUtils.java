@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.BlockFace;
 
 public class LocationUtils {
     public static String getLocKey(Location l) {
