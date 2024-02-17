@@ -39,19 +39,21 @@ public class CargoNodeListener implements Listener {
             BlockData blockData = b.getBlockData();
             BlockFace blockFace = null;
             Vector vector;
-            if (blockData instanceof Directional directional){
+            if (blockData instanceof Directional directional) {
                 blockFace = directional.getFacing();
-            }
-            else if (blockData instanceof Rotatable rotatable){
+            } else if (blockData instanceof Rotatable rotatable) {
                 blockFace = rotatable.getRotation();
             }
-            if (blockFace == null){
+            if (blockFace == null) {
                 vector = new Vector();
-            }
-            else {
+            } else {
                 vector = blockFace.getOppositeFace().getDirection();
             }
-            Block realAgainst = against.getWorld().getBlockAt(against.getX() + (int) vector.getX(), against.getY() + (int) vector.getY(), against.getZ() + (int) vector.getZ());
+            Block realAgainst = against.getWorld()
+                    .getBlockAt(
+                            against.getX() + (int) vector.getX(),
+                            against.getY() + (int) vector.getY(),
+                            against.getZ() + (int) vector.getZ());
             if (!isContainer(realAgainst)) {
                 Slimefun.getLocalization().sendMessage(e.getPlayer(), "machines.CARGO_NODES.must-be-placed", true);
                 e.setCancelled(true);
@@ -62,7 +64,9 @@ public class CargoNodeListener implements Listener {
     private boolean isCargoNode(@Nonnull ItemStack item) {
         return SlimefunItem.getByItem(item) instanceof CargoNode;
     }
+
     private boolean isContainer(@Nonnull Block block) {
-        return block.getState() instanceof Container || Slimefun.getDatabaseManager().getBlockDataController().getBlockData(block.getLocation()) != null;
+        return block.getState() instanceof Container
+                || Slimefun.getDatabaseManager().getBlockDataController().getBlockData(block.getLocation()) != null;
     }
 }
