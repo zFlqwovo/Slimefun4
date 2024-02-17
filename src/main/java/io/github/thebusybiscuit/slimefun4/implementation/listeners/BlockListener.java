@@ -123,18 +123,22 @@ public class BlockListener implements Listener {
             } else {
                 if (e.getBlock().getBlockData() instanceof Rotatable rotatable
                         && !(rotatable.getRotation() == BlockFace.UP || rotatable.getRotation() == BlockFace.DOWN)) {
+                    BlockFace rotation = null;
+
                     if (sfItem instanceof NotCardinallyRotatable && sfItem instanceof NotDiagonallyRotatable) {
-                        rotatable.setRotation(BlockFace.NORTH);
+                        rotation = BlockFace.NORTH;
                     } else if (sfItem instanceof NotRotatable notRotatable) {
-                        rotatable.setRotation(notRotatable.getRotation());
-                    } else if (sfItem instanceof NotCardinallyRotatable) {
-                        rotatable.setRotation(LocationUtils.angleToNot90DegreeBlockFace(
-                                e.getPlayer().getLocation().getYaw()));
-                    } else if (sfItem instanceof NotDiagonallyRotatable) {
-                        rotatable.setRotation(LocationUtils.angleToNotDiagonallyBlockFace(
-                                e.getPlayer().getLocation().getYaw()));
+                        rotation = notRotatable.getRotation();
+                    } else if (sfItem instanceof NotCardinallyRotatable notRotatable) {
+                        rotation = notRotatable.getRotation(e.getPlayer().getLocation().getYaw());
+                    } else if (sfItem instanceof NotDiagonallyRotatable notRotatable) {
+                        rotation = notRotatable.getRotation(e.getPlayer().getLocation().getYaw());
                     }
-                    e.getBlock().setBlockData(rotatable);
+
+                    if (rotation != null) {
+                        rotatable.setRotation(rotation);
+                        e.getBlock().setBlockData(rotatable);
+                    }
                 }
                 var placeEvent = new SlimefunBlockPlaceEvent(e.getPlayer(), item, e.getBlock(), sfItem);
                 Bukkit.getPluginManager().callEvent(placeEvent);

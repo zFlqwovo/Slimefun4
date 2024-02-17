@@ -14,4 +14,12 @@ import org.bukkit.block.BlockFace;
  * @author Ddggdd135
  *
  */
-public interface NotCardinallyRotatable extends ItemAttribute {}
+public interface NotCardinallyRotatable extends ItemAttribute {
+    default BlockFace getRotation(double angle) {
+        if (0 < angle && angle <= 90) return BlockFace.SOUTH_WEST;
+        else if (90 < angle && angle <= 180) return BlockFace.NORTH_WEST;
+        else if (-180 <= angle && angle <= -90) return BlockFace.NORTH_EAST;
+        else if (-90 < angle && angle <= 0) return BlockFace.SOUTH_EAST;
+        throw new IllegalArgumentException("angle must be number from -180 to 180");
+    }
+}
