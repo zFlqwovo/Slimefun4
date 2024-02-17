@@ -354,7 +354,7 @@ public class BlockListener implements Listener {
      */
     @ParametersAreNonnullByDefault
     private void checkForSensitiveBlocks(Block block, Integer count, boolean isDropItems) {
-        if (count >= Bukkit.getServer().getMaxChainedNeighborUpdates()) {
+        /**if (count >= Bukkit.getServer().getMaxChainedNeighborUpdates()) {
             return;
         }
 
@@ -375,6 +375,7 @@ public class BlockListener implements Listener {
         // Set the BlockData back: this makes it so containers and spawners drop correctly. This is a hacky fix.
         block.setBlockData(state.getBlockData(), false);
         state.update(true, false);
+         */
     }
 
     /**
