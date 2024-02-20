@@ -241,7 +241,7 @@ public abstract class Reactor extends AbstractEnergyProvider
         if (this instanceof NuclearReactor) {
             preset.addItem(
                     1,
-                    new CustomItemStack(getFuelIcon(), "&7燃料", "", "&f这里可以放入放射性燃料:", "&2铀 &f或 &a镎"),
+                    new CustomItemStack(getFuelIcon(), "&7燃料", "", "&f这里可以放入放射性燃料:", "&2铀238 &f或 &a镎"),
                     ChestMenuUtils.getEmptyClickHandler());
         } else if (this instanceof NetherStarReactor) {
             preset.addItem(

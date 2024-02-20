@@ -83,12 +83,9 @@ public final class ChestMenuUtils {
     }
 
     public static @Nonnull ItemStack getMenuButton(@Nonnull Player p) {
-        return new CustomItemStack(
-                MENU_BUTTON,
-                ChatColor.YELLOW + Slimefun.getLocalization().getMessage(p, "guide.title.settings"),
-                "",
-                "&7\u21E8 " + Slimefun.getLocalization().getMessage(p, "guide.tooltips.open-itemgroup"));
+        return new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
     }
+
 
     public static @Nonnull ItemStack getSearchButton(@Nonnull Player p) {
         return new CustomItemStack(SEARCH_BUTTON, meta -> {

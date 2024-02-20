@@ -437,12 +437,12 @@ public final class Slimefun extends JavaPlugin implements SlimefunAddon, ICompat
 
     @Override
     public String getBugTrackerURL() {
-        return "https://github.com/StarWishsama/Slimefun4/issues";
+        return "https://github.com/YangLine/Craft-Space";
     }
 
     @Override
     public String getWikiURL() {
-        return "https://slimefun-wiki.guizhanss.cn/{0}";
+        return "https://doc.craftspace.top/{0}";
     }
 
     /**

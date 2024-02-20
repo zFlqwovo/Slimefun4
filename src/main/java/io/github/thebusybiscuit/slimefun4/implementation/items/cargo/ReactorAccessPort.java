@@ -151,7 +151,7 @@ public class ReactorAccessPort extends SlimefunItem {
 
         preset.addItem(
                 1,
-                new CustomItemStack(SlimefunItems.URANIUM, "&7燃料槽", "", "&r这里可以放入放射性燃料, 例如:", "&2铀 &r或 &a镎"),
+                new CustomItemStack(SlimefunItems.URANIUM, "&7燃料槽", "", "&r这里可以放入放射性燃料, 例如:", "&2铀238 &r或 &a镎"),
                 ChestMenuUtils.getEmptyClickHandler());
         preset.addItem(
                 22,

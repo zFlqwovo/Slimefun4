@@ -69,13 +69,13 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
     private final ItemStack item;
 
     public SurvivalSlimefunGuide() {
-        item = new SlimefunGuideItem(this, "&aSlimefun 指南 &7(箱子界面)");
+        item = new SlimefunGuideItem(this, "&a科技指南");
     }
 
     // fallback
     @Deprecated
     public SurvivalSlimefunGuide(boolean v1, boolean v2) {
-        item = new SlimefunGuideItem(this, "&aSlimefun 指南 &7(箱子界面)");
+        item = new SlimefunGuideItem(this, "&a科技指南");
     }
 
     @Override
@@ -842,8 +842,8 @@ public class SurvivalSlimefunGuide implements SlimefunGuideImplementation {
 
     @ParametersAreNonnullByDefault
     private void printErrorMessage(Player p, Throwable x) {
-        p.sendMessage(ChatColor.DARK_RED + "服务器发生了一个内部错误. 请联系管理员处理.");
-        Slimefun.logger().log(Level.SEVERE, "在打开指南书里的 Slimefun 物品时发生了意外!", x);
+        p.sendMessage(ChatColor.DARK_RED + "服务器发生了一个内部错误！赶紧去锤Yang Line处理！");
+        Slimefun.logger().log(Level.SEVERE, "在打开指南书里的物品时发生了意外!", x);
     }
 
     @ParametersAreNonnullByDefault
