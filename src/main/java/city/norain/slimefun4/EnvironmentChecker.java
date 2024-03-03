@@ -9,7 +9,7 @@ import org.bukkit.Bukkit;
 
 class EnvironmentChecker {
     private static final List<String> UNSUPPORTED_PLUGINS =
-            List.of("BedrockTechnology", "SlimefunFix", "SlimefunBugFixer", "Slimefunbookfix", "MiraiMC");
+            List.of("BedrockTechnology", "SlimefunFix", "SlimefunBugFixer", "Slimefunbookfix", "PlaceItemsOnGroundRebuilt");
 
     static boolean checkIncompatiblePlugins(@Nonnull Logger logger) {
         List<String> plugins = UNSUPPORTED_PLUGINS.stream()
