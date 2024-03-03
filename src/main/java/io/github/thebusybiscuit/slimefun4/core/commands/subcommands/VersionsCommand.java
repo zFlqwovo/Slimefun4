@@ -87,8 +87,7 @@ class VersionsCommand extends SubCommand {
 
             if (Slimefun.getConfigManager().isBypassEnvironmentCheck()) {
                 builder.append("\n").event((HoverEvent) null);
-                builder.append("\n已禁用环境兼容性检查")
-                    .color(ChatColor.RED);
+                builder.append("\n已禁用环境兼容性检查").color(ChatColor.RED);
             }
 
             builder.append("\n").event((HoverEvent) null);
