@@ -743,7 +743,7 @@ public class BlockDataController extends ADataController {
     }
 
     private void deleteChunkAndBlockDataDirectly(String cKey) {
-        var req = new RecordKey(DataScope.BLOCK_DATA);
+        var req = new RecordKey(DataScope.BLOCK_RECORD);
         req.addCondition(FieldKey.CHUNK, cKey);
         deleteData(req);
 
