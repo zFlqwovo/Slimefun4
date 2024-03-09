@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import lombok.Getter;
+import lombok.Setter;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.apache.commons.lang.Validate;
@@ -20,12 +22,12 @@ import org.bukkit.inventory.ItemStack;
 // This class will be deprecated, relocated and rewritten in a future version.
 public abstract class BlockMenuPreset extends ChestMenu {
 
-    final Set<Integer> occupiedSlots = new HashSet<>();
+    protected final Set<Integer> occupiedSlots = new HashSet<>();
     private final String inventoryTitle;
     private final String id;
 
     // -1 means "automatically update according to the contents"
-    int size = -1;
+    protected int size = -1;
 
     private boolean locked;
 
