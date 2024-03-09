@@ -1,17 +1,19 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 echo "[pre-commit check]"
 
-if ! [ -x "$(command -v mvn)" ]; then
-  echo -e 'Maven are not installed!'
-  echo
-  echo 'Please visit following site to download latest maven:'
-  echo
-  echo "  https://maven.apache.org/download.cgi"
-  echo
-  echo 'If you are sure that you have installed maven,'
-  echo 'Please check whether your environment variables is being set properly.'
-  exit 1
+STAGED_FILES=$(git --no-pager diff --name-only --staged --line-prefix=$(git rev-parse --show-toplevel)/ | paste -sd ',')
+
+if [ ! -z "$STAGED_FILES" ]
+then
+  echo -n "Checking code format with spotless: "
+  mvn spotless:check -DspotlessFiles=$STAGED_FILES > /tmp/spotless.out 2>&1
+  RETURN_VALUE=$?
+  if [ $RETURN_VALUE -gt 0 ]
+  then
+    echo "Please run 'mvn spotless:check' for more details or 'mvn spotless:apply' to automatically fix the violations."
+  fi
+  exit $RETURN_VALUE
 fi
 
-mvn spotless:apply
+exit 0

@@ -49,4 +49,10 @@ public class UnbanItemCommand extends SubCommand {
             Slimefun.getLocalization().sendMessage(sender, "messages.no-permission", true);
         }
     }
+
+    @Nonnull
+    @Override
+    public String getDescription() {
+        return "commands.unbanitem.description";
+    }
 }

@@ -4,7 +4,9 @@ import io.github.bakedlibs.dough.common.ChatColors;
 import io.github.thebusybiscuit.slimefun4.core.services.holograms.HologramsService;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.HologramProjector;
+import java.util.function.Supplier;
 import javax.annotation.Nonnull;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
@@ -32,6 +34,23 @@ public interface HologramOwner extends ItemAttribute {
     default void updateHologram(@Nonnull Block b, @Nonnull String text) {
         Location loc = b.getLocation().add(getHologramOffset(b));
         Slimefun.getHologramsService().setHologramLabel(loc, ChatColors.color(text));
+    }
+
+    default void updateHologram(@Nonnull Block b, @Nonnull String text, Supplier<Boolean> abort) {
+        if (Bukkit.isPrimaryThread()) {
+            if (abort.get()) {
+                return;
+            }
+            updateHologram(b, text);
+            return;
+        }
+
+        Slimefun.runSync(() -> {
+            if (abort.get()) {
+                return;
+            }
+            updateHologram(b, text);
+        });
     }
 
     /**

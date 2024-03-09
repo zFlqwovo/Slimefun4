@@ -54,6 +54,16 @@ public class SlimefunItemInteractListener implements Listener {
                 return;
             }
 
+            // Fixes #4087 - Prevents players from interacting with a block that is about to be deleted
+            // We especially don't want to open inventories as that can cause duplication
+            if (e.getClickedBlock() != null
+                    && StorageCacheUtils.hasBlock(e.getClickedBlock().getLocation())
+                    && StorageCacheUtils.getBlock(e.getClickedBlock().getLocation())
+                            .isPendingRemove()) {
+                e.setCancelled(true);
+                return;
+            }
+
             // Fire our custom Event
             PlayerRightClickEvent event = new PlayerRightClickEvent(e);
             Bukkit.getPluginManager().callEvent(event);

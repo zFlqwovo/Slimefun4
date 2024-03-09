@@ -5,6 +5,7 @@
 /target/
 /.idea/
 /.vscode/
+/data-storage/
 
 .classpath
 .factorypath

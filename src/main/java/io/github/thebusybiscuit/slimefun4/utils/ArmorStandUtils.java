@@ -3,6 +3,7 @@ package io.github.thebusybiscuit.slimefun4.utils;
 import io.github.thebusybiscuit.slimefun4.core.services.holograms.HologramsService;
 import io.github.thebusybiscuit.slimefun4.implementation.items.altar.AncientPedestal;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.HologramProjector;
+import io.papermc.lib.PaperLib;
 import javax.annotation.Nonnull;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
@@ -17,6 +18,8 @@ import org.bukkit.entity.ArmorStand;
  * @author JustAHuman
  */
 public class ArmorStandUtils {
+
+    private ArmorStandUtils() {}
 
     /**
      * Spawns an {@link ArmorStand} at the given {@link Location} with the given custom name
@@ -45,13 +48,25 @@ public class ArmorStandUtils {
      * @return The spawned {@link ArmorStand}
      */
     public static @Nonnull ArmorStand spawnArmorStand(@Nonnull Location location) {
-        return location.getWorld().spawn(location, ArmorStand.class, armorStand -> {
-            armorStand.setVisible(false);
-            armorStand.setSilent(true);
-            armorStand.setMarker(true);
-            armorStand.setGravity(false);
-            armorStand.setBasePlate(false);
-            armorStand.setRemoveWhenFarAway(false);
-        });
+        // The consumer method was moved from World to RegionAccessor in 1.20.2
+        // Due to this, we need to use a rubbish workaround to support 1.20.1 and below
+        // This causes flicker on these versions which sucks but not sure a better way around this right now.
+        if (PaperLib.getMinecraftVersion() < 20
+                || (PaperLib.getMinecraftVersion() == 20 && PaperLib.getMinecraftPatchVersion() < 2)) {
+            ArmorStand armorStand = location.getWorld().spawn(location, ArmorStand.class);
+            setupArmorStand(armorStand);
+            return armorStand;
+        }
+
+        return location.getWorld().spawn(location, ArmorStand.class, ArmorStandUtils::setupArmorStand);
+    }
+
+    private static void setupArmorStand(ArmorStand armorStand) {
+        armorStand.setVisible(false);
+        armorStand.setSilent(true);
+        armorStand.setMarker(true);
+        armorStand.setGravity(false);
+        armorStand.setBasePlate(false);
+        armorStand.setRemoveWhenFarAway(false);
     }
 }
