@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.core.networks.energy;
 
 import city.norain.slimefun4.utils.MathUtil;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.thebusybiscuit.slimefun4.api.ErrorReport;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -138,11 +139,11 @@ public class EnergyNet extends Network implements HologramOwner {
         }
     }
 
-    public void tick(@Nonnull Block b) {
+    public void tick(@Nonnull Block b, SlimefunBlockData blockData) {
         AtomicLong timestamp = new AtomicLong(Slimefun.getProfiler().newEntry());
 
         if (!regulator.equals(b.getLocation())) {
-            updateHologram(b, "&4检测到附近有其他调节器");
+            updateHologram(b, "&4检测到附近有其他调节器", blockData::isPendingRemove);
             Slimefun.getProfiler()
                     .closeEntry(b.getLocation(), SlimefunItems.ENERGY_REGULATOR.getItem(), timestamp.get());
             return;
@@ -151,7 +152,7 @@ public class EnergyNet extends Network implements HologramOwner {
         super.tick();
 
         if (connectorNodes.isEmpty() && terminusNodes.isEmpty()) {
-            updateHologram(b, "&4找不到能源网络");
+            updateHologram(b, "&4找不到能源网络", blockData::isPendingRemove);
         } else {
             int supply = tickAllGenerators(timestamp::getAndAdd) + tickAllCapacitors();
             int remainingEnergy = supply;
@@ -165,12 +166,22 @@ public class EnergyNet extends Network implements HologramOwner {
                     continue;
                 }
 
+                EnergyNetComponent component = entry.getValue();
+                if (!((SlimefunItem) component).getId().equals(data.getSfId())) {
+                    var newItem = SlimefunItem.getById(data.getSfId());
+                    if (!(newItem instanceof EnergyNetComponent newComponent)
+                            || newComponent.getEnergyComponentType() != EnergyNetComponentType.CONSUMER) {
+                        continue;
+                    }
+                    consumers.put(loc, newComponent);
+                    component = newComponent;
+                }
+
                 if (!data.isDataLoaded()) {
                     StorageCacheUtils.requestLoad(data);
                     continue;
                 }
 
-                EnergyNetComponent component = entry.getValue();
                 int capacity = component.getCapacity();
                 int charge = component.getCharge(loc);
 
@@ -191,7 +202,7 @@ public class EnergyNet extends Network implements HologramOwner {
             }
 
             storeRemainingEnergy(remainingEnergy);
-            updateHologram(b, supply, demand);
+            updateHologram(blockData, supply, demand);
         }
 
         // We have subtracted the timings from Generators, so they do not show up twice.
@@ -265,6 +276,15 @@ public class EnergyNet extends Network implements HologramOwner {
                     continue;
                 }
 
+                if (!item.getId().equals(data.getSfId())) {
+                    var newItem = SlimefunItem.getById(data.getSfId());
+                    if (!(newItem instanceof EnergyNetProvider newProvider)) {
+                        continue;
+                    }
+                    generators.put(loc, newProvider);
+                    provider = newProvider;
+                }
+
                 if (!data.isDataLoaded()) {
                     StorageCacheUtils.requestLoad(data);
                     continue;
@@ -314,13 +334,15 @@ public class EnergyNet extends Network implements HologramOwner {
         return supply;
     }
 
-    private void updateHologram(@Nonnull Block b, double supply, double demand) {
+    private void updateHologram(@Nonnull SlimefunBlockData data, double supply, double demand) {
         if (demand > supply) {
             String netLoss = NumberUtils.getCompactDouble(demand - supply);
-            updateHologram(b, "&4&l- &c" + netLoss + " &7J &e\u26A1");
+            updateHologram(
+                    data.getLocation().getBlock(), "&4&l- &c" + netLoss + " &7J &e\u26A1", data::isPendingRemove);
         } else {
             String netGain = NumberUtils.getCompactDouble(supply - demand);
-            updateHologram(b, "&2&l+ &a" + netGain + " &7J &e\u26A1");
+            updateHologram(
+                    data.getLocation().getBlock(), "&2&l+ &a" + netGain + " &7J &e\u26A1", data::isPendingRemove);
         }
     }
 

@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.attributes.EnergyNetComponent;
 import io.github.thebusybiscuit.slimefun4.core.attributes.HologramOwner;
+import io.github.thebusybiscuit.slimefun4.core.attributes.NotRotatable;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNet;
@@ -28,7 +29,7 @@ import org.bukkit.inventory.ItemStack;
  * @see EnergyNetComponent
  *
  */
-public class EnergyRegulator extends SlimefunItem implements HologramOwner {
+public class EnergyRegulator extends SlimefunItem implements HologramOwner, NotRotatable {
 
     @ParametersAreNonnullByDefault
     public EnergyRegulator(ItemGroup itemGroup, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -72,13 +73,13 @@ public class EnergyRegulator extends SlimefunItem implements HologramOwner {
 
             @Override
             public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
-                EnergyRegulator.this.tick(b);
+                EnergyRegulator.this.tick(b, data);
             }
         });
     }
 
-    private void tick(@Nonnull Block b) {
+    private void tick(@Nonnull Block b, SlimefunBlockData blockData) {
         EnergyNet network = EnergyNet.getNetworkFromLocationOrCreate(b.getLocation());
-        network.tick(b);
+        network.tick(b, blockData);
     }
 }
