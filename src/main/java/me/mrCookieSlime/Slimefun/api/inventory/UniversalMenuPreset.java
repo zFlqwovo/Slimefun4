@@ -1,6 +1,8 @@
 package me.mrCookieSlime.Slimefun.api.inventory;
 
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.bukkit.block.Block;
 
 public abstract class UniversalMenuPreset extends BlockMenuPreset {
@@ -14,11 +16,11 @@ public abstract class UniversalMenuPreset extends BlockMenuPreset {
         super(id, title);
     }
 
-    public void newInstance(@Nonnull UniversalChestMenu menu, @Nonnull Block b) {
+    public void newInstance(@Nonnull UniversalMenu menu, @Nonnull Block b) {
         // This method can optionally be overridden by implementations
     }
 
-    protected void clone(@Nonnull DirtyChestMenu menu, @Nonnull Block block) {
+    protected void clone(@Nonnull UniversalMenu menu, @Nonnull Block b) {
         menu.setPlayerInventoryClickable(true);
 
         for (int slot : occupiedSlots) {
@@ -29,9 +31,7 @@ public abstract class UniversalMenuPreset extends BlockMenuPreset {
             menu.addItem(size - 1, null);
         }
 
-        if (menu instanceof UniversalChestMenu universalChestMenu) {
-            newInstance(universalChestMenu, block);
-        }
+        newInstance(menu, b);
 
         for (int slot = 0; slot < 54; slot++) {
             if (getMenuClickHandler(slot) != null) {
@@ -41,5 +41,10 @@ public abstract class UniversalMenuPreset extends BlockMenuPreset {
 
         menu.addMenuOpeningHandler(getMenuOpeningHandler());
         menu.addMenuCloseHandler(getMenuCloseHandler());
+    }
+
+    @Nullable
+    public static BlockMenuPreset getPreset(@Nullable String id) {
+        return id == null ? null : Slimefun.getRegistry().getMenuPresets().get(id);
     }
 }

@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import io.papermc.lib.PaperLib;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.TileState;
@@ -12,7 +13,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 public class PDCUtil {
-    public static final PersistentDataType<byte[], UUID> uuid = new UUIDType();
+    public static final PersistentDataType<byte[], UUID> UUID_TYPE = new UUIDType();
 
     private PDCUtil() throws IllegalAccessException {
         throw new IllegalAccessException("Utility Class");
@@ -41,6 +42,7 @@ public class PDCUtil {
         container.set(key, type, value);
     }
 
+    @Nullable
     public static <T, Z> Z getValue(
             @Nonnull Block block, @Nonnull PersistentDataType<T, Z> type, @Nonnull NamespacedKey key) {
         var state = (TileState) PaperLib.getBlockState(block, false);
@@ -49,6 +51,7 @@ public class PDCUtil {
         return getValue(container, type, key);
     }
 
+    @Nullable
     public static <T, Z> Z getValue(
             @Nonnull PersistentDataContainer container,
             @Nonnull PersistentDataType<T, Z> type,

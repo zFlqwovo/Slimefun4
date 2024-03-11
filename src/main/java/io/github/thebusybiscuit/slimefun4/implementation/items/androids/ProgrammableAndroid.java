@@ -45,7 +45,7 @@ import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.inventory.UniversalChestMenu;
+import me.mrCookieSlime.Slimefun.api.inventory.UniversalMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.UniversalMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.apache.commons.lang.Validate;
@@ -113,8 +113,9 @@ public class ProgrammableAndroid extends SlimefunItem
 
             @Override
             public boolean canOpen(Block b, Player p) {
-                boolean isOwner = p.getUniqueId().toString().equals(StorageCacheUtils.getData(b.getLocation(), "owner"))
-                        || p.hasPermission("slimefun.android.bypass");
+                UUID owner = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, OWNER_KEY);
+
+                boolean isOwner = p.getUniqueId().equals(owner) || p.hasPermission("slimefun.android.bypass");
 
                 if (isOwner || AndroidShareMenu.isTrustedUser(b, p.getUniqueId())) {
                     return true;
@@ -125,7 +126,7 @@ public class ProgrammableAndroid extends SlimefunItem
             }
 
             @Override
-            public void newInstance(UniversalChestMenu menu, Block b) {
+            public void newInstance(UniversalMenu menu, Block b) {
                 menu.replaceExistingItem(
                         15, new CustomItemStack(HeadTexture.SCRIPT_START.getAsItemStack(), "&a启动/继续运行"));
                 menu.addMenuClickHandler(15, (p, slot, item, action) -> {
@@ -193,8 +194,8 @@ public class ProgrammableAndroid extends SlimefunItem
 
                 Slimefun.getDatabaseManager().getBlockDataController().createUniversalInventory(uuid);
 
-                PDCUtil.setValue(b, PDCUtil.uuid, OWNER_KEY, p.getUniqueId());
-                PDCUtil.setValue(b, PDCUtil.uuid, UUID_KEY, uuid);
+                PDCUtil.setValue(b, PDCUtil.UUID_TYPE, OWNER_KEY, p.getUniqueId());
+                PDCUtil.setValue(b, PDCUtil.UUID_TYPE, UUID_KEY, uuid);
                 PDCUtil.setValue(b, PersistentDataType.STRING, SCRIPT_KEY, DEFAULT_SCRIPT);
                 PDCUtil.setValue(b, PersistentDataType.SHORT, SCRIPT_INDEX_KEY, (short) 0);
                 PDCUtil.setValue(b, PersistentDataType.INTEGER, FUEL_KEY, 0);
@@ -221,8 +222,8 @@ public class ProgrammableAndroid extends SlimefunItem
             @Override
             public void onPlayerBreak(BlockBreakEvent e, ItemStack item, List<ItemStack> drops) {
                 Block b = e.getBlock();
-                UUID owner = PDCUtil.getValue(b, PDCUtil.uuid, OWNER_KEY);
-                UUID uuid = PDCUtil.getValue(b, PDCUtil.uuid, UUID_KEY);
+                UUID owner = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, OWNER_KEY);
+                UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
 
                 if (!e.getPlayer().hasPermission("slimefun.android.bypass")
                         && !e.getPlayer().getUniqueId().equals(owner)) {
@@ -231,7 +232,7 @@ public class ProgrammableAndroid extends SlimefunItem
                     return;
                 }
 
-                UniversalChestMenu inv = Slimefun.getDatabaseManager().getBlockDataController().getUniversalInventory(uuid);
+                UniversalMenu inv = Slimefun.getDatabaseManager().getBlockDataController().getUniversalInventory(uuid);
 
                 if (inv != null) {
                     inv.dropItems(b.getLocation(), 43);
@@ -291,7 +292,7 @@ public class ProgrammableAndroid extends SlimefunItem
         ChestMenu menu =
                 new ChestMenu(ChatColor.DARK_AQUA + Slimefun.getLocalization().getMessage(p, "android.scripts.editor"));
         menu.setEmptySlotsClickable(false);
-        UUID uuid = PDCUtil.getValue(b, PDCUtil.uuid, UUID_KEY);
+        UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
 
         menu.addItem(
                 0,
@@ -301,7 +302,7 @@ public class ProgrammableAndroid extends SlimefunItem
                         "",
                         "&7\u21E8 &e左键 &7返回机器人的控制面板"));
         menu.addMenuClickHandler(0, (pl, slot, item, action) -> {
-            UniversalChestMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
+            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
             // Fixes #2937
             if (inv != null) {
                 inv.open(pl);
@@ -336,7 +337,7 @@ public class ProgrammableAndroid extends SlimefunItem
                                 "",
                                 "&7\u21E8 &e左键 &7返回机器人的控制面板"));
                 menu.addMenuClickHandler(slot, (pl, s, item, action) -> {
-                    UniversalChestMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
+                    UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
                     // Fixes #2937
                     if (inv != null) {
                         inv.open(pl);
@@ -582,7 +583,7 @@ public class ProgrammableAndroid extends SlimefunItem
                 new ChestMenu(ChatColor.DARK_AQUA + Slimefun.getLocalization().getMessage(p, "android.scripts.editor"));
         menu.setEmptySlotsClickable(false);
 
-        UUID uuid = PDCUtil.getValue(b, PDCUtil.uuid, UUID_KEY);
+        UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
 
         menu.addItem(1, new CustomItemStack(HeadTexture.SCRIPT_FORWARD.getAsItemStack(), "&2> 编辑脚本", "", "&a修改你现有的脚本"));
         menu.addMenuClickHandler(1, (pl, slot, item, action) -> {
@@ -625,7 +626,7 @@ public class ProgrammableAndroid extends SlimefunItem
 
         menu.addItem(8, new CustomItemStack(HeadTexture.SCRIPT_LEFT.getAsItemStack(), "&6> 返回", "", "&7返回机器人控制面板"));
         menu.addMenuClickHandler(8, (pl, slot, item, action) -> {
-            UniversalChestMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
+            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
             // Fixes #2937
             if (inv != null) {
                 inv.open(pl);
@@ -1000,8 +1001,8 @@ public class ProgrammableAndroid extends SlimefunItem
     public void addItems(Block b, ItemStack... items) {
         Validate.notNull(b, "The Block cannot be null.");
 
-        UUID uuid = PDCUtil.getValue(b, PDCUtil.uuid, UUID_KEY);
-        UniversalChestMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
+        UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
+        UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
 
         if (inv != null) {
             for (ItemStack item : items) {

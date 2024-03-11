@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
-import me.mrCookieSlime.Slimefun.api.inventory.UniversalChestMenu;
+import me.mrCookieSlime.Slimefun.api.inventory.UniversalMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -583,17 +583,12 @@ public class BlockDataController extends ADataController {
         });
     }
 
-    public UniversalChestMenu createUniversalInventory(@Nonnull UUID uuid) {
-        // TODO: Fill code
+    @Nullable public UniversalMenu getUniversalInventory(@Nonnull UUID uuid) {
+
         return null;
     }
 
-    @Nullable public UniversalChestMenu getUniversalInventory(@Nonnull UUID uuid) {
-        // TODO: Fill code
-        return null;
-    }
-
-    public void saveUniversalInventory(@Nonnull UUID universalID, UniversalChestMenu menu) {
+    public void saveUniversalInventory(@Nonnull UUID universalID, UniversalMenu menu) {
         var newInv = menu.getContents();
         List<Pair<ItemStack, Integer>> lastSave;
         if (newInv == null) {
@@ -670,7 +665,7 @@ public class BlockDataController extends ADataController {
         }
     }
 
-    private void scheduleDelayedUniversalInvUpdate(UUID uuid, UniversalChestMenu menu, int slot) {
+    private void scheduleDelayedUniversalInvUpdate(UUID uuid, UniversalMenu menu, int slot) {
         var scopeKey = new UUIDKey(DataScope.NONE, uuid);
         var reqKey = new RecordKey(DataScope.UNIVERSAL_INVENTORY);
         reqKey.addCondition(FieldKey.UNIVERSAL_UUID, uuid.toString());
@@ -724,6 +719,20 @@ public class BlockDataController extends ADataController {
         }
     }
 
+    void scheduleDelayedUniversalDataUpdate(SlimefunUniversalData universalData, String key) {
+        var scopeKey = new UUIDKey(DataScope.NONE, universalData.getKey());
+        var reqKey = new RecordKey(DataScope.UNIVERSAL_RECORD);
+        reqKey.addCondition(FieldKey.UNIVERSAL_UUID, universalData.getKey());
+        reqKey.addCondition(FieldKey.DATA_KEY, key);
+        if (enableDelayedSaving) {
+            scheduleDelayedUpdateTask(
+                new LinkedKey(scopeKey, reqKey),
+                () -> scheduleUniversalDataUpdate(scopeKey, reqKey, universalData.getKey(), key, universalData.getData(key)));
+        } else {
+            scheduleUniversalDataUpdate(scopeKey, reqKey, universalData.getKey(), key, universalData.getData(key));
+        }
+    }
+
     private void removeDelayedBlockDataUpdates(ScopeKey scopeKey) {
         synchronized (delayedWriteTasks) {
             delayedWriteTasks
@@ -739,6 +748,19 @@ public class BlockDataController extends ADataController {
             var data = new RecordSet();
             reqKey.addField(FieldKey.DATA_VALUE);
             data.put(FieldKey.LOCATION, lKey);
+            data.put(FieldKey.DATA_KEY, key);
+            data.put(FieldKey.DATA_VALUE, DataUtils.blockDataBase64(val));
+            scheduleWriteTask(scopeKey, reqKey, data, true);
+        }
+    }
+
+    private void scheduleUniversalDataUpdate(ScopeKey scopeKey, RecordKey reqKey, String uuid, String key, String val) {
+        if (val == null) {
+            scheduleDeleteTask(scopeKey, reqKey, false);
+        } else {
+            var data = new RecordSet();
+            reqKey.addField(FieldKey.DATA_VALUE);
+            data.put(FieldKey.UNIVERSAL_UUID, uuid);
             data.put(FieldKey.DATA_KEY, key);
             data.put(FieldKey.DATA_VALUE, DataUtils.blockDataBase64(val));
             scheduleWriteTask(scopeKey, reqKey, data, true);

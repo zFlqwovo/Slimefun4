@@ -42,7 +42,7 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
                 blockDataTable = SqlUtils.mapTable(DataScope.BLOCK_DATA, config.tablePrefix());
                 blockInvTable = SqlUtils.mapTable(DataScope.BLOCK_INVENTORY, config.tablePrefix());
                 chunkDataTable = SqlUtils.mapTable(DataScope.CHUNK_DATA, config.tablePrefix());
-                universalInventoryTable = SqlUtils.mapTable(DataScope.UNIVERSAL_INVENTORY, config.tablePrefix());
+                universalInvTable = SqlUtils.mapTable(DataScope.UNIVERSAL_INVENTORY, config.tablePrefix());
                 createBlockStorageTables();
             }
         }
@@ -334,7 +334,7 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
 
     private void createUniversalInventoryTable() {
         executeSql("CREATE TABLE IF NOT EXISTS "
-                + universalInventoryTable
+                + universalInvTable
                 + "("
                 + FIELD_UNIVERSAL_UUID
                 + " UUID NOT NULL, "

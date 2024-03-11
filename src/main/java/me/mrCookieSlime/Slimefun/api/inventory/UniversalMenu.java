@@ -2,7 +2,7 @@ package me.mrCookieSlime.Slimefun.api.inventory;
 
 import java.util.UUID;
 import javax.annotation.Nonnull;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
@@ -10,15 +10,16 @@ import org.bukkit.inventory.ItemStack;
  * This class represents a universal chest menu
  * which a menu located by certain identify id instead of location.
  */
-public class UniversalChestMenu extends DirtyChestMenu {
+public class UniversalMenu extends DirtyChestMenu {
+    @Getter
     private final UUID uuid;
 
-    public UniversalChestMenu(@Nonnull UniversalMenuPreset preset, @Nonnull UUID uuid) {
+    public UniversalMenu(@Nonnull UniversalMenuPreset preset, @Nonnull UUID uuid) {
         super(preset);
         this.uuid = uuid;
     }
 
-    public UniversalChestMenu(@Nonnull UniversalMenuPreset preset, @Nonnull UUID uuid, ItemStack[] contents) {
+    public UniversalMenu(@Nonnull UniversalMenuPreset preset, @Nonnull UUID uuid, ItemStack[] contents) {
         super(preset);
         this.uuid = uuid;
 
@@ -29,8 +30,6 @@ public class UniversalChestMenu extends DirtyChestMenu {
             }
             addItem(i, item);
         }
-
-        preset.clone(this);
     }
 
     /**

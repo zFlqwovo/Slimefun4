@@ -11,7 +11,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import me.mrCookieSlime.Slimefun.api.inventory.UniversalChestMenu;
+import me.mrCookieSlime.Slimefun.api.inventory.UniversalMenu;
 import org.bukkit.Location;
 
 /**
@@ -80,7 +80,7 @@ public class StorageCacheUtils {
     }
 
     @ParametersAreNonnullByDefault
-    @Nullable public static UniversalChestMenu getUniversalMenu(UUID uuid) {
+    @Nullable public static UniversalMenu getUniversalMenu(UUID uuid) {
         return Slimefun.getDatabaseManager().getBlockDataController().getUniversalInventory(uuid);
     }
 

@@ -14,7 +14,7 @@ import java.util.logging.Level;
 public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements IDataSourceAdapter<T> {
     protected HikariDataSource ds;
     protected String profileTable, researchTable, backpackTable, bpInvTable;
-    protected String blockRecordTable, blockDataTable, chunkDataTable, blockInvTable, universalInventoryTable;
+    protected String blockRecordTable, blockDataTable, universalDataTable, chunkDataTable, blockInvTable, universalInvTable;
     protected T config;
 
     @Override
@@ -57,7 +57,7 @@ public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements ID
             case CHUNK_DATA -> chunkDataTable;
             case BLOCK_DATA -> blockDataTable;
             case BLOCK_RECORD -> blockRecordTable;
-            case UNIVERSAL_INVENTORY -> universalInventoryTable;
+            case UNIVERSAL_INVENTORY -> universalInvTable;
             case NONE -> throw new IllegalArgumentException("NONE cannot be a storage data scope!");
         };
     }
@@ -74,6 +74,6 @@ public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements ID
         blockRecordTable = null;
         chunkDataTable = null;
         blockInvTable = null;
-        universalInventoryTable = null;
+        universalInvTable = null;
     }
 }
