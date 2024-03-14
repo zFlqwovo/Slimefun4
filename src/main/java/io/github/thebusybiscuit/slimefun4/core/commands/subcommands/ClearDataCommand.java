@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
 public class ClearDataCommand extends SubCommand {
+    public static final List<String> ValidClearTypes = List.of("block", "oil");
     @ParametersAreNonnullByDefault
     public ClearDataCommand(Slimefun plugin, SlimefunCommand cmd) {
         super(plugin, cmd, "cleardata", false);
@@ -24,29 +25,25 @@ public class ClearDataCommand extends SubCommand {
     public void onExecute(@Nonnull CommandSender sender, @Nonnull String[] args) {
         if (sender.hasPermission("slimefun.command.cleardata") || sender instanceof ConsoleCommandSender) {
             if (args.length == 4 && args[3].equalsIgnoreCase("confirm")) {
-                String arg1 = args[1];
-                String arg2 = args[2];
                 List<World> worlds = new ArrayList<>();
-                List<String> availableClearTypes = List.of("block", "oil");
                 List<String> clearTypes = new ArrayList<>();
                 String block = Slimefun.getLocalization().getMessage("commands.cleardata.block");
                 String oil = Slimefun.getLocalization().getMessage("commands.cleardata.oil");
-                SlimefunDatabaseManager database = Slimefun.getDatabaseManager();
-                BlockDataController controller = database.getBlockDataController();
-                if (arg1.equals("*")) {
+                BlockDataController controller = Slimefun.getDatabaseManager().getBlockDataController();
+                if (args[1].equals("*")) {
                     worlds.addAll(Bukkit.getWorlds());
                 } else {
-                    World toAdd = Bukkit.getWorld(arg1);
+                    World toAdd = Bukkit.getWorld(args[1]);
                     if (toAdd == null) {
                         Slimefun.getLocalization().sendMessage(sender, "commands.cleardata.worldNotFound", true);
                         return;
                     }
                 }
 
-                if (arg2.equals("*")) {
-                    clearTypes.addAll(availableClearTypes);
-                } else if (availableClearTypes.contains(arg2)) {
-                    clearTypes.add(arg2);
+                if (args[2].equals("*")) {
+                    clearTypes.addAll(ValidClearTypes);
+                } else if (ValidClearTypes.contains(args[2])) {
+                    clearTypes.add(args[2]);
                 }
 
                 for (World world : worlds) {
