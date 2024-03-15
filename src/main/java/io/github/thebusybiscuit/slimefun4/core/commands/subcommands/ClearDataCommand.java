@@ -4,7 +4,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataControlle
 import io.github.thebusybiscuit.slimefun4.api.geo.GEOResource;
 import io.github.thebusybiscuit.slimefun4.core.commands.SlimefunCommand;
 import io.github.thebusybiscuit.slimefun4.core.commands.SubCommand;
-import io.github.thebusybiscuit.slimefun4.core.config.SlimefunDatabaseManager;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.bukkit.command.ConsoleCommandSender;
 
 public class ClearDataCommand extends SubCommand {
     public static final List<String> ValidClearTypes = List.of("block", "oil");
+
     @ParametersAreNonnullByDefault
     public ClearDataCommand(Slimefun plugin, SlimefunCommand cmd) {
         super(plugin, cmd, "cleardata", false);
