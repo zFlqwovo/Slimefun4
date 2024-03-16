@@ -65,7 +65,7 @@ public class ClearDataCommand extends SubCommand {
                                     oilresource = resource;
                                 }
                             }
-                            controller.removeDataInWorldAsync(
+                            controller.removeFromAllChunkInWorldAsync(
                                     world,
                                     oilresource.getKey().toString().replace(":", "-"),
                                     () -> Slimefun.runSync(() -> Slimefun.getLocalization()

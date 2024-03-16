@@ -574,28 +574,9 @@ public class BlockDataController extends ADataController {
         loadedChunk.entrySet().removeIf(entry -> entry.getKey().startsWith(prefix));
     }
 
-    public void removeDataInWorld(World world, String key) {
-        // remove data in cache
-        for (SlimefunChunkData data : loadedChunk.values()) {
-            if (LocationUtils.isSameWorld(data.getChunk().getWorld(), world)) data.removeData(key);
-        }
-        var re = new RecordKey(DataScope.CHUNK_DATA);
-        re.addCondition(FieldKey.CHUNK, world.getName() + ";%");
-        re.addCondition(FieldKey.DATA_KEY, key);
-
-        deleteData(re);
-    }
-
     public void removeAllDataInWorldAsync(World world, Runnable onFinishedCallback) {
         scheduleWriteTask(() -> {
             removeAllDataInWorld(world);
-            onFinishedCallback.run();
-        });
-    }
-
-    public void removeDataInWorldAsync(World world, String key, Runnable onFinishedCallback) {
-        scheduleWriteTask(() -> {
-            removeDataInWorld(world, key);
             onFinishedCallback.run();
         });
     }
