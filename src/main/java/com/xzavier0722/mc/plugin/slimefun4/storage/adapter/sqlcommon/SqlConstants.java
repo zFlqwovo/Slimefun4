@@ -10,6 +10,8 @@ public interface SqlConstants {
     String TABLE_NAME_CHUNK_DATA = "chunk_data";
     String TABLE_NAME_BLOCK_INVENTORY = "block_inventory";
     String TABLE_NAME_UNIVERSAL_INVENTORY = "universal_inventory";
+    String TABLE_NAME_UNIVERSAL_RECORD = "universal_record";
+    String TABLE_NAME_UNIVERSAL_DATA = "universal_data";
 
     String FIELD_PLAYER_UUID = "p_uuid";
     String FIELD_PLAYER_NAME = "p_name";

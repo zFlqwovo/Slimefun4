@@ -23,7 +23,9 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_CHUNK_DATA;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_PLAYER_PROFILE;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_PLAYER_RESEARCH;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_UNIVERSAL_DATA;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_UNIVERSAL_INVENTORY;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.TABLE_NAME_UNIVERSAL_RECORD;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
@@ -77,6 +79,8 @@ public class SqlUtils {
             case CHUNK_DATA -> TABLE_NAME_CHUNK_DATA;
             case BLOCK_INVENTORY -> TABLE_NAME_BLOCK_INVENTORY;
             case UNIVERSAL_INVENTORY -> TABLE_NAME_UNIVERSAL_INVENTORY;
+            case UNIVERSAL_RECORD -> TABLE_NAME_UNIVERSAL_RECORD;
+            case UNIVERSAL_DATA -> TABLE_NAME_UNIVERSAL_DATA;
             case NONE -> throw new IllegalArgumentException("NONE cannot be a storage data scope!");
         };
     }
