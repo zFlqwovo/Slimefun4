@@ -15,8 +15,9 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
-import io.github.thebusybiscuit.slimefun4.core.attributes.NotDiagonallyRotatable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.RecipeDisplayItem;
+import io.github.thebusybiscuit.slimefun4.core.attributes.UniversalDataSupport;
+import io.github.thebusybiscuit.slimefun4.core.attributes.rotations.NotDiagonallyRotatable;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.services.sounds.SoundEffect;
@@ -72,7 +73,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 public class ProgrammableAndroid extends SlimefunItem
-        implements InventoryBlock, RecipeDisplayItem, NotDiagonallyRotatable {
+        implements InventoryBlock, RecipeDisplayItem, NotDiagonallyRotatable, UniversalDataSupport {
 
     private static final List<BlockFace> POSSIBLE_ROTATIONS =
             Arrays.asList(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST);
@@ -192,8 +193,6 @@ public class ProgrammableAndroid extends SlimefunItem
                 Block b = e.getBlock();
                 UUID uuid = UUID.randomUUID();
 
-                Slimefun.getDatabaseManager().getBlockDataController().createUniversalInventory(uuid);
-
                 PDCUtil.setValue(b, PDCUtil.UUID_TYPE, OWNER_KEY, p.getUniqueId());
                 PDCUtil.setValue(b, PDCUtil.UUID_TYPE, UUID_KEY, uuid);
                 PDCUtil.setValue(b, PersistentDataType.STRING, SCRIPT_KEY, DEFAULT_SCRIPT);
@@ -232,11 +231,15 @@ public class ProgrammableAndroid extends SlimefunItem
                     return;
                 }
 
-                UniversalMenu inv = Slimefun.getDatabaseManager().getBlockDataController().getUniversalInventory(uuid);
+                var uniData =
+                        Slimefun.getDatabaseManager().getBlockDataController().getUniversalData(uuid);
 
-                if (inv != null) {
-                    inv.dropItems(b.getLocation(), 43);
-                    inv.dropItems(b.getLocation(), getOutputSlots());
+                if (uniData != null) {
+                    var menu = uniData.getUniversalMenu();
+                    if (menu != null) {
+                        menu.dropItems(b.getLocation(), 43);
+                        menu.dropItems(b.getLocation(), getOutputSlots());
+                    }
                 }
             }
         };
@@ -293,6 +296,10 @@ public class ProgrammableAndroid extends SlimefunItem
                 new ChestMenu(ChatColor.DARK_AQUA + Slimefun.getLocalization().getMessage(p, "android.scripts.editor"));
         menu.setEmptySlotsClickable(false);
         UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
+
+        if (uuid == null) {
+            throw new IllegalStateException("Android missing uuid");
+        }
 
         menu.addItem(
                 0,

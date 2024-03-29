@@ -25,7 +25,9 @@ public enum FieldKey {
     /**
      * Represents uuid of universal inventory
      */
-    UNIVERSAL_UUID;
+    UNIVERSAL_UUID,
+
+    LAST_PRESENT;
 
     private final boolean isNumType;
 

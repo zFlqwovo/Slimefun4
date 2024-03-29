@@ -32,4 +32,6 @@ public interface SqlConstants {
     String FIELD_DATA_VALUE = "data_val";
 
     String FIELD_UNIVERSAL_UUID = "universal_uuid";
+
+    String FIELD_LAST_PRESENT = "last_present";
 }

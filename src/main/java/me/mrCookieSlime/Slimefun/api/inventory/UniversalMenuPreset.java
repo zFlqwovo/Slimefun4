@@ -43,8 +43,16 @@ public abstract class UniversalMenuPreset extends BlockMenuPreset {
         menu.addMenuCloseHandler(getMenuCloseHandler());
     }
 
-    @Nullable
-    public static BlockMenuPreset getPreset(@Nullable String id) {
-        return id == null ? null : Slimefun.getRegistry().getMenuPresets().get(id);
+    @Nullable public static UniversalMenuPreset getPreset(@Nullable String id) {
+        if (id == null) {
+            return null;
+        } else {
+            var preset = Slimefun.getRegistry().getMenuPresets().get(id);
+            if (preset instanceof UniversalMenuPreset uniPreset) {
+                return uniPreset;
+            } else {
+                return null;
+            }
+        }
     }
 }

@@ -42,8 +42,7 @@ public class PDCUtil {
         container.set(key, type, value);
     }
 
-    @Nullable
-    public static <T, Z> Z getValue(
+    @Nullable public static <T, Z> Z getValue(
             @Nonnull Block block, @Nonnull PersistentDataType<T, Z> type, @Nonnull NamespacedKey key) {
         var state = (TileState) PaperLib.getBlockState(block, false);
         var container = state.getPersistentDataContainer();
@@ -51,8 +50,7 @@ public class PDCUtil {
         return getValue(container, type, key);
     }
 
-    @Nullable
-    public static <T, Z> Z getValue(
+    @Nullable public static <T, Z> Z getValue(
             @Nonnull PersistentDataContainer container,
             @Nonnull PersistentDataType<T, Z> type,
             @Nonnull NamespacedKey key) {

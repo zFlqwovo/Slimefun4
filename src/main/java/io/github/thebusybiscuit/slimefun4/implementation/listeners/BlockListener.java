@@ -9,10 +9,11 @@ import io.github.thebusybiscuit.slimefun4.api.events.ExplosiveToolBreakBlocksEve
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockBreakEvent;
 import io.github.thebusybiscuit.slimefun4.api.events.SlimefunBlockPlaceEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
-import io.github.thebusybiscuit.slimefun4.core.attributes.NotCardinallyRotatable;
-import io.github.thebusybiscuit.slimefun4.core.attributes.NotDiagonallyRotatable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
-import io.github.thebusybiscuit.slimefun4.core.attributes.NotRotatable;
+import io.github.thebusybiscuit.slimefun4.core.attributes.UniversalDataSupport;
+import io.github.thebusybiscuit.slimefun4.core.attributes.rotations.NotCardinallyRotatable;
+import io.github.thebusybiscuit.slimefun4.core.attributes.rotations.NotDiagonallyRotatable;
+import io.github.thebusybiscuit.slimefun4.core.attributes.rotations.NotRotatable;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ToolUseHandler;
@@ -143,9 +144,15 @@ public class BlockListener implements Listener {
                 var placeEvent = new SlimefunBlockPlaceEvent(e.getPlayer(), item, e.getBlock(), sfItem);
                 Bukkit.getPluginManager().callEvent(placeEvent);
 
-                Slimefun.getDatabaseManager()
-                        .getBlockDataController()
-                        .createBlock(e.getBlock().getLocation(), sfItem.getId());
+                if (sfItem instanceof UniversalDataSupport) {
+                    Slimefun.getDatabaseManager()
+                            .getBlockDataController()
+                            .createUniversalData(e.getBlock().getLocation(), sfItem.getId());
+                } else {
+                    Slimefun.getDatabaseManager()
+                            .getBlockDataController()
+                            .createBlock(e.getBlock().getLocation(), sfItem.getId());
+                }
                 sfItem.callItemHandler(BlockPlaceHandler.class, handler -> handler.onPlayerPlace(e));
             }
         }

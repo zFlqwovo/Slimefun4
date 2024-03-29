@@ -81,7 +81,13 @@ public class StorageCacheUtils {
 
     @ParametersAreNonnullByDefault
     @Nullable public static UniversalMenu getUniversalMenu(UUID uuid) {
-        return Slimefun.getDatabaseManager().getBlockDataController().getUniversalInventory(uuid);
+        var uniData = Slimefun.getDatabaseManager().getBlockDataController().getUniversalData(uuid);
+
+        if (uniData == null) {
+            return null;
+        }
+
+        return uniData.getUniversalMenu();
     }
 
     public static void requestLoad(SlimefunBlockData blockData) {
