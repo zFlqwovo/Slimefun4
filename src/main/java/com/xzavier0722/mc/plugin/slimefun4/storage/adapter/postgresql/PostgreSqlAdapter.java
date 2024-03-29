@@ -370,28 +370,28 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
 
     private void createUniversalDataTable() {
         executeSql("CREATE TABLE IF NOT EXISTS "
-            + universalDataTable
-            + "("
-            + FIELD_UNIVERSAL_UUID
-            + " UUID NOT NULL, "
-            + FIELD_DATA_KEY
-            + " VARCHAR(64) NOT NULL, "
-            + FIELD_DATA_VALUE
-            + " TEXT NOT NULL, "
-            + "FOREIGN KEY ("
-            + FIELD_UNIVERSAL_UUID
-            + ") "
-            + "REFERENCES "
-            + universalRecordTable
-            + "("
-            + FIELD_UNIVERSAL_UUID
-            + ") "
-            + "ON UPDATE CASCADE ON DELETE CASCADE, "
-            + "PRIMARY KEY ("
-            + FIELD_UNIVERSAL_UUID
-            + ", "
-            + FIELD_DATA_KEY
-            + ")"
-            + ");");
+                + universalDataTable
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + " UUID NOT NULL, "
+                + FIELD_DATA_KEY
+                + " VARCHAR(64) NOT NULL, "
+                + FIELD_DATA_VALUE
+                + " TEXT NOT NULL, "
+                + "FOREIGN KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ") "
+                + "REFERENCES "
+                + universalRecordTable
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + ") "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "PRIMARY KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ", "
+                + FIELD_DATA_KEY
+                + ")"
+                + ");");
     }
 }
