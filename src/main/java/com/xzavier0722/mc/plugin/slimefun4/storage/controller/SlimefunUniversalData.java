@@ -71,6 +71,10 @@ public class SlimefunUniversalData extends ASlimefunDataContainer {
         return re;
     }
 
+    public UUID getUUID() {
+        return UUID.fromString(getKey());
+    }
+
     @Override
     public String toString() {
         return "SlimefunUniversalData [sfId=" + sfId + ", isPendingRemove=" + pendingRemove + "]";

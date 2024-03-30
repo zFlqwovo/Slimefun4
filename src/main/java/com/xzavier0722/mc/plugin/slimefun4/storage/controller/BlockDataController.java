@@ -17,6 +17,7 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.util.InvStorageUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import io.github.bakedlibs.dough.collections.Pair;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.core.attributes.UniversalDataSupport;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +65,13 @@ public class BlockDataController extends ADataController {
         lock = new ScopedLock();
     }
 
+    /**
+     * 初始化数据控制器
+     *
+     * @param dataAdapter 使用的 {@link IDataSourceAdapter}
+     * @param maxReadThread 最大数据库读线程数
+     * @param maxWriteThread 最大数据库写线程数
+     */
     @Override
     public void init(IDataSourceAdapter<?> dataAdapter, int maxReadThread, int maxWriteThread) {
         super.init(dataAdapter, maxReadThread, maxWriteThread);
@@ -71,13 +79,21 @@ public class BlockDataController extends ADataController {
         initLoadData();
     }
 
+    /**
+     * 初始化加载数据
+     */
     private void initLoadData() {
         switch (chunkDataLoadMode) {
             case LOAD_WITH_CHUNK -> loadLoadedChunks();
             case LOAD_ON_STARTUP -> loadLoadedWorlds();
         }
+
+        loadUniversalData(); // FIXME: 按需加载?
     }
 
+    /**
+     * 加载所有服务器已加载的世界中的数据
+     */
     private void loadLoadedWorlds() {
         Bukkit.getScheduler()
                 .runTaskLater(
@@ -92,6 +108,9 @@ public class BlockDataController extends ADataController {
                         1);
     }
 
+    /**
+     * 加载所有服务器已加载的世界区块中的数据
+     */
     private void loadLoadedChunks() {
         Bukkit.getScheduler()
                 .runTaskLater(
@@ -103,6 +122,23 @@ public class BlockDataController extends ADataController {
                                     loadChunk(chunk, false);
                                 }
                             }
+                            initLoading = false;
+                        },
+                        1);
+    }
+
+    /**
+     * 加载所有通用数据
+     *
+     * @see SlimefunUniversalData
+     */
+    private void loadUniversalData() {
+        Bukkit.getScheduler()
+                .runTaskLater(
+                        Slimefun.instance(),
+                        () -> {
+                            initLoading = true;
+                            // TODO
                             initLoading = false;
                         },
                         1);
@@ -147,16 +183,26 @@ public class BlockDataController extends ADataController {
      *
      * @param l    slimefun block location {@link Location}
      * @param sfId slimefun block id {@link SlimefunItem#getId()}
-     * @return {@link SlimefunBlockData}
+     * @return {@link ASlimefunDataContainer}
      */
     @Nonnull
-    public SlimefunBlockData createBlock(Location l, String sfId) {
+    public ASlimefunDataContainer createBlock(Location l, String sfId) {
         checkDestroy();
-        var re = getChunkDataCache(l.getChunk(), true).createBlockData(l, sfId);
-        if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
-            Slimefun.getTickerTask().enableTicker(l);
+        var sfItem = SlimefunItem.getById(sfId);
+
+        if (sfItem instanceof UniversalDataSupport) {
+            var re = createUniversalData(l, sfId);
+            if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
+                Slimefun.getTickerTask().enableTicker(l);
+            }
+            return re;
+        } else {
+            var re = getChunkDataCache(l.getChunk(), true).createBlockData(l, sfId);
+            if (Slimefun.getRegistry().getTickerBlocks().contains(sfId)) {
+                Slimefun.getTickerTask().enableTicker(l);
+            }
+            return re;
         }
-        return re;
     }
 
     @Nonnull
@@ -599,6 +645,75 @@ public class BlockDataController extends ADataController {
             List<SlimefunBlockData> blockDataList, IAsyncReadCallback<List<SlimefunBlockData>> callback) {
         scheduleReadTask(() -> blockDataList.forEach(this::loadBlockData));
         invokeCallback(callback, blockDataList);
+    }
+
+    @ParametersAreNonnullByDefault
+    public void loadUniversalData(SlimefunUniversalData uniData) {
+        if (uniData.isDataLoaded()) {
+            return;
+        }
+
+        var key = new RecordKey(DataScope.UNIVERSAL_DATA);
+        key.addCondition(FieldKey.UNIVERSAL_UUID, uniData.getKey());
+        key.addField(FieldKey.DATA_KEY);
+        key.addField(FieldKey.DATA_VALUE);
+
+        lock.lock(key);
+
+        try {
+            if (uniData.isDataLoaded()) {
+                return;
+            }
+
+            getData(key)
+                    .forEach(recordSet -> uniData.setCacheInternal(
+                            recordSet.get(FieldKey.DATA_KEY),
+                            DataUtils.blockDataDebase64(recordSet.get(FieldKey.DATA_VALUE)),
+                            false));
+
+            uniData.setIsDataLoaded(true);
+
+            var menuPreset = UniversalMenuPreset.getPreset(uniData.getSfId());
+            if (menuPreset != null) {
+                var menuKey = new RecordKey(DataScope.UNIVERSAL_INVENTORY);
+                menuKey.addCondition(FieldKey.UNIVERSAL_UUID, uniData.getKey());
+                menuKey.addField(FieldKey.INVENTORY_SLOT);
+                menuKey.addField(FieldKey.INVENTORY_ITEM);
+
+                var inv = new ItemStack[54];
+
+                getData(menuKey)
+                        .forEach(recordSet -> inv[recordSet.getInt(FieldKey.INVENTORY_SLOT)] =
+                                recordSet.getItemStack(FieldKey.INVENTORY_ITEM));
+                uniData.setUniversalMenu(new UniversalMenu(menuPreset, uniData.getUUID(), inv));
+
+                var content = uniData.getMenuContents();
+                if (content != null) {
+                    invSnapshots.put(uniData.getKey(), InvStorageUtils.getInvSnapshot(content));
+                }
+            }
+
+            var sfItem = SlimefunItem.getById(uniData.getSfId());
+            if (sfItem != null
+                    && sfItem.isTicking()
+                    && !uniData.getLastPresent()
+                            .getBlock()
+                            .getType()
+                            .equals(sfItem.getItem().getType())) {
+                Slimefun.getTickerTask().enableTicker(uniData.getLastPresent());
+            }
+        } finally {
+            lock.unlock(key);
+        }
+    }
+
+    @ParametersAreNonnullByDefault
+    public void loadUniversalDataAsync(
+            SlimefunUniversalData uniData, IAsyncReadCallback<SlimefunUniversalData> callback) {
+        scheduleReadTask(() -> {
+            loadUniversalData(uniData);
+            invokeCallback(callback, uniData);
+        });
     }
 
     public SlimefunChunkData getChunkData(Chunk chunk) {
