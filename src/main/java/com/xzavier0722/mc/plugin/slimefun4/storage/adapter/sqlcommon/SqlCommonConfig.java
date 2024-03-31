@@ -47,7 +47,7 @@ public abstract class SqlCommonConfig implements ISqlCommonConfig {
         }
 
         config.setMaximumPoolSize(maxConnection);
-        config.setLeakDetectionThreshold(20000);
+        config.setLeakDetectionThreshold(3000);
         config.addDataSourceProperty("useLocalSessionState", "true");
         config.addDataSourceProperty("rewriteBatchedStatements", "true");
         config.addDataSourceProperty("cacheResultSetMetadata", "true");

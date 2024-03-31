@@ -11,7 +11,7 @@ public record SqliteConfig(String path, int maxConnection) implements ISqlCommon
         config.setJdbcUrl(jdbcUrl());
         config.setPoolName("SlimefunHikariPool");
         config.setMaximumPoolSize(maxConnection);
-        config.setLeakDetectionThreshold(20000);
+        config.setLeakDetectionThreshold(3000);
 
         return new HikariDataSource(config);
     }
