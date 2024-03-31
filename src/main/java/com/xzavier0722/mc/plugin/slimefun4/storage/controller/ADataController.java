@@ -76,28 +76,20 @@ public abstract class ADataController {
     }
 
     protected void scheduleDeleteTask(ScopeKey scopeKey, RecordKey key, boolean forceScopeKey) {
-        Debug.log(TestCase.DATABASE, "Scheduled remove task for key = {}", key);
-
         scheduleWriteTask(
                 scopeKey,
                 key,
                 () -> {
                     dataAdapter.deleteData(key);
-                    Debug.log(TestCase.DATABASE, "Data from key {} deleted.", key);
                 },
                 forceScopeKey);
     }
 
     protected void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, RecordSet data, boolean forceScopeKey) {
-        Debug.log(TestCase.DATABASE, "Scheduled write task for key = {}, record set = {}", key, data.getAll());
-
         scheduleWriteTask(
                 scopeKey,
                 key,
-                () -> {
-                    dataAdapter.setData(key, data);
-                    Debug.log(TestCase.DATABASE, "Data from key {} set, with record set {}", key, data.getAll());
-                },
+                () -> dataAdapter.setData(key, data),
                 forceScopeKey);
     }
 
