@@ -28,8 +28,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.FieldMapper;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import io.github.bakedlibs.dough.collections.Pair;
-import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
-import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;

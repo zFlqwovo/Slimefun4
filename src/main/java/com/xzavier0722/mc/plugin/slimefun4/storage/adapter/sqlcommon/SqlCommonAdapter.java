@@ -7,11 +7,9 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
 import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
-import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
-import java.util.logging.Level;
 
 public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements IDataSourceAdapter<T> {
     protected HikariDataSource ds;

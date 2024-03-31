@@ -8,8 +8,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.ScopeKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.DatabaseThreadFactory;
 import com.xzavier0722.mc.plugin.slimefun4.storage.task.QueuedWriteTask;
-import io.github.thebusybiscuit.slimefun4.core.debug.Debug;
-import io.github.thebusybiscuit.slimefun4.core.debug.TestCase;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.List;
 import java.util.Map;
@@ -86,11 +84,7 @@ public abstract class ADataController {
     }
 
     protected void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, RecordSet data, boolean forceScopeKey) {
-        scheduleWriteTask(
-                scopeKey,
-                key,
-                () -> dataAdapter.setData(key, data),
-                forceScopeKey);
+        scheduleWriteTask(scopeKey, key, () -> dataAdapter.setData(key, data), forceScopeKey);
     }
 
     protected void scheduleWriteTask(ScopeKey scopeKey, RecordKey key, Runnable task, boolean forceScopeKey) {
