@@ -3,7 +3,7 @@
 echo "[pre-commit check]"
 
 echo -n "Checking code format with spotless: "
-mvn spotless:apply > /tmp/spotless.out 2>&1
+mvn spotless:check > /tmp/spotless.out 2>&1
 RETURN_VALUE=$?
 if [ $RETURN_VALUE -gt 0 ]
 then
