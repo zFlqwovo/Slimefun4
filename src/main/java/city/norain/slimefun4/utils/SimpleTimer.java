@@ -18,8 +18,11 @@ public class SimpleTimer {
     }
 
     public String durationStr() {
-        var duration = duration();
-        return String.format("%d:%02d:%02d", duration.toHours(), duration.toMinutesPart(), duration.toSecondsPart());
+        if (snapshot == null) {
+            snapshot = duration();
+        }
+
+        return String.format("%d:%02d:%02d", snapshot.toHours(), snapshot.toMinutesPart(), snapshot.toSecondsPart());
     }
 
     public boolean isTimeout(Duration duration) {
