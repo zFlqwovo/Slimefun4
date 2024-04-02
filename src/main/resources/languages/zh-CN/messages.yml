@@ -152,6 +152,10 @@ guide:
       wiki: '&3Wiki 编辑者'
       resourcepack: '&c材质制作者'
       translator: '&9翻译者'
+
+actionbar:
+  radiation: '&6辐射暴露等级：&c%level%&7/&e100'
+
 messages:
   android-no-permission: "&c你的机器人在某个你没有权限的领地/地皮中无法工作, 机器人已自动暂停运行."
   transform:
