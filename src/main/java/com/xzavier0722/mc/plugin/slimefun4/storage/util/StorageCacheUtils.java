@@ -91,11 +91,11 @@ public class StorageCacheUtils {
     @Nullable public static UniversalMenu getUniversalMenu(Block block) {
         var uuid = Slimefun.getBlockDataService().getUniversalDataUUID(block);
 
-        return uuid.map(StorageCacheUtils::getUniversalMenu).orElse(null);
+        return uuid.map(uniId -> getUniversalMenu(uniId, block.getLocation())).orElse(null);
     }
 
     @ParametersAreNonnullByDefault
-    @Nullable public static UniversalMenu getUniversalMenu(UUID uuid) {
+    @Nullable public static UniversalMenu getUniversalMenu(UUID uuid, Location l) {
         var uniData = Slimefun.getDatabaseManager().getBlockDataController().getUniversalDataFromCache(uuid);
 
         if (uniData == null) {
@@ -106,6 +106,8 @@ public class StorageCacheUtils {
             requestLoad(uniData);
             return null;
         }
+
+        uniData.setLastPresent(l);
 
         return uniData.getUniversalMenu();
     }

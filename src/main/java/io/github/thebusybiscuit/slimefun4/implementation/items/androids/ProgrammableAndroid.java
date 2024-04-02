@@ -309,7 +309,7 @@ public class ProgrammableAndroid extends SlimefunItem
                         "",
                         "&7\u21E8 &e左键 &7返回机器人的控制面板"));
         menu.addMenuClickHandler(0, (pl, slot, item, action) -> {
-            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
+            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid, b.getLocation());
             // Fixes #2937
             if (inv != null) {
                 inv.open(pl);
@@ -344,7 +344,7 @@ public class ProgrammableAndroid extends SlimefunItem
                                 "",
                                 "&7\u21E8 &e左键 &7返回机器人的控制面板"));
                 menu.addMenuClickHandler(slot, (pl, s, item, action) -> {
-                    UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
+                    UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid, b.getLocation());
                     // Fixes #2937
                     if (inv != null) {
                         inv.open(pl);
@@ -633,7 +633,7 @@ public class ProgrammableAndroid extends SlimefunItem
 
         menu.addItem(8, new CustomItemStack(HeadTexture.SCRIPT_LEFT.getAsItemStack(), "&6> 返回", "", "&7返回机器人控制面板"));
         menu.addMenuClickHandler(8, (pl, slot, item, action) -> {
-            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
+            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid, b.getLocation());
             // Fixes #2937
             if (inv != null) {
                 inv.open(pl);
@@ -1009,7 +1009,7 @@ public class ProgrammableAndroid extends SlimefunItem
         Validate.notNull(b, "The Block cannot be null.");
 
         UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
-        UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid);
+        UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid, b.getLocation());
 
         if (inv != null) {
             for (ItemStack item : items) {
