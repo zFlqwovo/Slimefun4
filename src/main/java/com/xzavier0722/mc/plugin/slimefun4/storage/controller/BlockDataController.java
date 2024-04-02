@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,17 +44,55 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
+/**
+ * 方块数据控制器
+ * <p>
+ * 用于管理区块中的 Slimefun 方块数据
+ * <p>
+ * {@link SlimefunBlockData}
+ * {@link SlimefunUniversalData}
+ *
+ * @author Xzavier0722
+ * @author NoRainCity
+ */
 public class BlockDataController extends ADataController {
-
+    /**
+     * 延迟写数据任务队列
+     */
     private final Map<LinkedKey, DelayedTask> delayedWriteTasks;
+    /**
+     * 区块数据缓存
+     */
     private final Map<String, SlimefunChunkData> loadedChunk;
+    /**
+     * 通用数据缓存
+     */
     private final Map<UUID, SlimefunUniversalData> loadedUniversalData;
+    /**
+     * 方块物品栏快照
+     */
     private final Map<String, List<Pair<ItemStack, Integer>>> invSnapshots;
+    /**
+     * 全局控制器加载数据锁
+     *
+     * {@link ScopedLock}
+     */
     private final ScopedLock lock;
+    /**
+     * 延时加载模式标志
+     */
     private boolean enableDelayedSaving = false;
+
     private int delayedSecond = 0;
     private BukkitTask looperTask;
+    /**
+     * 区块数据加载模式
+     * {@link ChunkDataLoadMode}
+     */
     private ChunkDataLoadMode chunkDataLoadMode;
+    /**
+     * 初始化加载中标志
+     */
     private boolean initLoading = false;
 
     BlockDataController() {
@@ -87,8 +126,6 @@ public class BlockDataController extends ADataController {
             case LOAD_WITH_CHUNK -> loadLoadedChunks();
             case LOAD_ON_STARTUP -> loadLoadedWorlds();
         }
-
-        loadUniversalData(); // FIXME: 按需加载?
     }
 
     /**
@@ -128,26 +165,16 @@ public class BlockDataController extends ADataController {
     }
 
     /**
-     * 加载所有通用数据
+     * 初始化延时加载任务
      *
-     * @see SlimefunUniversalData
+     * @param p 插件实例
+     * @param delayedSecond 首次执行延时
+     * @param forceSavePeriod 强制保存周期
      */
-    private void loadUniversalData() {
-        Bukkit.getScheduler()
-                .runTaskLater(
-                        Slimefun.instance(),
-                        () -> {
-                            initLoading = true;
-                            // TODO
-                            initLoading = false;
-                        },
-                        1);
-    }
-
     public void initDelayedSaving(Plugin p, int delayedSecond, int forceSavePeriod) {
         checkDestroy();
         if (delayedSecond < 1 || forceSavePeriod < 1) {
-            throw new IllegalArgumentException("Second must be greater than 0!");
+            throw new IllegalArgumentException("save period second must be greater than 0!");
         }
         enableDelayedSaving = true;
         this.delayedSecond = delayedSecond;
@@ -179,11 +206,13 @@ public class BlockDataController extends ADataController {
     }
 
     /**
-     * Creates a new slimefun block data at specific location
+     * 在指定位置新建方块
      *
-     * @param l    slimefun block location {@link Location}
-     * @param sfId slimefun block id {@link SlimefunItem#getId()}
-     * @return {@link ASlimefunDataContainer}
+     * @param l    Slimefun 方块位置 {@link Location}
+     * @param sfId Slimefun 物品 ID {@link SlimefunItem#getId()}
+     * @return 方块数据, 可能会返回两类数据
+     *      {@link SlimefunBlockData}
+     *      {@link SlimefunUniversalData}
      */
     @Nonnull
     public ASlimefunDataContainer createBlock(Location l, String sfId) {
@@ -270,6 +299,8 @@ public class BlockDataController extends ADataController {
 
         var removed = getChunkDataCache(l.getChunk(), true).removeBlockData(l);
         if (removed == null) {
+            getUniversalDataFromCache(l).ifPresent(data -> removeUniversalData(data.getUUID()));
+
             return;
         }
 
@@ -424,6 +455,19 @@ public class BlockDataController extends ADataController {
     }
 
     /**
+     * Get slimefun universal data from cache by location
+     *
+     * @param l     Slimefun block location {@link Location}
+     */
+    public Optional<SlimefunUniversalData> getUniversalDataFromCache(@Nonnull Location l) {
+        checkDestroy();
+
+        return loadedUniversalData.values().stream()
+                .filter(uniData -> uniData.getLastPresent().equals(l))
+                .findFirst();
+    }
+
+    /**
      * Move block data to specific location
      * <p>
      * Similar to original BlockStorage#move.
@@ -515,6 +559,8 @@ public class BlockDataController extends ADataController {
 
         loadChunkData(chunkData);
 
+        // 按区块加载方块数据
+
         var key = new RecordKey(DataScope.BLOCK_RECORD);
         key.addField(FieldKey.LOCATION);
         key.addField(FieldKey.SLIMEFUN_ID);
@@ -536,6 +582,32 @@ public class BlockDataController extends ADataController {
                 scheduleReadTask(() -> loadBlockData(blockData));
             }
         });
+
+        // 按区块对应世界加载通用数据
+
+        var uniKey = new RecordKey(DataScope.UNIVERSAL_RECORD);
+        uniKey.addField(FieldKey.LAST_PRESENT);
+        // FIXME: 不应该在区块加载中再直接加载全世界
+        uniKey.addCondition(FieldKey.LAST_PRESENT, chunk.getWorld().getName() + ";%");
+        getData(uniKey, true).forEach(data -> {
+            var sfId = data.get(FieldKey.SLIMEFUN_ID);
+            var sfItem = SlimefunItem.getById(sfId);
+
+            if (sfItem == null) {
+                return;
+            }
+
+            var uuid = data.getUUID(FieldKey.UNIVERSAL_UUID);
+            var location = LocationUtils.toLocation(data.get(FieldKey.LAST_PRESENT));
+
+            var cache = getUniversalDataFromCache(uuid);
+            var uniData = cache == null ? new SlimefunUniversalData(uuid, location, sfId) : cache;
+
+            if (sfItem.loadDataByDefault()) {
+                scheduleReadTask(() -> loadUniversalData(uniData));
+            }
+        });
+
         Bukkit.getPluginManager().callEvent(new SlimefunChunkDataLoadEvent(chunkData));
     }
 
