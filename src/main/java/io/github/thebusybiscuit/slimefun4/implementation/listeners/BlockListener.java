@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunUniversalData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.protection.Interaction;
 import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
@@ -119,7 +120,8 @@ public class BlockListener implements Listener {
             if (!sfItem.canUse(e.getPlayer(), true)) {
                 e.setCancelled(true);
             } else {
-                if (e.getBlock().getBlockData() instanceof Rotatable rotatable
+                var block = e.getBlock();
+                if (block.getBlockData() instanceof Rotatable rotatable
                         && !(rotatable.getRotation() == BlockFace.UP || rotatable.getRotation() == BlockFace.DOWN)) {
                     BlockFace rotation = null;
 
@@ -137,17 +139,30 @@ public class BlockListener implements Listener {
 
                     if (rotation != null) {
                         rotatable.setRotation(rotation);
-                        e.getBlock().setBlockData(rotatable);
+                        block.setBlockData(rotatable);
                     }
                 }
-                var placeEvent = new SlimefunBlockPlaceEvent(e.getPlayer(), item, e.getBlock(), sfItem);
+                var placeEvent = new SlimefunBlockPlaceEvent(e.getPlayer(), item, block, sfItem);
                 Bukkit.getPluginManager().callEvent(placeEvent);
 
-                Slimefun.getDatabaseManager()
-                        .getBlockDataController()
-                        .createBlock(e.getBlock().getLocation(), sfItem.getId());
+                if (placeEvent.isCancelled()) {
+                    e.setCancelled(true);
+                } else {
+                    if (Slimefun.getBlockDataService().isTileEntity(block.getType())) {
+                        Slimefun.getBlockDataService().setBlockData(block, sfItem.getId());
+                    }
 
-                sfItem.callItemHandler(BlockPlaceHandler.class, handler -> handler.onPlayerPlace(e));
+                    var data = Slimefun.getDatabaseManager()
+                            .getBlockDataController()
+                            .createBlock(block.getLocation(), sfItem.getId());
+
+                    if (Slimefun.getBlockDataService().isTileEntity(block.getType())
+                            && data instanceof SlimefunUniversalData) {
+                        Slimefun.getBlockDataService().setUniversalDataUUID(block, data.getKey());
+                    }
+
+                    sfItem.callItemHandler(BlockPlaceHandler.class, handler -> handler.onPlayerPlace(e));
+                }
             }
         }
     }

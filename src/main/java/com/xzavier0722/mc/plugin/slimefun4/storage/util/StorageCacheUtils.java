@@ -15,6 +15,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.UniversalMenu;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 
 /**
  * Utils to access the cached block data.
@@ -28,6 +29,11 @@ public class StorageCacheUtils {
     @ParametersAreNonnullByDefault
     public static boolean hasBlock(Location l) {
         return getBlock(l) != null;
+    }
+
+    @ParametersAreNonnullByDefault
+    public static boolean hasUniversalBlock(Location l) {
+        return Slimefun.getBlockDataService().getUniversalDataUUID(l.getBlock()).isPresent();
     }
 
     @ParametersAreNonnullByDefault
@@ -79,6 +85,13 @@ public class StorageCacheUtils {
         }
 
         return blockData.getBlockMenu();
+    }
+
+    @ParametersAreNonnullByDefault
+    @Nullable public static UniversalMenu getUniversalMenu(Block block) {
+        var uuid = Slimefun.getBlockDataService().getUniversalDataUUID(block);
+
+        return uuid.map(StorageCacheUtils::getUniversalMenu).orElse(null);
     }
 
     @ParametersAreNonnullByDefault
