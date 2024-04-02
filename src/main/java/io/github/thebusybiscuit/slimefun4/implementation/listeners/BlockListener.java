@@ -143,10 +143,18 @@ public class BlockListener implements Listener {
                 var placeEvent = new SlimefunBlockPlaceEvent(e.getPlayer(), item, e.getBlock(), sfItem);
                 Bukkit.getPluginManager().callEvent(placeEvent);
 
-                Slimefun.getDatabaseManager()
-                        .getBlockDataController()
-                        .createBlock(e.getBlock().getLocation(), sfItem.getId());
-                sfItem.callItemHandler(BlockPlaceHandler.class, handler -> handler.onPlayerPlace(e));
+                if (placeEvent.isCancelled()) {
+                    e.setCancelled(true);
+                } else {
+                    if (Slimefun.getBlockDataService().isTileEntity(e.getBlock().getType())) {
+                        Slimefun.getBlockDataService().setBlockData(e.getBlock(), sfItem.getId());
+                    }
+
+                    Slimefun.getDatabaseManager()
+                            .getBlockDataController()
+                            .createBlock(e.getBlock().getLocation(), sfItem.getId());
+                    sfItem.callItemHandler(BlockPlaceHandler.class, handler -> handler.onPlayerPlace(e));
+                }
             }
         }
     }
