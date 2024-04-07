@@ -85,7 +85,6 @@ public class ProgrammableAndroid extends SlimefunItem
     private static final int MAX_SCRIPT_LENGTH = 54;
 
     private static final NamespacedKey OWNER_KEY = new NamespacedKey(Slimefun.instance(), "android_owner");
-    private static final NamespacedKey UUID_KEY = new NamespacedKey(Slimefun.instance(), "android_uuid");
     private static final NamespacedKey SCRIPT_KEY = new NamespacedKey(Slimefun.instance(), "android_script");
     private static final NamespacedKey SCRIPT_INDEX_KEY = new NamespacedKey(Slimefun.instance(), "android_script_step");
     private static final NamespacedKey FUEL_KEY = new NamespacedKey(Slimefun.instance(), "android_fuel");
@@ -194,7 +193,6 @@ public class ProgrammableAndroid extends SlimefunItem
                 UUID uuid = UUID.randomUUID();
 
                 PDCUtil.setValue(b, PDCUtil.UUID_TYPE, OWNER_KEY, p.getUniqueId());
-                PDCUtil.setValue(b, PDCUtil.UUID_TYPE, UUID_KEY, uuid);
                 PDCUtil.setValue(b, PersistentDataType.STRING, SCRIPT_KEY, DEFAULT_SCRIPT);
                 PDCUtil.setValue(b, PersistentDataType.SHORT, SCRIPT_INDEX_KEY, (short) 0);
                 PDCUtil.setValue(b, PersistentDataType.INTEGER, FUEL_KEY, 0);
@@ -221,8 +219,8 @@ public class ProgrammableAndroid extends SlimefunItem
             @Override
             public void onPlayerBreak(BlockBreakEvent e, ItemStack item, List<ItemStack> drops) {
                 Block b = e.getBlock();
+                Optional<UUID> uuid = Slimefun.getBlockDataService().getUniversalDataUUID(b);
                 UUID owner = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, OWNER_KEY);
-                UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
 
                 if (!e.getPlayer().hasPermission("slimefun.android.bypass")
                         && !e.getPlayer().getUniqueId().equals(owner)) {
@@ -231,16 +229,19 @@ public class ProgrammableAndroid extends SlimefunItem
                     return;
                 }
 
-                var uniData =
-                        Slimefun.getDatabaseManager().getBlockDataController().getUniversalData(uuid);
+                uuid.ifPresent(data -> {
+                    var uniData = Slimefun.getDatabaseManager()
+                            .getBlockDataController()
+                            .getUniversalData(data);
 
-                if (uniData != null) {
-                    var menu = uniData.getUniversalMenu();
-                    if (menu != null) {
-                        menu.dropItems(b.getLocation(), 43);
-                        menu.dropItems(b.getLocation(), getOutputSlots());
+                    if (uniData != null) {
+                        var menu = uniData.getUniversalMenu();
+                        if (menu != null) {
+                            menu.dropItems(b.getLocation(), 43);
+                            menu.dropItems(b.getLocation(), getOutputSlots());
+                        }
                     }
-                }
+                });
             }
         };
     }
@@ -295,9 +296,9 @@ public class ProgrammableAndroid extends SlimefunItem
         ChestMenu menu =
                 new ChestMenu(ChatColor.DARK_AQUA + Slimefun.getLocalization().getMessage(p, "android.scripts.editor"));
         menu.setEmptySlotsClickable(false);
-        UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
+        Optional<UUID> uuid = Slimefun.getBlockDataService().getUniversalDataUUID(b);
 
-        if (uuid == null) {
+        if (uuid.isEmpty()) {
             throw new IllegalStateException("Android missing uuid");
         }
 
@@ -309,7 +310,7 @@ public class ProgrammableAndroid extends SlimefunItem
                         "",
                         "&7\u21E8 &e左键 &7返回机器人的控制面板"));
         menu.addMenuClickHandler(0, (pl, slot, item, action) -> {
-            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid, b.getLocation());
+            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid.get(), b.getLocation());
             // Fixes #2937
             if (inv != null) {
                 inv.open(pl);
@@ -322,6 +323,7 @@ public class ProgrammableAndroid extends SlimefunItem
         String[] script = CommonPatterns.DASH.split(sourceCode);
 
         for (int i = 1; i < script.length; i++) {
+
             int index = i;
 
             if (i == script.length - 1) {
@@ -344,7 +346,7 @@ public class ProgrammableAndroid extends SlimefunItem
                                 "",
                                 "&7\u21E8 &e左键 &7返回机器人的控制面板"));
                 menu.addMenuClickHandler(slot, (pl, s, item, action) -> {
-                    UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid, b.getLocation());
+                    UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid.get(), b.getLocation());
                     // Fixes #2937
                     if (inv != null) {
                         inv.open(pl);
@@ -590,7 +592,11 @@ public class ProgrammableAndroid extends SlimefunItem
                 new ChestMenu(ChatColor.DARK_AQUA + Slimefun.getLocalization().getMessage(p, "android.scripts.editor"));
         menu.setEmptySlotsClickable(false);
 
-        UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
+        Optional<UUID> uuid = Slimefun.getBlockDataService().getUniversalDataUUID(b);
+
+        if (uuid.isEmpty()) {
+            throw new IllegalStateException("Android missing uuid");
+        }
 
         menu.addItem(1, new CustomItemStack(HeadTexture.SCRIPT_FORWARD.getAsItemStack(), "&2> 编辑脚本", "", "&a修改你现有的脚本"));
         menu.addMenuClickHandler(1, (pl, slot, item, action) -> {
@@ -633,7 +639,7 @@ public class ProgrammableAndroid extends SlimefunItem
 
         menu.addItem(8, new CustomItemStack(HeadTexture.SCRIPT_LEFT.getAsItemStack(), "&6> 返回", "", "&7返回机器人控制面板"));
         menu.addMenuClickHandler(8, (pl, slot, item, action) -> {
-            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid, b.getLocation());
+            UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid.get(), b.getLocation());
             // Fixes #2937
             if (inv != null) {
                 inv.open(pl);
@@ -1008,8 +1014,13 @@ public class ProgrammableAndroid extends SlimefunItem
     public void addItems(Block b, ItemStack... items) {
         Validate.notNull(b, "The Block cannot be null.");
 
-        UUID uuid = PDCUtil.getValue(b, PDCUtil.UUID_TYPE, UUID_KEY);
-        UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid, b.getLocation());
+        Optional<UUID> uuid = Slimefun.getBlockDataService().getUniversalDataUUID(b);
+
+        if (uuid.isEmpty()) {
+            throw new IllegalStateException("Android missing uuid");
+        }
+
+        UniversalMenu inv = StorageCacheUtils.getUniversalMenu(uuid.get(), b.getLocation());
 
         if (inv != null) {
             for (ItemStack item : items) {
@@ -1019,23 +1030,23 @@ public class ProgrammableAndroid extends SlimefunItem
     }
 
     @ParametersAreNonnullByDefault
-    protected void move(Block b, BlockFace face, Block block) {
-        var blockData = StorageCacheUtils.getBlock(b.getLocation());
-        OfflinePlayer owner = Bukkit.getOfflinePlayer(UUID.fromString(blockData.getData("owner")));
+    protected void move(Block from, BlockFace face, Block to) {
+        var uniData = StorageCacheUtils.getUniversalData(from);
+        OfflinePlayer owner = Bukkit.getOfflinePlayer(PDCUtil.getValue(from, PDCUtil.UUID_TYPE, OWNER_KEY));
 
-        if (!Slimefun.getProtectionManager().hasPermission(owner, block.getLocation(), Interaction.PLACE_BLOCK)) {
+        if (!Slimefun.getProtectionManager().hasPermission(owner, to.getLocation(), Interaction.PLACE_BLOCK)) {
             return;
         }
 
-        if (block.getY() > block.getWorld().getMinHeight()
-                && block.getY() < block.getWorld().getMaxHeight()
-                && block.isEmpty()) {
+        if (to.getY() > to.getWorld().getMinHeight()
+                && to.getY() < to.getWorld().getMaxHeight()
+                && to.isEmpty()) {
 
-            if (!block.getWorld().getWorldBorder().isInside(block.getLocation())) {
+            if (!to.getWorld().getWorldBorder().isInside(to.getLocation())) {
                 return;
             }
 
-            block.setBlockData(Material.PLAYER_HEAD.createBlockData(data -> {
+            to.setBlockData(Material.PLAYER_HEAD.createBlockData(data -> {
                 if (data instanceof Rotatable rotatable) {
                     rotatable.setRotation(face.getOppositeFace());
                 }
@@ -1043,15 +1054,15 @@ public class ProgrammableAndroid extends SlimefunItem
 
             Slimefun.runSync(() -> {
                 PlayerSkin skin = PlayerSkin.fromBase64(texture);
-                Material type = block.getType();
+                Material type = to.getType();
                 // Ensure that this Block is still a Player Head
                 if (type == Material.PLAYER_HEAD || type == Material.PLAYER_WALL_HEAD) {
-                    PlayerHead.setSkin(block, skin, true);
+                    PlayerHead.setSkin(to, skin, true);
                 }
             });
 
-            b.setType(Material.AIR);
-            Slimefun.getDatabaseManager().getBlockDataController().setBlockDataLocation(blockData, block.getLocation());
+            from.setType(Material.AIR);
+            uniData.setLastPresent(to.getLocation());
         }
     }
 
