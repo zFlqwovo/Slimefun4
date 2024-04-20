@@ -4,9 +4,6 @@ import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.logging.Level;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -122,6 +119,9 @@ public class BlockMenu extends DirtyChestMenu {
 
     @Deprecated
     public void delete(Location l) {
-        Slimefun.logger().log(Level.WARNING, () -> "BlockMenu#delete(Location l) is not supported anymore. l is " + serializeLocation(l));
+        Slimefun.logger()
+                .log(
+                        Level.WARNING,
+                        () -> "BlockMenu#delete(Location l) is not supported anymore. l is " + serializeLocation(l));
     }
 }
