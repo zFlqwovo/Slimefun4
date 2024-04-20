@@ -35,25 +35,18 @@ public class CargoNodeListener implements Listener {
             Block b = e.getBlock();
 
             // || !e.getBlockReplacedState().getType().isAir() 这会导致#832
-            Block against = e.getBlock();
             BlockData blockData = b.getBlockData();
-            BlockFace blockFace = null;
-            Vector vector;
+            BlockFace blockFace;
             if (blockData instanceof Directional directional) {
-                blockFace = directional.getFacing();
+                blockFace = directional.getFacing().getOppositeFace();
             } else if (blockData instanceof Rotatable rotatable) {
-                blockFace = rotatable.getRotation();
-            }
-            if (blockFace == null) {
-                vector = new Vector();
+                blockFace = rotatable.getRotation().getOppositeFace();
             } else {
-                vector = blockFace.getOppositeFace().getDirection();
+                e.setCancelled(true);
+                return;
             }
-            Block realAgainst = against.getWorld()
-                    .getBlockAt(
-                            against.getX() + (int) vector.getX(),
-                            against.getY() + (int) vector.getY(),
-                            against.getZ() + (int) vector.getZ());
+
+            Block realAgainst = b.getRelative(blockFace);
             if (!isContainer(realAgainst)) {
                 Slimefun.getLocalization().sendMessage(e.getPlayer(), "machines.CARGO_NODES.must-be-placed", true);
                 e.setCancelled(true);
