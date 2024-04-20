@@ -1,5 +1,7 @@
 package me.mrCookieSlime.Slimefun.api.inventory;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.config.Config;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.io.File;
@@ -77,18 +79,8 @@ public class BlockMenu extends DirtyChestMenu {
             return;
         }
 
-        // To force CS-CoreLib to build the Inventory
-        this.getContents();
-
-        File file = new File("data-storage/Slimefun/stored-inventories/" + serializeLocation(l) + ".sfi");
-        Config cfg = new Config(file);
-        cfg.setValue("preset", preset.getID());
-
-        for (int slot : preset.getInventorySlots()) {
-            cfg.setValue(String.valueOf(slot), getItemInSlot(slot));
-        }
-
-        cfg.save();
+        SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
+        Slimefun.getDatabaseManager().getBlockDataController().saveBlockInventory(blockData);
 
         changes = 0;
     }
@@ -128,15 +120,8 @@ public class BlockMenu extends DirtyChestMenu {
         }
     }
 
+    @Deprecated
     public void delete(Location l) {
-        File file = new File("data-storage/Slimefun/stored-inventories/" + serializeLocation(l) + ".sfi");
-
-        if (file.exists()) {
-            try {
-                Files.delete(file.toPath());
-            } catch (IOException e) {
-                Slimefun.logger().log(Level.WARNING, e, () -> "Could not delete file \"" + file.getName() + '"');
-            }
-        }
+        Slimefun.logger().log(Level.WARNING, () -> "BlockMenu#delete(Location l) is not supported anymore. l is " + serializeLocation(l));
     }
 }
