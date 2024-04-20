@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -28,6 +29,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
     private boolean emptyClickable;
     private String title;
     private List<ItemStack> items;
+    private int size = -1;
     private Map<Integer, MenuClickHandler> handlers;
     private MenuOpeningHandler open;
     private MenuCloseHandler close;
@@ -50,6 +52,11 @@ public class ChestMenu extends SlimefunInventoryHolder {
         this.open = p -> {};
         this.close = p -> {};
         this.playerclick = (p, slot, item, action) -> isPlayerInventoryClickable();
+    }
+
+    public ChestMenu(String title, int size) {
+        this(title);
+        setSize(size);
     }
 
     /**
@@ -116,14 +123,9 @@ public class ChestMenu extends SlimefunInventoryHolder {
      * @return The ChestMenu Instance
      */
     public ChestMenu addItem(int slot, ItemStack item) {
-        final int size = this.items.size();
-        if (size > slot) this.items.set(slot, item);
-        else {
-            for (int i = 0; i < slot - size; i++) {
-                this.items.add(null);
-            }
-            this.items.add(item);
-        }
+        setSize((int) (Math.max(getSize(), Math.ceil((slot + 1) / 9d) * 9)));
+        this.items.set(slot, item);
+        this.inventory.setItem(slot, item);
         return this;
     }
 
@@ -150,6 +152,9 @@ public class ChestMenu extends SlimefunInventoryHolder {
      */
     public ItemStack getItemInSlot(int slot) {
         setup();
+        if (items.size() - 1 < slot) {
+            addItem(slot, new ItemStack(Material.AIR));
+        }
         return this.inventory.getItem(slot);
     }
 
@@ -225,7 +230,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
 
     private void setup() {
         if (this.inventory != null) return;
-        this.inventory = Bukkit.createInventory(this, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
+        this.inventory = Bukkit.createInventory(this, getSize(), title);
         for (int i = 0; i < this.items.size(); i++) {
             this.inventory.setItem(i, this.items.get(i));
         }
@@ -235,8 +240,10 @@ public class ChestMenu extends SlimefunInventoryHolder {
      * Resets this ChestMenu to a Point BEFORE the User interacted with it
      */
     public void reset(boolean update) {
+        if (this.inventory == null || this.inventory.getSize() != getSize())
+            this.inventory = Bukkit.createInventory(this, getSize(), title);
         if (update) this.inventory.clear();
-        else this.inventory = Bukkit.createInventory(this, ((int) Math.ceil(this.items.size() / 9F)) * 9, title);
+        else this.inventory = Bukkit.createInventory(this, getSize(), title);
         for (int i = 0; i < this.items.size(); i++) {
             this.inventory.setItem(i, this.items.get(i));
         }
@@ -250,6 +257,8 @@ public class ChestMenu extends SlimefunInventoryHolder {
      */
     public void replaceExistingItem(int slot, ItemStack item) {
         setup();
+        setSize((int) (Math.max(getSize(), Math.ceil((slot + 1) / 9d) * 9)));
+        this.items.set(slot, item);
         this.inventory.setItem(slot, item);
     }
 
@@ -313,6 +322,36 @@ public class ChestMenu extends SlimefunInventoryHolder {
      */
     public Inventory toInventory() {
         return this.inventory;
+    }
+
+    public int getSize() {
+        return isSizeAutomaticallyInferred() ? Math.max(9, (int) Math.ceil(this.items.size() / 9F) * 9) : size;
+    }
+
+    public ChestMenu setSize(int size) {
+        if (size % 9 == 0 && size >= 0 && size < 55) {
+            if (size > items.size()) {
+                while (items.size() < size) {
+                    this.items.add(null);
+                }
+            } else if (size < items.size()) {
+                while (items.size() > size) {
+                    this.items.remove(items.size() - 1);
+                }
+            } else return this;
+            this.size = size;
+            reset(false);
+            return this;
+        } else {
+            throw new IllegalArgumentException(
+                    "The size of a ChestMenu must be a multiple of 9 and within the bounds 0-54,"
+                            + " received: "
+                            + size);
+        }
+    }
+
+    public boolean isSizeAutomaticallyInferred() {
+        return size == -1;
     }
 
     @FunctionalInterface
