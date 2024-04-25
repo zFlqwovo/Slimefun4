@@ -76,6 +76,8 @@ public class BlockMenu extends DirtyChestMenu {
             return;
         }
 
+        // To force CS-CoreLib to build the Inventory
+        this.getContents();
         SlimefunBlockData blockData = StorageCacheUtils.getBlock(location);
         Slimefun.getDatabaseManager().getBlockDataController().saveBlockInventory(blockData);
 
