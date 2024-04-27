@@ -2,6 +2,7 @@ package io.github.thebusybiscuit.slimefun4.implementation.items.androids;
 
 import city.norain.slimefun4.utils.PDCUtil;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.chat.ChatInput;
 import io.github.bakedlibs.dough.common.ChatColors;
@@ -32,6 +33,7 @@ import io.papermc.lib.PaperLib;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -127,20 +129,25 @@ public class ProgrammableAndroid extends SlimefunItem
 
             @Override
             public void newInstance(UniversalMenu menu, Block b) {
+                var uniData = StorageCacheUtils.getUniversalData(menu.getUuid(), b.getLocation());
+
+                Objects.requireNonNull(
+                        uniData,
+                        "Unable to get android's universal data at " + LocationUtils.locationToString(b.getLocation())
+                                + "!");
+
                 menu.replaceExistingItem(
                         15, new CustomItemStack(HeadTexture.SCRIPT_START.getAsItemStack(), "&a启动/继续运行"));
                 menu.addMenuClickHandler(15, (p, slot, item, action) -> {
                     Slimefun.getLocalization().sendMessage(p, "android.started", true);
-                    PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, true);
-                    // StorageCacheUtils.setData(b.getLocation(), "paused", "false");
+                    uniData.setData("paused", "false");
                     p.closeInventory();
                     return false;
                 });
 
                 menu.replaceExistingItem(17, new CustomItemStack(HeadTexture.SCRIPT_PAUSE.getAsItemStack(), "&4暂停运行"));
                 menu.addMenuClickHandler(17, (p, slot, item, action) -> {
-                    PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
-                    // StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    uniData.setData("paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     return false;
                 });
@@ -150,8 +157,7 @@ public class ProgrammableAndroid extends SlimefunItem
                         new CustomItemStack(
                                 HeadTexture.ENERGY_REGULATOR.getAsItemStack(), "&b内存核心", "", "&8\u21E8 &7单击打开脚本编辑器"));
                 menu.addMenuClickHandler(16, (p, slot, item, action) -> {
-                    PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
-                    // StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    uniData.setData("paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     openScriptEditor(p, b);
                     return false;
@@ -165,8 +171,7 @@ public class ProgrammableAndroid extends SlimefunItem
                                 "",
                                 Slimefun.getLocalization().getMessage("android.access-manager.subtitle")));
                 menu.addMenuClickHandler(25, (p, slot, item, action) -> {
-                    PDCUtil.setValue(b, PersistentDataType.BOOLEAN, STATUS_KEY, false);
-                    // StorageCacheUtils.setData(b.getLocation(), "paused", "true");
+                    uniData.setData("paused", "true");
                     Slimefun.getLocalization().sendMessage(p, "android.stopped", true);
                     AndroidShareMenu.openShareMenu(p, b);
                     return false;
@@ -190,7 +195,6 @@ public class ProgrammableAndroid extends SlimefunItem
             public void onPlayerPlace(BlockPlaceEvent e) {
                 Player p = e.getPlayer();
                 Block b = e.getBlock();
-                UUID uuid = UUID.randomUUID();
 
                 PDCUtil.setValue(b, PDCUtil.UUID_TYPE, OWNER_KEY, p.getUniqueId());
                 PDCUtil.setValue(b, PersistentDataType.STRING, SCRIPT_KEY, DEFAULT_SCRIPT);
@@ -1032,6 +1036,12 @@ public class ProgrammableAndroid extends SlimefunItem
     @ParametersAreNonnullByDefault
     protected void move(Block from, BlockFace face, Block to) {
         var uniData = StorageCacheUtils.getUniversalData(from);
+
+        if (uniData == null) {
+            throw new IllegalStateException("This android doesn't have universal data! Location at "
+                    + LocationUtils.locationToString(from.getLocation()));
+        }
+
         OfflinePlayer owner = Bukkit.getOfflinePlayer(PDCUtil.getValue(from, PDCUtil.UUID_TYPE, OWNER_KEY));
 
         if (!Slimefun.getProtectionManager().hasPermission(owner, to.getLocation(), Interaction.PLACE_BLOCK)) {
