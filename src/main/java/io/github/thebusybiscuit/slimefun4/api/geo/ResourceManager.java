@@ -286,18 +286,18 @@ public class ResourceManager {
         int index = 10;
         int pages = (int) (Math.ceil((double) resources.size() / 36) + 1);
 
-        Map<GEOResource, Integer> suppliemap = new HashMap<>();
+        Map<GEOResource, Integer> supplyMap = new HashMap<>();
 
         // if resource is not generated, generate the first
         resources.forEach(resource -> {
             OptionalInt optional = getSupplies(resource, block.getWorld(), x, z);
             int supplies = optional.orElseGet(() -> generate(resource, block.getWorld(), x, block.getY(), z));
-            suppliemap.put(resource, supplies);
+            supplyMap.put(resource, supplies);
         });
 
         for (int i = page * 28; i < resources.size() && i < (page + 1) * 28; i++) {
             GEOResource resource = resources.get(i);
-            int supplies = suppliemap.get(resource);
+            int supplies = supplyMap.get(resource);
             String suffix = Slimefun.getLocalization()
                     .getResourceString(p, ChatUtils.checkPlurality("tooltips.unit", supplies));
 
