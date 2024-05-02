@@ -4,9 +4,24 @@ import city.norain.slimefun4.listener.SlimefunMigrateListener;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
+import lombok.Getter;
 
 public final class SlimefunExtended {
     private static SlimefunMigrateListener migrateListener = new SlimefunMigrateListener();
+
+    @Getter
+    private static boolean databaseDebugMode = false;
+
+    private static void checkDebug() {
+        if ("true".equals(System.getProperty("slimefun.database.debug"))) {
+            databaseDebugMode = true;
+            System.setProperty("log4j.category.com.zaxxer.hikari", "DEBUG");
+            System.setProperty("log4j.logger.HikariPool", "TRACE");
+        } else {
+            System.setProperty("log4j.category.com.zaxxer.hikari", "WARN");
+            System.setProperty("log4j.logger.HikariPool", "WARN");
+        }
+    }
 
     public static boolean checkEnvironment(@Nonnull Slimefun sf) {
         if (EnvironmentChecker.checkHybridServer()) {
@@ -40,6 +55,8 @@ public final class SlimefunExtended {
     public static void register(@Nonnull Slimefun sf) {
         EnvironmentChecker.scheduleSlimeGlueCheck(sf);
 
+        checkDebug();
+
         VaultIntegration.register(sf);
 
         migrateListener.register(sf);
@@ -49,5 +66,7 @@ public final class SlimefunExtended {
         migrateListener = null;
 
         VaultIntegration.cleanup();
+
+        databaseDebugMode = false;
     }
 }
