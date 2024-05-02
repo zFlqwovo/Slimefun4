@@ -160,14 +160,15 @@ public class SQLProfiler {
             writer.append("已运行: ")
                     .append(String.format(
                             "%dh%dm%dns", totalTime.toHours(), totalTime.toMinutesPart(), totalTime.toSecondsPart()));
+            writer.newLine();
             writer.append("总耗时: ")
                     .append(String.format(
-                            "%dh%dm%dns",
-                            sqlTotalTime.toHours(), sqlTotalTime.toMinutesPart(), sqlTotalTime.toSecondsPart()));
+                            "%dm%ds%dms",
+                            sqlTotalTime.toSeconds(), sqlTotalTime.toMillisPart(), sqlTotalTime.toNanosPart()));
             writer.newLine();
+            var avg = sqlTotalTime.dividedBy(entryCount);
             writer.append("平均耗时: ")
-                    .append(String.valueOf(sqlTotalTime.dividedBy(entryCount).toSeconds()))
-                    .append(" 秒");
+                    .append(String.format("%dm%ds%dms", avg.toSeconds(), avg.toMillisPart(), avg.toNanosPart()));
         } catch (IOException e) {
             Slimefun.logger().log(Level.WARNING, "Unable to create sql timing report!", e);
         }
