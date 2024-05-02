@@ -84,7 +84,7 @@
             <url>https://repo.walshy.dev/public</url>
         </repository>
         <repository>
-            <!-- Orebfuscator, QuickShop-Reremake -->
+            <!-- Orebfuscator -->
             <id>codemc-repo</id>
             <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
@@ -420,19 +420,6 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7.1</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <!-- We don't need any of the dependencies -->
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.maxgamer</groupId>
-            <artifactId>QuickShop</artifactId>
-            <version>5.1.0.9</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
