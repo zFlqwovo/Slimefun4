@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,8 +36,12 @@ public class SQLProfiler {
 
     private final Set<CommandSender> subscribers = new HashSet<>();
 
+    private long startTime = -1L;
+
     public void start() {
         if (isProfiling) return;
+
+        startTime = System.nanoTime();
 
         samplingEntries.clear();
         entries.clear();
@@ -93,6 +97,7 @@ public class SQLProfiler {
 
         subscribers.clear();
         entries.clear();
+        startTime = 0L;
     }
 
     private String generateReportFile(Map<String, List<Map.Entry<TimingEntry, Long>>> entries) {
@@ -104,13 +109,14 @@ public class SQLProfiler {
                 new File("plugins/Slimefun/sql-timings/", "sql-timing-report-" + System.currentTimeMillis() + ".txt");
 
         try {
+            reportFile.getParentFile().mkdirs();
             reportFile.createNewFile();
         } catch (Exception e) {
             Slimefun.logger().log(Level.WARNING, "Unable to create sql timing report!");
         }
 
         int entryCount = 0;
-        Duration totalTime = Duration.ZERO;
+        Duration sqlTotalTime = Duration.ZERO;
 
         try (var writer = Files.newBufferedWriter(reportFile.toPath(), StandardCharsets.UTF_8)) {
             writer.append("Slimefun SQL Timing 报告");
@@ -120,8 +126,10 @@ public class SQLProfiler {
             for (Map.Entry<String, List<Map.Entry<TimingEntry, Long>>> entry : entries.entrySet()) {
                 String columnType = entry.getKey();
                 List<Map.Entry<TimingEntry, Long>> value = entry.getValue().stream()
-                        .sorted(Comparator.comparingLong(Map.Entry::getValue))
-                        .toList();
+                        .sorted(Map.Entry.comparingByValue())
+                        .collect(Collectors.toList());
+
+                Collections.reverse(value);
 
                 try {
                     writer.append("-- ").append(columnType);
@@ -130,7 +138,7 @@ public class SQLProfiler {
                         entryCount++;
 
                         var duration = Duration.ofNanos(timingEntry.getValue());
-                        totalTime = totalTime.plus(duration);
+                        sqlTotalTime = sqlTotalTime.plus(duration);
 
                         var formattedTime = String.format(
                                 "%ds%dms%dns",
@@ -148,12 +156,17 @@ public class SQLProfiler {
                 }
             }
 
-            writer.append("总耗时: ")
+            var totalTime = Duration.ofNanos(System.nanoTime()).minus(Duration.ofNanos(startTime));
+            writer.append("已运行: ")
                     .append(String.format(
                             "%dh%dm%dns", totalTime.toHours(), totalTime.toMinutesPart(), totalTime.toSecondsPart()));
+            writer.append("总耗时: ")
+                    .append(String.format(
+                            "%dh%dm%dns",
+                            sqlTotalTime.toHours(), sqlTotalTime.toMinutesPart(), sqlTotalTime.toSecondsPart()));
             writer.newLine();
             writer.append("平均耗时: ")
-                    .append(String.valueOf(totalTime.dividedBy(entryCount).toSeconds()))
+                    .append(String.valueOf(sqlTotalTime.dividedBy(entryCount).toSeconds()))
                     .append(" 秒");
         } catch (IOException e) {
             Slimefun.logger().log(Level.WARNING, "Unable to create sql timing report!", e);

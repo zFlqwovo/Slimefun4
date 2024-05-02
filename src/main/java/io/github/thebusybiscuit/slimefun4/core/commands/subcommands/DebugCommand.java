@@ -48,8 +48,7 @@ public class DebugCommand extends SubCommand {
 
         switch (test.toLowerCase()) {
             case "disable", "off" -> {
-                if (Slimefun.getSQLProfiler().isProfiling()
-                        && Debug.getTestCase().contains(TestCase.DATABASE.toString())) {
+                if (Slimefun.getSQLProfiler().isProfiling()) {
                     Slimefun.getSQLProfiler().stop();
                 }
 
@@ -62,6 +61,7 @@ public class DebugCommand extends SubCommand {
                         Slimefun.getLocalization().sendMessage(sender, "sf-cn.timings.running");
                     } else {
                         Slimefun.getSQLProfiler().start();
+                        Slimefun.getSQLProfiler().subscribe(sender);
                         Slimefun.getLocalization().sendMessage(sender, "sf-cn.timings.started");
                     }
                 }
