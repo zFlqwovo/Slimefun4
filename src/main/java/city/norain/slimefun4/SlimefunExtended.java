@@ -1,11 +1,7 @@
 package city.norain.slimefun4;
 
 import city.norain.slimefun4.listener.SlimefunMigrateListener;
-import city.norain.slimefun4.utils.LogUtil;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.pool.HikariPool;
-import com.zaxxer.hikari.util.DriverDataSource;
+import city.norain.slimefun4.utils.HikariLogFilter;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
@@ -20,15 +16,7 @@ public final class SlimefunExtended {
     private static void checkDebug() {
         if ("true".equals(System.getProperty("slimefun.database.debug"))) {
             databaseDebugMode = true;
-            LogUtil.setSlf4jLogLevel(HikariPool.class, org.apache.logging.log4j.Level.TRACE);
-            LogUtil.setSlf4jLogLevel(HikariConfig.class, org.apache.logging.log4j.Level.DEBUG);
-            LogUtil.setSlf4jLogLevel(HikariDataSource.class, org.apache.logging.log4j.Level.TRACE);
-            LogUtil.setSlf4jLogLevel(DriverDataSource.class, org.apache.logging.log4j.Level.DEBUG);
-        } else {
-            LogUtil.setSlf4jLogLevel(HikariPool.class, org.apache.logging.log4j.Level.WARN);
-            LogUtil.setSlf4jLogLevel(HikariConfig.class, org.apache.logging.log4j.Level.WARN);
-            LogUtil.setSlf4jLogLevel(HikariDataSource.class, org.apache.logging.log4j.Level.WARN);
-            LogUtil.setSlf4jLogLevel(DriverDataSource.class, org.apache.logging.log4j.Level.WARN);
+            HikariLogFilter.registerFilter(org.apache.logging.log4j.Level.DEBUG);
         }
     }
 
