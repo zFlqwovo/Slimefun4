@@ -11,7 +11,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -29,7 +28,12 @@ public class ChestMenu extends SlimefunInventoryHolder {
     private boolean emptyClickable;
     private String title;
     private List<ItemStack> items;
+    /**
+     * Size of chestmenu
+     * Warning: it DOES NOT present actual size of its inventory!
+     */
     private int size = -1;
+
     private Map<Integer, MenuClickHandler> handlers;
     private MenuOpeningHandler open;
     private MenuCloseHandler close;
@@ -123,9 +127,9 @@ public class ChestMenu extends SlimefunInventoryHolder {
      * @return The ChestMenu Instance
      */
     public ChestMenu addItem(int slot, ItemStack item) {
-        setSize((int) (Math.max(getSize(), Math.ceil((slot + 1) / 9d) * 9)));
+        resizeCheck(slot);
+
         this.items.set(slot, item);
-        this.inventory.setItem(slot, item);
         return this;
     }
 
@@ -153,7 +157,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
     public ItemStack getItemInSlot(int slot) {
         setup();
         if (items.size() - 1 < slot) {
-            addItem(slot, new ItemStack(Material.AIR));
+            addItem(slot, null);
         }
         return this.inventory.getItem(slot);
     }
@@ -242,8 +246,13 @@ public class ChestMenu extends SlimefunInventoryHolder {
     public void reset(boolean update) {
         if (this.inventory == null || this.inventory.getSize() != getSize())
             this.inventory = Bukkit.createInventory(this, getSize(), title);
-        if (update) this.inventory.clear();
-        else this.inventory = Bukkit.createInventory(this, getSize(), title);
+
+        if (update) {
+            this.inventory.clear();
+        } else {
+            this.inventory = Bukkit.createInventory(this, getSize(), title);
+        }
+
         for (int i = 0; i < this.items.size(); i++) {
             this.inventory.setItem(i, this.items.get(i));
         }
@@ -257,7 +266,7 @@ public class ChestMenu extends SlimefunInventoryHolder {
      */
     public void replaceExistingItem(int slot, ItemStack item) {
         setup();
-        setSize((int) (Math.max(getSize(), Math.ceil((slot + 1) / 9d) * 9)));
+        resizeCheck(slot);
         this.items.set(slot, item);
         this.inventory.setItem(slot, item);
     }
@@ -330,6 +339,9 @@ public class ChestMenu extends SlimefunInventoryHolder {
 
     public ChestMenu setSize(int size) {
         if (size % 9 == 0 && size >= 0 && size < 55) {
+
+            // Resize items list to match actual inventory size in order to reset inventory.
+            // I'm sure that use size of items as inventory size is somehow strange.
             if (size > items.size()) {
                 while (items.size() < size) {
                     this.items.add(null);
@@ -338,9 +350,14 @@ public class ChestMenu extends SlimefunInventoryHolder {
                 while (items.size() > size) {
                     this.items.remove(items.size() - 1);
                 }
-            } else return this;
+            } else {
+                return this;
+            }
+
             this.size = size;
+
             reset(false);
+
             return this;
         } else {
             throw new IllegalArgumentException(
@@ -352,6 +369,17 @@ public class ChestMenu extends SlimefunInventoryHolder {
 
     public boolean isSizeAutomaticallyInferred() {
         return size == -1;
+    }
+
+    private void resizeCheck(int operateSlot) {
+        if (isSizeAutomaticallyInferred()) {
+            setSize((int) (Math.max(getSize(), Math.ceil((operateSlot + 1) / 9d) * 9)));
+        } else {
+            if ((operateSlot - 1) > getSize()) {
+                throw new IllegalStateException(
+                        "Unable to add item since slot is larger than inv size (" + getSize() + ")");
+            }
+        }
     }
 
     @FunctionalInterface
