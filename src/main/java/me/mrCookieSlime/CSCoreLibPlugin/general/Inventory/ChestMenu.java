@@ -127,9 +127,9 @@ public class ChestMenu extends SlimefunInventoryHolder {
      * @return The ChestMenu Instance
      */
     public ChestMenu addItem(int slot, ItemStack item) {
-        resizeCheck(slot);
-
+        setSize((int) (Math.max(getSize(), Math.ceil((slot + 1) / 9d) * 9)));
         this.items.set(slot, item);
+        this.inventory.setItem(slot, item);
         return this;
     }
 
@@ -266,8 +266,6 @@ public class ChestMenu extends SlimefunInventoryHolder {
      */
     public void replaceExistingItem(int slot, ItemStack item) {
         setup();
-        resizeCheck(slot);
-        this.items.set(slot, item);
         this.inventory.setItem(slot, item);
     }
 
@@ -339,7 +337,6 @@ public class ChestMenu extends SlimefunInventoryHolder {
 
     public ChestMenu setSize(int size) {
         if (size % 9 == 0 && size >= 0 && size < 55) {
-
             // Resize items list to match actual inventory size in order to reset inventory.
             // I'm sure that use size of items as inventory size is somehow strange.
             if (size > items.size()) {
@@ -369,17 +366,6 @@ public class ChestMenu extends SlimefunInventoryHolder {
 
     public boolean isSizeAutomaticallyInferred() {
         return size == -1;
-    }
-
-    private void resizeCheck(int operateSlot) {
-        if (isSizeAutomaticallyInferred()) {
-            setSize((int) (Math.max(getSize(), Math.ceil((operateSlot + 1) / 9d) * 9)));
-        } else {
-            if ((operateSlot - 1) > getSize()) {
-                throw new IllegalStateException(
-                        "Unable to add item since slot is larger than inv size (" + getSize() + ")");
-            }
-        }
     }
 
     @FunctionalInterface
