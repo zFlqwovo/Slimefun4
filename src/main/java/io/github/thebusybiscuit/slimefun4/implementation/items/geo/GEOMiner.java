@@ -343,7 +343,7 @@ public class GEOMiner extends SlimefunItem
     }
 
     private void start(@Nonnull Block b, @Nonnull BlockMenu inv) {
-        boolean succeed = Slimefun.getRegistry().getGEOResources().values().isEmpty();
+        boolean success = Slimefun.getRegistry().getGEOResources().values().isEmpty();
         for (GEOResource resource : Slimefun.getRegistry().getGEOResources().values()) {
             if (resource.isObtainableFromGEOMiner()) {
                 OptionalInt optional = Slimefun.getGPSNetwork()
@@ -352,7 +352,7 @@ public class GEOMiner extends SlimefunItem
 
                 if (optional.isEmpty()) continue;
 
-                succeed = true;
+                success = true;
 
                 int supplies = optional.getAsInt();
                 if (supplies > 0) {
@@ -370,7 +370,7 @@ public class GEOMiner extends SlimefunItem
             }
         }
 
-        if (!succeed) {
+        if (!success) {
             updateHologram(b, "&4需要先进行地形扫描!");
             return;
         }
