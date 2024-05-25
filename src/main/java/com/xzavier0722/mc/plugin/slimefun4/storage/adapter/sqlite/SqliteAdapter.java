@@ -2,12 +2,14 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite;
 
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.*;
 
+import city.norain.slimefun4.timings.entry.SQLEntry;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlCommonAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataScope;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.DataType;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordKey;
 import com.xzavier0722.mc.plugin.slimefun4.storage.common.RecordSet;
+import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -339,10 +341,15 @@ public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
     }
 
     private synchronized int executeUpdate(String sql) {
+        var entry = new SQLEntry(sql);
+        Slimefun.getSQLProfiler().recordEntry(entry);
+
         try (var conn = ds.getConnection()) {
             return SqlUtils.execUpdate(conn, sql);
         } catch (SQLException e) {
             throw new IllegalStateException("An exception thrown while executing sql: " + sql, e);
+        } finally {
+            Slimefun.getSQLProfiler().finishEntry(entry);
         }
     }
 }

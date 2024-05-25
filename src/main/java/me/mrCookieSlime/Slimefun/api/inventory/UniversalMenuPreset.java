@@ -23,12 +23,12 @@ public abstract class UniversalMenuPreset extends BlockMenuPreset {
     protected void clone(@Nonnull UniversalMenu menu, @Nonnull Block b) {
         menu.setPlayerInventoryClickable(true);
 
+        if (isSizeAutomaticallyInferred()) {
+            menu.addItem(getSize() - 1, null);
+        } else menu.setSize(getSize());
+
         for (int slot : occupiedSlots) {
             menu.addItem(slot, getItemInSlot(slot));
-        }
-
-        if (size > -1) {
-            menu.addItem(size - 1, null);
         }
 
         newInstance(menu, b);
