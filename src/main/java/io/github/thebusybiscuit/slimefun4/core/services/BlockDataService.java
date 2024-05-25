@@ -47,7 +47,7 @@ public class BlockDataService implements Keyed {
      */
     public BlockDataService(@Nonnull Plugin plugin, @Nonnull String key) {
         namespacedKey = new NamespacedKey(plugin, key);
-        universalDataKey = new NamespacedKey(plugin, "slimefun_unidata_uuid");
+        universalDataKey = new NamespacedKey(plugin, "slimefun_universal_data_uuid");
     }
 
     @Override
@@ -76,7 +76,7 @@ public class BlockDataService implements Keyed {
      *            The uuid linked to certain slimefun item
      */
     public void setUniversalDataUUID(@Nonnull Block b, @Nonnull String uuid) {
-        setBlockData(b, namespacedKey, uuid);
+        setBlockData(b, universalDataKey, uuid);
     }
 
     /**

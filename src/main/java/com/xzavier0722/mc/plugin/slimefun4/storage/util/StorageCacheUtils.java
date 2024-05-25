@@ -1,6 +1,5 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.util;
 
-import com.google.common.base.Preconditions;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ASlimefunDataContainer;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
@@ -50,7 +49,10 @@ public class StorageCacheUtils {
     @ParametersAreNonnullByDefault
     @Nullable public static SlimefunItem getSfItem(Location l) {
         var blockData = getBlock(l);
-        return blockData == null ? null : SlimefunItem.getById(blockData.getSfId());
+        var universalData = getUniversalData(l.getBlock());
+        if (blockData == null && universalData == null) return null;
+        if (blockData != null) return SlimefunItem.getById(blockData.getSfId());
+        return SlimefunItem.getById(universalData.getSfId());
     }
 
     @ParametersAreNonnullByDefault
@@ -62,14 +64,21 @@ public class StorageCacheUtils {
     @ParametersAreNonnullByDefault
     public static void setData(Location loc, String key, String val) {
         var block = getBlock(loc);
-        Preconditions.checkNotNull(block);
+        var universal = getUniversalData(loc.getBlock());
+        if (block == null && universal == null) throw new NullPointerException();
 
-        block.setData(key, val);
+        if (block != null) block.setData(key, val);
+        if (universal != null) universal.setData(key, val);
     }
 
     @ParametersAreNonnullByDefault
     public static void removeData(Location loc, String key) {
-        getBlock(loc).removeData(key);
+        var block = getBlock(loc);
+        var universal = getUniversalData(loc.getBlock());
+        if (block == null && universal == null) throw new NullPointerException();
+
+        if (block != null) block.removeData(key);
+        if (universal != null) universal.removeData(key);
     }
 
     @ParametersAreNonnullByDefault
@@ -101,6 +110,14 @@ public class StorageCacheUtils {
         }
 
         return uniData;
+    }
+
+    @ParametersAreNonnullByDefault
+    @Nullable public static SlimefunUniversalData getUniversalData(Location location) {
+        var uuid = Slimefun.getBlockDataService().getUniversalDataUUID(location.getBlock());
+
+        return uuid.map(uniId -> getUniversalData(uniId, location.getBlock().getLocation()))
+                .orElse(null);
     }
 
     @ParametersAreNonnullByDefault

@@ -1,20 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlite;
 
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_ID;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NAME;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_NUM;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_BACKPACK_SIZE;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_CHUNK;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_KEY;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_VALUE;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_ITEM;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_SLOT;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_LOCATION;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_NAME;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_RESEARCH_KEY;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_SLIMEFUN_ID;
-import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_UNIVERSAL_UUID;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.*;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlCommonAdapter;
 import com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlUtils;
@@ -118,6 +104,7 @@ public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
         createBlockInvTable();
         createChunkDataTable();
         createUniversalInventoryTable();
+        createUniversalRecordTable();
     }
 
     private void createProfileTable() {
@@ -327,6 +314,22 @@ public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
                 + FIELD_UNIVERSAL_UUID
                 + ", "
                 + FIELD_INVENTORY_SLOT
+                + ")"
+                + ");");
+    }
+
+    private void createUniversalRecordTable() {
+        executeSql("CREATE TABLE IF NOT EXISTS "
+                + SqlUtils.mapTable(DataScope.UNIVERSAL_RECORD)
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + " UUID NOT NULL, "
+                + FIELD_SLIMEFUN_ID
+                + " TEXT NOT NULL, "
+                + FIELD_LAST_PRESENT
+                + " TEXT NOT NULL, "
+                + "PRIMARY KEY ("
+                + FIELD_UNIVERSAL_UUID
                 + ")"
                 + ");");
     }
