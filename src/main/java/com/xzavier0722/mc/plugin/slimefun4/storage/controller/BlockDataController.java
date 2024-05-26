@@ -250,7 +250,7 @@ public class BlockDataController extends ADataController {
             uniData.setUniversalMenu(new UniversalMenu(preset, uuid));
         }
 
-        Slimefun.getDatabaseManager().getBlockDataController().saveUniversalData(uuid, sfId);
+        Slimefun.getDatabaseManager().getBlockDataController().saveUniversalData(uuid, sfId, l);
 
         return uniData;
     }
@@ -277,12 +277,13 @@ public class BlockDataController extends ADataController {
      * @param uuid universal data uuid
      * @param sfId the item universal data represents
      */
-    void saveUniversalData(UUID uuid, String sfId) {
+    void saveUniversalData(UUID uuid, String sfId, Location lastPresent) {
         var key = new RecordKey(DataScope.UNIVERSAL_RECORD);
 
         var data = new RecordSet();
         data.put(FieldKey.UNIVERSAL_UUID, uuid.toString());
         data.put(FieldKey.SLIMEFUN_ID, sfId);
+        data.put(FieldKey.LAST_PRESENT, LocationUtils.getLocKey(lastPresent));
 
         var scopeKey = new UUIDKey(DataScope.NONE, uuid);
         removeDelayedBlockDataUpdates(scopeKey); // Shouldn't have.. But for safe..
@@ -1024,7 +1025,7 @@ public class BlockDataController extends ADataController {
 
     void scheduleDelayedUniversalDataUpdate(SlimefunUniversalData universalData, String key) {
         var scopeKey = new UUIDKey(DataScope.NONE, universalData.getKey());
-        var reqKey = new RecordKey(DataScope.UNIVERSAL_RECORD);
+        var reqKey = new RecordKey(DataScope.UNIVERSAL_DATA);
         reqKey.addCondition(FieldKey.UNIVERSAL_UUID, universalData.getKey());
         reqKey.addCondition(FieldKey.DATA_KEY, key);
         if (enableDelayedSaving) {

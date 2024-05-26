@@ -121,6 +121,22 @@ public class StorageCacheUtils {
     }
 
     @ParametersAreNonnullByDefault
+    @Nullable public static SlimefunUniversalData getUniversalData(UUID uuid) {
+        var uniData = Slimefun.getDatabaseManager().getBlockDataController().getUniversalDataFromCache(uuid);
+
+        if (uniData == null) {
+            return null;
+        }
+
+        if (!uniData.isDataLoaded()) {
+            requestLoad(uniData);
+            return null;
+        }
+
+        return uniData;
+    }
+
+    @ParametersAreNonnullByDefault
     @Nullable public static SlimefunUniversalData getUniversalData(Block block) {
         var uuid = Slimefun.getBlockDataService().getUniversalDataUUID(block);
 

@@ -9,6 +9,7 @@ import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlC
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_DATA_VALUE;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_ITEM;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_INVENTORY_SLOT;
+import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_LAST_PRESENT;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_LOCATION;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_NAME;
 import static com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon.SqlConstants.FIELD_PLAYER_UUID;
@@ -63,6 +64,7 @@ public class SqlUtils {
         fieldMap.put(FieldKey.DATA_KEY, FIELD_DATA_KEY);
         fieldMap.put(FieldKey.DATA_VALUE, FIELD_DATA_VALUE);
         fieldMap.put(FieldKey.UNIVERSAL_UUID, FIELD_UNIVERSAL_UUID);
+        fieldMap.put(FieldKey.LAST_PRESENT, FIELD_LAST_PRESENT);
         mapper = new FieldMapper<>(fieldMap);
     }
 
