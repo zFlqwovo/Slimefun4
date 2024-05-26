@@ -5,6 +5,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,6 +18,10 @@ import org.bukkit.Location;
 
 public class SlimefunChunkData extends ASlimefunDataContainer {
     private static final SlimefunBlockData INVALID_BLOCK_DATA = new SlimefunBlockData(
+            new Location(Bukkit.getWorlds().get(0), Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE),
+            "INVALID_BLOCK_DATA_SF_KEY");
+    private static final SlimefunUniversalData INVALID_UNIVERSAL_DATA = new SlimefunUniversalData(
+            new UUID(0, 0),
             new Location(Bukkit.getWorlds().get(0), Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE),
             "INVALID_BLOCK_DATA_SF_KEY");
     private final Chunk chunk;

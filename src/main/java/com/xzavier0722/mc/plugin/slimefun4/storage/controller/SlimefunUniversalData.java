@@ -19,7 +19,6 @@ public class SlimefunUniversalData extends ASlimefunDataContainer {
     @Getter
     private volatile UniversalMenu universalMenu;
 
-    @Setter
     @Getter
     @Nonnull
     private volatile Location lastPresent;
@@ -80,5 +79,10 @@ public class SlimefunUniversalData extends ASlimefunDataContainer {
     @Override
     public String toString() {
         return "SlimefunUniversalData [sfId=" + sfId + ", isPendingRemove=" + pendingRemove + "]";
+    }
+
+    public void setLastPresent(Location location) {
+        lastPresent = location;
+        Slimefun.getDatabaseManager().getBlockDataController().scheduleDelayedUniversalDataLastPresentUpdate(this);
     }
 }

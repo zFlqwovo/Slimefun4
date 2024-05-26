@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.tasks;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunUniversalData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
 import io.github.bakedlibs.dough.blocks.ChunkPosition;
@@ -11,10 +12,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
+import lombok.Getter;
+import lombok.Setter;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Chunk;
@@ -38,16 +42,29 @@ public class TickerTask implements Runnable {
      */
     private final Map<ChunkPosition, Set<Location>> tickingLocations = new ConcurrentHashMap<>();
 
+    private final Set<UUID> tickingUniversalBlockUUIDs = new HashSet<>();
+
     /**
      * This Map tracks how many bugs have occurred in a given Location .
      * If too many bugs happen, we delete that Location.
      */
     private final Map<BlockPosition, Integer> bugs = new ConcurrentHashMap<>();
 
+    /**
+     * -- GETTER --
+     *  This returns the delay between ticks
+     *
+     * @return The tick delay
+     */
+    @Getter
     private int tickRate;
+
+    @Getter
     private boolean halted = false;
+
     private boolean running = false;
 
+    @Setter
     private volatile boolean paused = false;
 
     /**
@@ -89,6 +106,7 @@ public class TickerTask implements Runnable {
             // Run our ticker code
             if (!halted) {
                 Set<Map.Entry<ChunkPosition, Set<Location>>> loc;
+                Set<UUID> uuids;
 
                 synchronized (tickingLocations) {
                     loc = new HashSet<>(tickingLocations.entrySet());
@@ -96,6 +114,14 @@ public class TickerTask implements Runnable {
 
                 for (Map.Entry<ChunkPosition, Set<Location>> entry : loc) {
                     tickChunk(entry.getKey(), tickers, new HashSet<>(entry.getValue()));
+                }
+
+                synchronized (tickingUniversalBlockUUIDs) {
+                    uuids = new HashSet<>(tickingUniversalBlockUUIDs);
+                }
+
+                for (UUID uuid : uuids) {
+                    tickUniversalBlocks(tickers, uuid);
                 }
             }
 
@@ -174,10 +200,62 @@ public class TickerTask implements Runnable {
         }
     }
 
+    private void tickUniversalBlocks(@Nonnull Set<BlockTicker> tickers, @Nonnull UUID uuid) {
+        var universalData = StorageCacheUtils.getUniversalData(uuid);
+        SlimefunItem item = SlimefunItem.getById(universalData.getSfId());
+
+        if (item != null && item.getBlockTicker() != null) {
+            Location l = universalData.getLastPresent();
+            if (item.isDisabledIn(l.getWorld())) {
+                return;
+            }
+
+            try {
+                if (item.getBlockTicker().isSynchronized()) {
+                    Slimefun.getProfiler().scheduleEntries(1);
+                    item.getBlockTicker().update();
+
+                    /**
+                     * We are inserting a new timestamp because synchronized actions
+                     * are always ran with a 50ms delay (1 game tick)
+                     */
+                    Slimefun.runSync(() -> {
+                        if (universalData.isPendingRemove()) {
+                            return;
+                        }
+                        Block b = l.getBlock();
+                        tickUniversalBlock(l, b, item, universalData, System.nanoTime());
+                    });
+                } else {
+                    long timestamp = Slimefun.getProfiler().newEntry();
+                    item.getBlockTicker().update();
+                    Block b = l.getBlock();
+                    tickUniversalBlock(l, b, item, universalData, timestamp);
+                }
+
+                tickers.add(item.getBlockTicker());
+            } catch (Exception x) {
+                reportErrors(l, item, x);
+            }
+        }
+    }
+
     @ParametersAreNonnullByDefault
     private void tickBlock(Location l, Block b, SlimefunItem item, SlimefunBlockData data, long timestamp) {
         try {
             item.getBlockTicker().tick(b, item, data);
+        } catch (Exception | LinkageError x) {
+            reportErrors(l, item, x);
+        } finally {
+            Slimefun.getProfiler().closeEntry(l, item, timestamp);
+        }
+    }
+
+    @ParametersAreNonnullByDefault
+    private void tickUniversalBlock(
+            Location l, Block b, SlimefunItem item, SlimefunUniversalData data, long timestamp) {
+        try {
+            item.getBlockTicker().tick(b, item, (SlimefunBlockData) null);
         } catch (Exception | LinkageError x) {
             reportErrors(l, item, x);
         } finally {
@@ -209,21 +287,8 @@ public class TickerTask implements Runnable {
         }
     }
 
-    public boolean isHalted() {
-        return halted;
-    }
-
     public void halt() {
         halted = true;
-    }
-
-    /**
-     * This returns the delay between ticks
-     *
-     * @return The tick delay
-     */
-    public int getTickRate() {
-        return tickRate;
     }
 
     /**
@@ -277,6 +342,14 @@ public class TickerTask implements Runnable {
         }
     }
 
+    public void enableTicker(@Nonnull UUID uuid) {
+        Validate.notNull(uuid, "UUID cannot be null!");
+
+        synchronized (tickingUniversalBlockUUIDs) {
+            tickingUniversalBlockUUIDs.add(uuid);
+        }
+    }
+
     /**
      * This method disables the ticker at the given {@link Location} and removes it from our internal
      * "queue".
@@ -297,11 +370,20 @@ public class TickerTask implements Runnable {
                 if (locations.isEmpty()) {
                     tickingLocations.remove(chunk);
                 }
+                return;
             }
+        }
+        synchronized (tickingUniversalBlockUUIDs) {
+            tickingUniversalBlockUUIDs.removeIf(
+                    x -> StorageCacheUtils.getUniversalData(x).getLastPresent().equals(l));
         }
     }
 
-    public void setPaused(boolean isPaused) {
-        paused = isPaused;
+    public void disableTicker(@Nonnull UUID uuid) {
+        Validate.notNull(uuid, "UUID cannot be null!");
+
+        synchronized (tickingUniversalBlockUUIDs) {
+            tickingUniversalBlockUUIDs.removeIf(x -> x.equals(uuid));
+        }
     }
 }

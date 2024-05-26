@@ -35,6 +35,9 @@ public class UniversalMenu extends DirtyChestMenu {
             }
             addItem(i, item);
         }
+
+        preset.clone(
+                this, StorageCacheUtils.getUniversalData(uuid).getLastPresent().getBlock());
     }
 
     /**

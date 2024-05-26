@@ -113,8 +113,8 @@ public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements ID
         createBlockDataTable();
         createBlockInvTable();
         createChunkDataTable();
-        createUniversalInventoryTable();
         createUniversalRecordTable();
+        createUniversalInventoryTable();
         createUniversalDataTable();
     }
 
@@ -311,24 +311,6 @@ public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements ID
                 + ");");
     }
 
-    protected void createUniversalInventoryTable() {
-        executeSql("CREATE TABLE IF NOT EXISTS "
-                + SqlUtils.mapTable(DataScope.UNIVERSAL_INVENTORY)
-                + "("
-                + FIELD_UNIVERSAL_UUID
-                + " UUID NOT NULL, "
-                + FIELD_INVENTORY_SLOT
-                + " TINYINT UNSIGNED NOT NULL, "
-                + FIELD_INVENTORY_ITEM
-                + " TEXT NOT NULL,"
-                + "PRIMARY KEY ("
-                + FIELD_UNIVERSAL_UUID
-                + ", "
-                + FIELD_INVENTORY_SLOT
-                + ")"
-                + ");");
-    }
-
     protected void createUniversalRecordTable() {
         executeSql("CREATE TABLE IF NOT EXISTS "
                 + SqlUtils.mapTable(DataScope.UNIVERSAL_RECORD)
@@ -341,6 +323,33 @@ public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements ID
                 + " TEXT NOT NULL, "
                 + "PRIMARY KEY ("
                 + FIELD_UNIVERSAL_UUID
+                + ")"
+                + ");");
+    }
+
+    protected void createUniversalInventoryTable() {
+        executeSql("CREATE TABLE IF NOT EXISTS "
+                + SqlUtils.mapTable(DataScope.UNIVERSAL_INVENTORY)
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + " UUID NOT NULL, "
+                + FIELD_INVENTORY_SLOT
+                + " TINYINT UNSIGNED NOT NULL, "
+                + FIELD_INVENTORY_ITEM
+                + " TEXT NOT NULL, "
+                + "FOREIGN KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ") "
+                + "REFERENCES "
+                + SqlUtils.mapTable(DataScope.UNIVERSAL_RECORD)
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + ") "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "PRIMARY KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ", "
+                + FIELD_INVENTORY_SLOT
                 + ")"
                 + ");");
     }

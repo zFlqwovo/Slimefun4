@@ -97,27 +97,10 @@ public class StorageCacheUtils {
     }
 
     @ParametersAreNonnullByDefault
-    @Nullable public static SlimefunUniversalData getUniversalData(UUID uuid, Location l) {
-        var uniData = Slimefun.getDatabaseManager().getBlockDataController().getUniversalDataFromCache(uuid);
-
-        if (uniData == null) {
-            return null;
-        }
-
-        if (!uniData.isDataLoaded()) {
-            requestLoad(uniData);
-            return null;
-        }
-
-        return uniData;
-    }
-
-    @ParametersAreNonnullByDefault
     @Nullable public static SlimefunUniversalData getUniversalData(Location location) {
         var uuid = Slimefun.getBlockDataService().getUniversalDataUUID(location.getBlock());
 
-        return uuid.map(uniId -> getUniversalData(uniId, location.getBlock().getLocation()))
-                .orElse(null);
+        return uuid.map(StorageCacheUtils::getUniversalData).orElse(null);
     }
 
     @ParametersAreNonnullByDefault
@@ -140,7 +123,7 @@ public class StorageCacheUtils {
     @Nullable public static SlimefunUniversalData getUniversalData(Block block) {
         var uuid = Slimefun.getBlockDataService().getUniversalDataUUID(block);
 
-        return uuid.map(uniId -> getUniversalData(uniId, block.getLocation())).orElse(null);
+        return uuid.map(StorageCacheUtils::getUniversalData).orElse(null);
     }
 
     @ParametersAreNonnullByDefault
@@ -219,6 +202,25 @@ public class StorageCacheUtils {
 
             @Override
             public void onResult(SlimefunBlockData result) {
+                execute.run();
+            }
+        });
+    }
+
+    public static void executeAfterLoad(SlimefunUniversalData data, Runnable execute, boolean runOnMainThread) {
+        if (data.isDataLoaded()) {
+            execute.run();
+            return;
+        }
+
+        Slimefun.getDatabaseManager().getBlockDataController().loadUniversalDataAsync(data, new IAsyncReadCallback<>() {
+            @Override
+            public boolean runOnMainThread() {
+                return runOnMainThread;
+            }
+
+            @Override
+            public void onResult(SlimefunUniversalData result) {
                 execute.run();
             }
         });

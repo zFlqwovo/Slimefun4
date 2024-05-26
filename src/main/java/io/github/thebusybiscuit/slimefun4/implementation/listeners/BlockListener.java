@@ -183,11 +183,24 @@ public class BlockListener implements Listener {
         var heldItem = e.getPlayer().getInventory().getItemInMainHand();
         var block = e.getBlock();
         var blockData = StorageCacheUtils.getBlock(block.getLocation());
+        var universalData = StorageCacheUtils.getUniversalData(block);
 
         // If there is a Slimefun Block here, call our BreakEvent and, if cancelled, cancel this event
         // and return
         if (blockData != null) {
             var sfItem = SlimefunItem.getById(blockData.getSfId());
+            SlimefunBlockBreakEvent breakEvent =
+                    new SlimefunBlockBreakEvent(e.getPlayer(), heldItem, e.getBlock(), sfItem);
+            Bukkit.getPluginManager().callEvent(breakEvent);
+
+            if (breakEvent.isCancelled()) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+
+        if (universalData != null) {
+            var sfItem = SlimefunItem.getById(universalData.getSfId());
             SlimefunBlockBreakEvent breakEvent =
                     new SlimefunBlockBreakEvent(e.getPlayer(), heldItem, e.getBlock(), sfItem);
             Bukkit.getPluginManager().callEvent(breakEvent);
@@ -210,35 +223,67 @@ public class BlockListener implements Listener {
             // TODO: merge this with the vanilla sensitive block check (when 1.18- is dropped)
             checkForSensitiveBlockAbove(e.getPlayer(), e.getBlock(), heldItem);
 
-            if (blockData == null || blockData.isPendingRemove()) {
+            if ((blockData == null && universalData == null)
+                    || (blockData != null && blockData.isPendingRemove())
+                    || (universalData != null && universalData.isPendingRemove())) {
                 dropItems(e, drops);
                 return;
             }
 
-            blockData.setPendingRemove(true);
+            if (blockData != null) {
+                blockData.setPendingRemove(true);
 
-            if (!blockData.isDataLoaded()) {
-                e.setDropItems(false);
-                var type = block.getType();
-                StorageCacheUtils.executeAfterLoad(
-                        blockData,
-                        () -> {
-                            callBlockHandler(e, heldItem, drops);
-                            if (e.isCancelled()) {
-                                block.setType(type);
-                                blockData.setPendingRemove(false);
-                                return;
-                            }
-                            e.setDropItems(true);
-                            dropItems(e, drops);
-                        },
-                        true);
-                return;
+                if (!blockData.isDataLoaded()) {
+                    e.setDropItems(false);
+                    var type = block.getType();
+                    StorageCacheUtils.executeAfterLoad(
+                            blockData,
+                            () -> {
+                                callBlockHandler(e, heldItem, drops);
+                                if (e.isCancelled()) {
+                                    block.setType(type);
+                                    blockData.setPendingRemove(false);
+                                    return;
+                                }
+                                e.setDropItems(true);
+                                dropItems(e, drops);
+                            },
+                            true);
+                    return;
+                }
+
+                callBlockHandler(e, heldItem, drops);
+                if (e.isCancelled()) {
+                    blockData.setPendingRemove(false);
+                }
             }
 
-            callBlockHandler(e, heldItem, drops);
-            if (e.isCancelled()) {
-                blockData.setPendingRemove(false);
+            if (universalData != null) {
+                universalData.setPendingRemove(true);
+
+                if (!universalData.isDataLoaded()) {
+                    e.setDropItems(false);
+                    var type = block.getType();
+                    StorageCacheUtils.executeAfterLoad(
+                            universalData,
+                            () -> {
+                                callBlockHandler(e, heldItem, drops);
+                                if (e.isCancelled()) {
+                                    block.setType(type);
+                                    universalData.setPendingRemove(false);
+                                    return;
+                                }
+                                e.setDropItems(true);
+                                dropItems(e, drops);
+                            },
+                            true);
+                    return;
+                }
+
+                callBlockHandler(e, heldItem, drops);
+                if (e.isCancelled()) {
+                    universalData.setPendingRemove(false);
+                }
             }
             dropItems(e, drops);
 
@@ -322,40 +367,78 @@ public class BlockListener implements Listener {
         if (SlimefunTag.SENSITIVE_MATERIALS.isTagged(blockAbove.getType())) {
             var loc = blockAbove.getLocation();
             var blockData = StorageCacheUtils.getBlock(loc);
+            var universalData = StorageCacheUtils.getUniversalData(loc);
             SlimefunItem sfItem = StorageCacheUtils.getSfItem(loc);
-
             if (sfItem != null && !sfItem.useVanillaBlockBreaking()) {
-                /*
-                 * We create a dummy here to pass onto the BlockBreakHandler.
-                 * This will set the correct block context.
-                 */
-                BlockBreakEvent dummyEvent = new BlockBreakEvent(blockAbove, player);
-                List<ItemStack> drops = new ArrayList<>(sfItem.getDrops(player));
+                if (blockData != null) {
+                    /*
+                     * We create a dummy here to pass onto the BlockBreakHandler.
+                     * This will set the correct block context.
+                     */
+                    BlockBreakEvent dummyEvent = new BlockBreakEvent(blockAbove, player);
+                    List<ItemStack> drops = new ArrayList<>(sfItem.getDrops(player));
 
-                var controller = Slimefun.getDatabaseManager().getBlockDataController();
-                if (blockData.isDataLoaded()) {
-                    sfItem.callItemHandler(
-                            BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
-                    controller.removeBlock(loc);
-                    dropItems(dummyEvent, drops);
-                } else {
-                    blockData.setPendingRemove(true);
-                    controller.loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
-                        @Override
-                        public boolean runOnMainThread() {
-                            return true;
-                        }
+                    var controller = Slimefun.getDatabaseManager().getBlockDataController();
+                    if (blockData.isDataLoaded()) {
+                        sfItem.callItemHandler(
+                                BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
+                        controller.removeBlock(loc);
+                        dropItems(dummyEvent, drops);
+                    } else {
+                        blockData.setPendingRemove(true);
+                        controller.loadBlockDataAsync(blockData, new IAsyncReadCallback<>() {
+                            @Override
+                            public boolean runOnMainThread() {
+                                return true;
+                            }
 
-                        @Override
-                        public void onResult(SlimefunBlockData result) {
-                            sfItem.callItemHandler(
-                                    BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
-                            controller.removeBlock(loc);
-                            dropItems(dummyEvent, drops);
-                        }
-                    });
+                            @Override
+                            public void onResult(SlimefunBlockData result) {
+                                sfItem.callItemHandler(
+                                        BlockBreakHandler.class,
+                                        handler -> handler.onPlayerBreak(dummyEvent, item, drops));
+                                controller.removeBlock(loc);
+                                dropItems(dummyEvent, drops);
+                            }
+                        });
+                    }
+                    blockAbove.setType(Material.AIR);
                 }
-                blockAbove.setType(Material.AIR);
+
+                if (universalData != null) {
+                    /*
+                     * We create a dummy here to pass onto the BlockBreakHandler.
+                     * This will set the correct block context.
+                     */
+                    BlockBreakEvent dummyEvent = new BlockBreakEvent(blockAbove, player);
+                    List<ItemStack> drops = new ArrayList<>(sfItem.getDrops(player));
+
+                    var controller = Slimefun.getDatabaseManager().getBlockDataController();
+                    if (universalData.isDataLoaded()) {
+                        sfItem.callItemHandler(
+                                BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
+                        controller.removeBlock(loc);
+                        dropItems(dummyEvent, drops);
+                    } else {
+                        universalData.setPendingRemove(true);
+                        controller.loadUniversalDataAsync(universalData, new IAsyncReadCallback<>() {
+                            @Override
+                            public boolean runOnMainThread() {
+                                return true;
+                            }
+
+                            @Override
+                            public void onResult(SlimefunUniversalData result) {
+                                sfItem.callItemHandler(
+                                        BlockBreakHandler.class,
+                                        handler -> handler.onPlayerBreak(dummyEvent, item, drops));
+                                controller.removeBlock(loc);
+                                dropItems(dummyEvent, drops);
+                            }
+                        });
+                    }
+                    blockAbove.setType(Material.AIR);
+                }
             }
         }
     }

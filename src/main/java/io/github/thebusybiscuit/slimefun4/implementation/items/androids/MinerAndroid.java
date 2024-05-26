@@ -16,6 +16,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
+import me.mrCookieSlime.Slimefun.api.inventory.UniversalMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Material;
@@ -70,7 +71,7 @@ public class MinerAndroid extends ProgrammableAndroid {
 
     @Override
     @ParametersAreNonnullByDefault
-    protected void dig(Block b, BlockMenu menu, Block block) {
+    protected void dig(Block b, UniversalMenu menu, Block block) {
         Collection<ItemStack> drops = block.getDrops(effectivePickaxe);
 
         if (!SlimefunTag.UNBREAKABLE_MATERIALS.isTagged(block.getType()) && !drops.isEmpty()) {
@@ -95,7 +96,7 @@ public class MinerAndroid extends ProgrammableAndroid {
 
     @Override
     @ParametersAreNonnullByDefault
-    protected void moveAndDig(Block b, BlockMenu menu, BlockFace face, Block block) {
+    protected void moveAndDig(Block b, UniversalMenu menu, BlockFace face, Block block) {
         Collection<ItemStack> drops = block.getDrops(effectivePickaxe);
 
         if (!SlimefunTag.UNBREAKABLE_MATERIALS.isTagged(block.getType()) && !drops.isEmpty()) {
@@ -124,7 +125,7 @@ public class MinerAndroid extends ProgrammableAndroid {
     }
 
     @ParametersAreNonnullByDefault
-    private void breakBlock(BlockMenu menu, Collection<ItemStack> drops, Block block) {
+    private void breakBlock(UniversalMenu menu, Collection<ItemStack> drops, Block block) {
 
         if (!block.getWorld().getWorldBorder().isInside(block.getLocation())) {
             return;
