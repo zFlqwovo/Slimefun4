@@ -79,4 +79,6 @@ public abstract class ASlimefunDataContainer {
     }
 
     public abstract void setData(String key, String val);
+
+    public abstract boolean isPendingRemove();
 }

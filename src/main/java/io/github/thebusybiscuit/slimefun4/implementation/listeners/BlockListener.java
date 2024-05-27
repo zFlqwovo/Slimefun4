@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ASlimefunDataContainer;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunUniversalData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
@@ -182,12 +183,12 @@ public class BlockListener implements Listener {
 
         var heldItem = e.getPlayer().getInventory().getItemInMainHand();
         var block = e.getBlock();
-        var blockData = StorageCacheUtils.getBlock(block.getLocation());
-        var universalData = StorageCacheUtils.getUniversalData(block);
+        ASlimefunDataContainer data = StorageCacheUtils.getBlock(block.getLocation());
+        if (data == null) data = StorageCacheUtils.getUniversalData(block);
 
         // If there is a Slimefun Block here, call our BreakEvent and, if cancelled, cancel this event
         // and return
-        if (blockData != null) {
+        if (data instanceof SlimefunBlockData blockData) {
             var sfItem = SlimefunItem.getById(blockData.getSfId());
             SlimefunBlockBreakEvent breakEvent =
                     new SlimefunBlockBreakEvent(e.getPlayer(), heldItem, e.getBlock(), sfItem);
@@ -199,7 +200,7 @@ public class BlockListener implements Listener {
             }
         }
 
-        if (universalData != null) {
+        if (data instanceof SlimefunUniversalData universalData) {
             var sfItem = SlimefunItem.getById(universalData.getSfId());
             SlimefunBlockBreakEvent breakEvent =
                     new SlimefunBlockBreakEvent(e.getPlayer(), heldItem, e.getBlock(), sfItem);
@@ -223,14 +224,12 @@ public class BlockListener implements Listener {
             // TODO: merge this with the vanilla sensitive block check (when 1.18- is dropped)
             checkForSensitiveBlockAbove(e.getPlayer(), e.getBlock(), heldItem);
 
-            if ((blockData == null && universalData == null)
-                    || (blockData != null && blockData.isPendingRemove())
-                    || (universalData != null && universalData.isPendingRemove())) {
+            if (data == null || data.isPendingRemove()) {
                 dropItems(e, drops);
                 return;
             }
 
-            if (blockData != null) {
+            if (data instanceof SlimefunBlockData blockData) {
                 blockData.setPendingRemove(true);
 
                 if (!blockData.isDataLoaded()) {
@@ -258,7 +257,7 @@ public class BlockListener implements Listener {
                 }
             }
 
-            if (universalData != null) {
+            if (data instanceof SlimefunUniversalData universalData) {
                 universalData.setPendingRemove(true);
 
                 if (!universalData.isDataLoaded()) {
