@@ -201,7 +201,6 @@
                 <configuration>
                     <installHooks>
                         <pre-commit>.git-hooks/pre-commit</pre-commit>
-                        <commit-msg>.git-hooks/commit-msg</commit-msg>
                     </installHooks>
                 </configuration>
                 <executions>
