@@ -24,6 +24,10 @@ jobs:
           java-package: jdk
           architecture: x64
           cache: maven
+      - name: Commit message style check
+        run: |
+          chmod +x .git-hooks/commit-msg
+          ./commit-msg
       - name: Codestyle check
         run: mvn -B spotless:check --errors
       - name: Build Slimefun
