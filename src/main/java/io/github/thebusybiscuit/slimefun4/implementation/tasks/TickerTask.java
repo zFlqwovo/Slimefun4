@@ -1,7 +1,6 @@
 package io.github.thebusybiscuit.slimefun4.implementation.tasks;
 
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunUniversalData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
 import io.github.bakedlibs.dough.blocks.ChunkPosition;
@@ -224,13 +223,13 @@ public class TickerTask implements Runnable {
                             return;
                         }
                         Block b = l.getBlock();
-                        tickUniversalBlock(l, b, item, universalData, System.nanoTime());
+                        tickBlock(l, b, item, null, System.nanoTime());
                     });
                 } else {
                     long timestamp = Slimefun.getProfiler().newEntry();
                     item.getBlockTicker().update();
                     Block b = l.getBlock();
-                    tickUniversalBlock(l, b, item, universalData, timestamp);
+                    tickBlock(l, b, item, null, timestamp);
                 }
 
                 tickers.add(item.getBlockTicker());
@@ -244,18 +243,6 @@ public class TickerTask implements Runnable {
     private void tickBlock(Location l, Block b, SlimefunItem item, SlimefunBlockData data, long timestamp) {
         try {
             item.getBlockTicker().tick(b, item, data);
-        } catch (Exception | LinkageError x) {
-            reportErrors(l, item, x);
-        } finally {
-            Slimefun.getProfiler().closeEntry(l, item, timestamp);
-        }
-    }
-
-    @ParametersAreNonnullByDefault
-    private void tickUniversalBlock(
-            Location l, Block b, SlimefunItem item, SlimefunUniversalData data, long timestamp) {
-        try {
-            item.getBlockTicker().tick(b, item, (SlimefunBlockData) null);
         } catch (Exception | LinkageError x) {
             reportErrors(l, item, x);
         } finally {
