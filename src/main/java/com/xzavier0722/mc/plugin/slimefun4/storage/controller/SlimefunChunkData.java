@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import lombok.Getter;
+import lombok.Setter;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import org.bukkit.Bukkit;
@@ -26,6 +28,10 @@ public class SlimefunChunkData extends ASlimefunDataContainer {
             "INVALID_BLOCK_DATA_SF_KEY");
     private final Chunk chunk;
     private final Map<String, SlimefunBlockData> sfBlocks;
+
+    @Setter
+    @Getter
+    private boolean isPendingRemove;
 
     @ParametersAreNonnullByDefault
     SlimefunChunkData(Chunk chunk) {
