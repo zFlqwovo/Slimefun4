@@ -17,6 +17,14 @@ import io.github.thebusybiscuit.slimefun4.core.services.sounds.SoundEffect;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunItem;
 import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -27,15 +35,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This {@link SlimefunItem} is a super class for items like the {@link ExplosivePickaxe} or {@link ExplosiveShovel}.
@@ -76,7 +75,7 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
 
     @ParametersAreNonnullByDefault
     private void breakBlocks(
-        BlockBreakEvent e, Player p, ItemStack item, Block b, List<Block> blocks, List<ItemStack> drops) {
+            BlockBreakEvent e, Player p, ItemStack item, Block b, List<Block> blocks, List<ItemStack> drops) {
         List<Block> blocksToDestroy = new ArrayList<>();
 
         if (callExplosionEvent.getValue()) {
@@ -115,7 +114,9 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
          * 为了修复该问题应该对该列表进行排序，确保头颅先被处理，具体为什么可以看下方 breakBlock 方法。
          */
         if (Bukkit.getPluginManager().isPluginEnabled("ExoticGarden")) {
-            blocksToDestroy.sort((block1, block2) -> Boolean.compare(block2.getType().equals(Material.PLAYER_HEAD), block1.getType().equals(Material.PLAYER_HEAD)));
+            blocksToDestroy.sort((block1, block2) -> Boolean.compare(
+                    block2.getType().equals(Material.PLAYER_HEAD),
+                    block1.getType().equals(Material.PLAYER_HEAD)));
         }
 
         if (!event.isCancelled()) {
@@ -170,8 +171,7 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
         block.getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, material);
         Location bloclLocation = block.getLocation();
 
-        Optional<SlimefunItem> optionalBlockSfItem =
-            Optional.ofNullable(StorageCacheUtils.getSfItem(bloclLocation));
+        Optional<SlimefunItem> optionalBlockSfItem = Optional.ofNullable(StorageCacheUtils.getSfItem(bloclLocation));
 
         /*
          * 修复: https://github.com/SlimefunGuguProject/Slimefun4/issues/853
@@ -184,7 +184,8 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
          */
         AtomicBoolean isUseVanillaBlockBreaking = new AtomicBoolean(true);
 
-        if (Bukkit.getPluginManager().isPluginEnabled("ExoticGarden") && block.getType().equals(Material.PLAYER_HEAD)) {
+        if (Bukkit.getPluginManager().isPluginEnabled("ExoticGarden")
+                && block.getType().equals(Material.PLAYER_HEAD)) {
             Location leavesLocation = bloclLocation.clone();
             leavesLocation.setY(leavesLocation.getY() - 1);
 
@@ -193,7 +194,7 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
 
             if (Tag.LEAVES.isTagged(leaveBlockType)) {
                 Optional<SlimefunItem> optionalLeavesBlockSfItem =
-                    Optional.ofNullable(StorageCacheUtils.getSfItem(leavesLocation));
+                        Optional.ofNullable(StorageCacheUtils.getSfItem(leavesLocation));
 
                 optionalBlockSfItem.ifPresent(blockSfItem -> optionalLeavesBlockSfItem.ifPresent(leavesSfItem -> {
                     Collection<ItemStack> sfItemDrops = blockSfItem.getDrops();
@@ -228,7 +229,8 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
                  * Fixes #3036 and handling in general.
                  * Call the BlockBreakHandler if the block has one to allow for proper handling.
                  */
-                sfItem.callItemHandler(BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
+                sfItem.callItemHandler(
+                        BlockBreakHandler.class, handler -> handler.onPlayerBreak(dummyEvent, item, drops));
 
                 // Make sure the event wasn't cancelled by the BlockBreakHandler.
                 if (!dummyEvent.isCancelled()) {
