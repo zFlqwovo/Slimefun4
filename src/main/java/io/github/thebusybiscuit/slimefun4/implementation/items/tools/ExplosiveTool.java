@@ -169,9 +169,9 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
         Material material = block.getType();
 
         block.getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, material);
-        Location bloclLocation = block.getLocation();
+        Location blockLocation = block.getLocation();
 
-        Optional<SlimefunItem> optionalBlockSfItem = Optional.ofNullable(StorageCacheUtils.getSfItem(bloclLocation));
+        Optional<SlimefunItem> optionalBlockSfItem = Optional.ofNullable(StorageCacheUtils.getSfItem(blockLocation));
 
         /*
          * 修复: https://github.com/SlimefunGuguProject/Slimefun4/issues/853
@@ -186,7 +186,7 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
 
         if (Bukkit.getPluginManager().isPluginEnabled("ExoticGarden")
                 && block.getType().equals(Material.PLAYER_HEAD)) {
-            Location leavesLocation = bloclLocation.clone();
+            Location leavesLocation = blockLocation.clone();
             leavesLocation.setY(leavesLocation.getY() - 1);
 
             Block leaveBlock = leavesLocation.getBlock();
@@ -236,7 +236,7 @@ public class ExplosiveTool extends SimpleSlimefunItem<ToolUseHandler> implements
                 if (!dummyEvent.isCancelled()) {
                     drops.addAll(sfItem.getDrops(player));
                     block.setType(Material.AIR);
-                    Slimefun.getDatabaseManager().getBlockDataController().removeBlock(bloclLocation);
+                    Slimefun.getDatabaseManager().getBlockDataController().removeBlock(blockLocation);
                 }
             }
         });
