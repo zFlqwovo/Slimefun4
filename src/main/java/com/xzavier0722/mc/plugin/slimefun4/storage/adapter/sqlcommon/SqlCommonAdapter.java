@@ -83,5 +83,7 @@ public abstract class SqlCommonAdapter<T extends ISqlCommonConfig> implements ID
         chunkDataTable = null;
         blockInvTable = null;
         universalInvTable = null;
+        universalDataTable = null;
+        universalRecordTable = null;
     }
 }

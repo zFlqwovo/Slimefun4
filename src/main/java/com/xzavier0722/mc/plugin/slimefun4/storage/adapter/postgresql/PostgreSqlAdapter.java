@@ -141,6 +141,7 @@ public class PostgreSqlAdapter extends SqlCommonAdapter<PostgreSqlConfig> {
         createChunkDataTable();
         createUniversalInventoryTable();
         createUniversalRecordTable();
+        createUniversalDataTable();
     }
 
     private void createProfileTable() {
