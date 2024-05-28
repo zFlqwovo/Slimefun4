@@ -1,5 +1,6 @@
 package com.xzavier0722.mc.plugin.slimefun4.storage.adapter.sqlcommon;
 
+import city.norain.slimefun4.SlimefunExtended;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -47,8 +48,15 @@ public abstract class SqlCommonConfig implements ISqlCommonConfig {
         }
 
         config.setMaximumPoolSize(maxConnection);
-        config.setConnectionTimeout(8000); // set below 30s to avoid watchdog
-        config.setLeakDetectionThreshold(2500);
+
+        /* ===================
+         * DATABASE DEBUG MODE
+         * ===================
+         */
+        if (SlimefunExtended.isDatabaseDebugMode()) {
+            config.setLeakDetectionThreshold(5000);
+        }
+
         config.addDataSourceProperty("useLocalSessionState", "true");
         config.addDataSourceProperty("rewriteBatchedStatements", "true");
         config.addDataSourceProperty("cacheResultSetMetadata", "true");
