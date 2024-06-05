@@ -22,6 +22,7 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -38,6 +39,7 @@ import org.bukkit.potion.PotionEffectType;
  * @author Walshy
  *
  */
+@SerializableAs("ItemStack") // fix #897
 public class SlimefunItemStack extends ItemStack {
 
     private String id;
