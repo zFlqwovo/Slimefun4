@@ -31,10 +31,7 @@ public class BanItemCommand extends SubCommand {
             if (args.length >= 2) {
                 SlimefunItem item = SlimefunItem.getById(args[1]);
                 if (item != null) {
-                    item.disable();
-                    Slimefun.getItemCfg().setValue(args[1] + ".enabled", false);
-                    Slimefun.getItemCfg().save();
-                    Slimefun.getLocalization().sendMessage(sender, "commands.banitem.success", true);
+                    banItem(item, sender);
                     return;
                 }
                 Slimefun.getLocalization()
@@ -47,10 +44,7 @@ public class BanItemCommand extends SubCommand {
                 if (!itemOnHand.getType().isAir()) {
                     SlimefunItem item = SlimefunItem.getByItem(itemOnHand);
                     if (item != null) {
-                        item.disable();
-                        Slimefun.getItemCfg().setValue(args[1] + ".enabled", false);
-                        Slimefun.getItemCfg().save();
-                        Slimefun.getLocalization().sendMessage(sender, "commands.banitem.success", true);
+                        banItem(item, sender);
                         return;
                     }
                 }
@@ -72,5 +66,12 @@ public class BanItemCommand extends SubCommand {
     @Override
     public String getDescription() {
         return "commands.banitem.description";
+    }
+
+    private static void banItem(SlimefunItem slimefunItem, CommandSender sender) {
+        slimefunItem.disable();
+        Slimefun.getItemCfg().setValue(slimefunItem.getId() + ".enabled", false);
+        Slimefun.getItemCfg().save();
+        Slimefun.getLocalization().sendMessage(sender, "commands.banitem.success", true);
     }
 }
