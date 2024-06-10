@@ -110,12 +110,7 @@ public class BlockListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         ItemStack item = e.getItemInHand();
         SlimefunItem sfItem = SlimefunItem.getByItem(item);
-
-        // TODO: Protection manager is null in testing environment.
-        if (!Slimefun.instance().isUnitTest()) {
-            Slimefun.getProtectionManager().logAction(e.getPlayer(), e.getBlock(), Interaction.PLACE_BLOCK);
-        }
-
+        
         if (sfItem != null && !(sfItem instanceof NotPlaceable)) {
             if (!sfItem.canUse(e.getPlayer(), true)) {
                 e.setCancelled(true);
