@@ -48,6 +48,12 @@ public enum MinecraftVersion {
     MINECRAFT_1_20(20, "1.20.x"),
 
     /**
+     * This constant represents Minecraft (Java Edition) Version 1.20.5
+     * ("The Armored Paws Update")
+     */
+    MINECRAFT_1_20_5(20, 5, "1.20.5+"),
+
+    /**
      * This constant represents an exceptional state in which we were unable
      * to identify the Minecraft Version we are using
      */
@@ -62,6 +68,7 @@ public enum MinecraftVersion {
     private final String name;
     private final boolean virtual;
     private final int majorVersion;
+    private final int minorVersion;
 
     /**
      * This constructs a new {@link MinecraftVersion} with the given name.
@@ -76,6 +83,26 @@ public enum MinecraftVersion {
     MinecraftVersion(int majorVersion, @Nonnull String name) {
         this.name = name;
         this.majorVersion = majorVersion;
+        this.minorVersion = -1;
+        this.virtual = false;
+    }
+
+    /**
+     * This constructs a new {@link MinecraftVersion} with the given name.
+     * This constructor forces the {@link MinecraftVersion} to be real.
+     * It must be a real version of Minecraft.
+     *
+     * @param majorVersion
+     *            The major (minor in semver, major in MC land) version of minecraft as an {@link Integer}
+     * @param minor
+     *           The minor (patch in semver, minor in MC land) version of minecraft as an {@link Integer}
+     * @param name
+     *            The display name of this {@link MinecraftVersion}
+     */
+    MinecraftVersion(int majorVersion, int minor, @Nonnull String name) {
+        this.name = name;
+        this.majorVersion = majorVersion;
+        this.minorVersion = minor;
         this.virtual = false;
     }
 
@@ -92,6 +119,7 @@ public enum MinecraftVersion {
     MinecraftVersion(@Nonnull String name, boolean virtual) {
         this.name = name;
         this.majorVersion = 0;
+        this.minorVersion = -1;
         this.virtual = virtual;
     }
 
@@ -132,7 +160,30 @@ public enum MinecraftVersion {
      * @return Whether this {@link MinecraftVersion} matches the specified version id
      */
     public boolean isMinecraftVersion(int minecraftVersion) {
-        return !isVirtual() && this.majorVersion == minecraftVersion;
+        return this.isMinecraftVersion(minecraftVersion, -1);
+    }
+
+    /**
+     * This tests if the given minecraft version matches with this
+     * {@link MinecraftVersion}.
+     * <p>
+     * You can obtain the version number by doing {@link PaperLib#getMinecraftVersion()}.
+     * It is equivalent to the "major" version<br />
+     * You can obtain the patch version by doing {@link PaperLib#getMinecraftPatchVersion()}.
+     * It is equivalent to the "minor" version
+     * <p>
+     * Example: {@literal "1.13"} returns {@literal 13}<br />
+     * Exampe: {@literal "1.13.2"} returns {@literal 13_2}
+     *
+     * @param minecraftVersion
+     *            The {@link Integer} version to match
+     *
+     * @return Whether this {@link MinecraftVersion} matches the specified version id
+     */
+    public boolean isMinecraftVersion(int minecraftVersion, int patchVersion) {
+        return !isVirtual()
+                && this.majorVersion == minecraftVersion
+                && (this.minorVersion == -1 || this.minorVersion >= patchVersion);
     }
 
     /**
