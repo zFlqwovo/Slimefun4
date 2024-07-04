@@ -460,7 +460,7 @@ public final class SlimefunUtils {
             @Nonnull ItemMeta itemMeta,
             @Nonnull ItemMeta sfitemMeta,
             boolean checkLore,
-            boolean bypassCustomModelCheck) {
+            boolean checkCustomModelCheck) {
         if (itemMeta.hasDisplayName() != sfitemMeta.hasDisplayName()) {
             return false;
         } else if (itemMeta.hasDisplayName()
@@ -480,7 +480,7 @@ public final class SlimefunUtils {
             }
         }
 
-        if (!bypassCustomModelCheck) {
+        if (checkCustomModelCheck) {
             // Fixes #3133: name and lore are not enough
             boolean hasItemMetaCustomModelData = itemMeta.hasCustomModelData();
             boolean hasSfItemMetaCustomModelData = sfitemMeta.hasCustomModelData();
