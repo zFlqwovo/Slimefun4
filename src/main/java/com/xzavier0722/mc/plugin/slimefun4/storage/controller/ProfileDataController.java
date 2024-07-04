@@ -301,12 +301,8 @@ public class ProfileDataController extends ADataController {
 
     public void updateUsername(String uuid, String newName) {
         var key = new RecordKey(DataScope.PLAYER_PROFILE);
+        key.addField(FieldKey.PLAYER_NAME);
         key.addCondition(FieldKey.PLAYER_UUID, uuid);
-
-        var result = getData(key);
-        if (result.isEmpty()) {
-            return;
-        }
 
         var data = new RecordSet();
         data.put(FieldKey.PLAYER_NAME, newName);
