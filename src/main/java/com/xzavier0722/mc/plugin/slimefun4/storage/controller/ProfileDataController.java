@@ -299,6 +299,21 @@ public class ProfileDataController extends ADataController {
         scheduleReadTask(() -> invokeCallback(callback, getPlayerUuid(pName)));
     }
 
+    public void updateUsername(String uuid, String newName) {
+        var key = new RecordKey(DataScope.PLAYER_PROFILE);
+        key.addCondition(FieldKey.PLAYER_UUID, uuid);
+
+        var result = getData(key);
+        if (result.isEmpty()) {
+            return;
+        }
+
+        var data = new RecordSet();
+        data.put(FieldKey.PLAYER_NAME, newName);
+
+        scheduleWriteTask(new UUIDKey(DataScope.NONE, uuid), key, data, false);
+    }
+
     private static RecordSet getRecordSet(PlayerBackpack bp) {
         var re = new RecordSet();
         re.put(FieldKey.PLAYER_UUID, bp.getOwner().getUniqueId().toString());
