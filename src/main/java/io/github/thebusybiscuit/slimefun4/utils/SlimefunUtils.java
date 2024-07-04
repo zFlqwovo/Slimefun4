@@ -411,14 +411,14 @@ public final class SlimefunUtils {
 
     private static boolean equalsItemMeta(
             @Nonnull ItemMeta itemMeta, @Nonnull ItemMetaSnapshot itemMetaSnapshot, boolean checkLore) {
-        return equalsItemMeta(itemMeta, itemMetaSnapshot, checkLore, true);
+        return equalsItemMeta(itemMeta, itemMetaSnapshot, checkLore, false);
     }
 
     private static boolean equalsItemMeta(
             @Nonnull ItemMeta itemMeta,
             @Nonnull ItemMetaSnapshot itemMetaSnapshot,
             boolean checkLore,
-            boolean bypassCustomModelCheck) {
+            boolean checkCustomModelCheck) {
         Optional<String> displayName = itemMetaSnapshot.getDisplayName();
 
         if (itemMeta.hasDisplayName() != displayName.isPresent()) {
@@ -437,7 +437,7 @@ public final class SlimefunUtils {
             }
         }
 
-        if (bypassCustomModelCheck) {
+        if (!checkCustomModelCheck) {
             return true;
         }
 
