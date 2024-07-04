@@ -26,7 +26,7 @@ jobs:
           - mcVersion: '1.19.4'
             javaVersion: '19'
           - mcVersion: 'latest'
-            javaVersion: '20'
+            javaVersion: '21'
 
     steps:
       - name: Checkout repository
