@@ -7,7 +7,6 @@ import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.implementation.items.armor.SlimefunArmorPiece;
 import io.github.thebusybiscuit.slimefun4.implementation.tasks.armor.RadiationTask;
 import javax.annotation.Nonnull;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,11 +30,9 @@ public class JoinListener implements Listener {
         final var p = e.getPlayer();
 
         PlayerProfile.get(p, playerProfile -> {
-            if (Bukkit.getOnlineMode()) {
-                Slimefun.getDatabaseManager()
-                        .getProfileDataController()
-                        .updateUsername(p.getUniqueId().toString(), p.getName());
-            }
+            Slimefun.getDatabaseManager()
+                    .getProfileDataController()
+                    .updateUsername(p.getUniqueId().toString(), p.getName());
 
             final ItemStack[] armorContents = p.getInventory().getArmorContents();
             final HashedArmorpiece[] hashedArmorpieces = playerProfile.getArmor();
