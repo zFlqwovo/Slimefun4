@@ -11,9 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 public class SlimefunUniversalData extends ASlimefunDataContainer {
-    @Getter
-    private final String sfId;
-
     @Setter
     @Getter
     private volatile UniversalMenu universalMenu;
@@ -28,16 +25,14 @@ public class SlimefunUniversalData extends ASlimefunDataContainer {
 
     @ParametersAreNonnullByDefault
     SlimefunUniversalData(UUID uuid, Location location, String sfId) {
-        super(uuid.toString());
+        super(uuid.toString(), sfId);
         this.lastPresent = location;
-        this.sfId = sfId;
     }
 
     @ParametersAreNonnullByDefault
     SlimefunUniversalData(UUID uuid, Location location, SlimefunUniversalData other) {
-        super(uuid.toString(), other);
+        super(uuid.toString(), other, other.getSfId());
         this.lastPresent = location;
-        this.sfId = other.sfId;
     }
 
     @ParametersAreNonnullByDefault
@@ -77,6 +72,6 @@ public class SlimefunUniversalData extends ASlimefunDataContainer {
 
     @Override
     public String toString() {
-        return "SlimefunUniversalData [sfId=" + sfId + ", isPendingRemove=" + pendingRemove + "]";
+        return "SlimefunUniversalData [sfId=" + getSfId() + ", isPendingRemove=" + pendingRemove + "]";
     }
 }

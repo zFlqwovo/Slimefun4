@@ -2,7 +2,7 @@ package com.xzavier0722.mc.plugin.slimefun4.storage.util;
 
 import com.google.common.base.Preconditions;
 import com.xzavier0722.mc.plugin.slimefun4.storage.callback.IAsyncReadCallback;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ASlimefunDataContainer;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ADataContainer;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunUniversalData;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -24,7 +24,7 @@ import org.bukkit.block.Block;
  * {@link com.xzavier0722.mc.plugin.slimefun4.storage.controller.BlockDataController#getBlockData}
  */
 public class StorageCacheUtils {
-    private static final Set<ASlimefunDataContainer> loadingData = new HashSet<>();
+    private static final Set<ADataContainer> loadingData = new HashSet<>();
 
     @ParametersAreNonnullByDefault
     public static boolean hasBlock(Location l) {
@@ -135,7 +135,7 @@ public class StorageCacheUtils {
         return uniData.getUniversalMenu();
     }
 
-    public static void requestLoad(ASlimefunDataContainer data) {
+    public static void requestLoad(ADataContainer data) {
         if (data.isDataLoaded()) {
             return;
         }

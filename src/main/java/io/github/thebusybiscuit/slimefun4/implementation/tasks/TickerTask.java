@@ -1,6 +1,9 @@
 package io.github.thebusybiscuit.slimefun4.implementation.tasks;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ASlimefunDataContainer;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunUniversalData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.blocks.BlockPosition;
 import io.github.bakedlibs.dough.blocks.ChunkPosition;
@@ -133,10 +136,13 @@ public class TickerTask implements Runnable {
     }
 
     private void tickLocation(@Nonnull Set<BlockTicker> tickers, @Nonnull Location l) {
-        var blockData = StorageCacheUtils.getBlock(l);
+        var blockData = StorageCacheUtils.hasBlock(l)
+                ? StorageCacheUtils.getBlock(l)
+                : StorageCacheUtils.getUniversalData(l.getBlock());
         if (blockData == null || !blockData.isDataLoaded() || blockData.isPendingRemove()) {
             return;
         }
+
         SlimefunItem item = SlimefunItem.getById(blockData.getSfId());
 
         if (item != null && item.getBlockTicker() != null) {
@@ -175,9 +181,28 @@ public class TickerTask implements Runnable {
     }
 
     @ParametersAreNonnullByDefault
-    private void tickBlock(Location l, Block b, SlimefunItem item, SlimefunBlockData data, long timestamp) {
+    private void tickBlock(Location l, Block b, SlimefunItem item, ASlimefunDataContainer data, long timestamp) {
         try {
-            item.getBlockTicker().tick(b, item, data);
+            switch (data) {
+                case SlimefunBlockData blockData -> {
+                    if (item.getBlockTicker().isUniversal()) {
+                        Slimefun.logger()
+                                .log(Level.WARNING, "BlockTicker is universal even identified as non-universal!");
+                        return;
+                    }
+                    item.getBlockTicker().tick(b, item, blockData);
+                }
+                case SlimefunUniversalData universalData -> {
+                    if (!item.getBlockTicker().isUniversal()) {
+                        Slimefun.logger()
+                                .log(Level.WARNING, "BlockTicker is non-universal even identified as universal!");
+                        return;
+                    }
+                    item.getBlockTicker().tick(b, item, universalData);
+                }
+                default -> throw new IllegalStateException(
+                        "Unable to tick abnormal blockdata @" + LocationUtils.locationToString(l));
+            }
         } catch (Exception | LinkageError x) {
             reportErrors(l, item, x);
         } finally {

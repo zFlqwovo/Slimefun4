@@ -338,45 +338,45 @@ public class SqliteAdapter extends SqlCommonAdapter<SqliteConfig> {
 
     private void createUniversalRecordTable() {
         executeSql("CREATE TABLE IF NOT EXISTS "
-            + universalRecordTable
-            + "("
-            + FIELD_UNIVERSAL_UUID
-            + " CHAR(64) NOT NULL, "
-            + FIELD_SLIMEFUN_ID
-            + " CHAR(64) NOT NULL, "
-            + FIELD_LAST_PRESENT
-            + " CHAR(64) NOT NULL, "
-            + "PRIMARY KEY ("
-            + FIELD_UNIVERSAL_UUID
-            + ")"
-            + ");");
+                + universalRecordTable
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + " CHAR(64) NOT NULL, "
+                + FIELD_SLIMEFUN_ID
+                + " CHAR(64) NOT NULL, "
+                + FIELD_LAST_PRESENT
+                + " CHAR(64) NOT NULL, "
+                + "PRIMARY KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ")"
+                + ");");
     }
 
     private void createUniversalDataTable() {
         executeSql("CREATE TABLE IF NOT EXISTS "
-            + universalDataTable
-            + "("
-            + FIELD_UNIVERSAL_UUID
-            + " CHAR(64) NOT NULL, "
-            + FIELD_DATA_KEY
-            + " CHAR(64) NOT NULL, "
-            + FIELD_DATA_VALUE
-            + " TEXT NOT NULL, "
-            + "FOREIGN KEY ("
-            + FIELD_UNIVERSAL_UUID
-            + ") "
-            + "REFERENCES "
-            + universalRecordTable
-            + "("
-            + FIELD_UNIVERSAL_UUID
-            + ") "
-            + "ON UPDATE CASCADE ON DELETE CASCADE, "
-            + "PRIMARY KEY ("
-            + FIELD_UNIVERSAL_UUID
-            + ", "
-            + FIELD_DATA_KEY
-            + ")"
-            + ");");
+                + universalDataTable
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + " CHAR(64) NOT NULL, "
+                + FIELD_DATA_KEY
+                + " CHAR(64) NOT NULL, "
+                + FIELD_DATA_VALUE
+                + " TEXT NOT NULL, "
+                + "FOREIGN KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ") "
+                + "REFERENCES "
+                + universalRecordTable
+                + "("
+                + FIELD_UNIVERSAL_UUID
+                + ") "
+                + "ON UPDATE CASCADE ON DELETE CASCADE, "
+                + "PRIMARY KEY ("
+                + FIELD_UNIVERSAL_UUID
+                + ", "
+                + FIELD_DATA_KEY
+                + ")"
+                + ");");
     }
 
     public synchronized void executeSql(String sql) {

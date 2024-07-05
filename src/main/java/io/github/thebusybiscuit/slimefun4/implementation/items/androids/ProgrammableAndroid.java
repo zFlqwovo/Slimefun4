@@ -1,7 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.androids;
 
 import city.norain.slimefun4.utils.PDCUtil;
-import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunUniversalData;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.LocationUtils;
 import com.xzavier0722.mc.plugin.slimefun4.storage.util.StorageCacheUtils;
 import io.github.bakedlibs.dough.chat.ChatInput;
@@ -46,8 +46,6 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineFuel;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.interfaces.InventoryBlock;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
-import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
-import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.inventory.UniversalMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.UniversalMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
@@ -282,7 +280,7 @@ public class ProgrammableAndroid extends SlimefunItem
         addItemHandler(new BlockTicker() {
 
             @Override
-            public void tick(Block b, SlimefunItem item, SlimefunBlockData data) {
+            public void tick(Block b, SlimefunItem item, SlimefunUniversalData data) {
                 if (b != null && data != null) {
                     ProgrammableAndroid.this.tick(b, data);
                 }
@@ -807,14 +805,14 @@ public class ProgrammableAndroid extends SlimefunItem
         return tier;
     }
 
-    protected void tick(Block b, SlimefunBlockData data) {
+    protected void tick(Block b, SlimefunUniversalData data) {
         if (b.getType() != Material.PLAYER_HEAD) {
             // The Android was destroyed or moved.
             return;
         }
 
         if ("false".equals(data.getData("paused"))) {
-            BlockMenu menu = data.getBlockMenu();
+            UniversalMenu menu = data.getUniversalMenu();
 
             String fuelData = data.getData("fuel");
             float fuel = fuelData == null ? 0 : Float.parseFloat(fuelData);
@@ -855,7 +853,7 @@ public class ProgrammableAndroid extends SlimefunItem
 
     @ParametersAreNonnullByDefault
     private void executeInstruction(
-            Instruction instruction, Block b, BlockMenu inv, SlimefunBlockData data, int index) {
+            Instruction instruction, Block b, UniversalMenu inv, SlimefunUniversalData data, int index) {
         if ("true".equals(data.getData("paused"))) {
             return;
         }
@@ -908,7 +906,7 @@ public class ProgrammableAndroid extends SlimefunItem
         StorageCacheUtils.setData(b.getLocation(), "rotation", rotation.name());
     }
 
-    protected void depositItems(BlockMenu menu, Block facedBlock) {
+    protected void depositItems(UniversalMenu menu, Block facedBlock) {
         if (facedBlock.getType() == Material.DISPENSER
                 && StorageCacheUtils.isBlock(facedBlock.getLocation(), "ANDROID_INTERFACE_ITEMS")) {
             BlockState state = PaperLib.getBlockState(facedBlock, false).getState();
@@ -932,7 +930,7 @@ public class ProgrammableAndroid extends SlimefunItem
         }
     }
 
-    protected void refuel(BlockMenu menu, Block facedBlock) {
+    protected void refuel(UniversalMenu menu, Block facedBlock) {
         if (facedBlock.getType() == Material.DISPENSER
                 && StorageCacheUtils.isBlock(facedBlock.getLocation(), "ANDROID_INTERFACE_FUEL")) {
             BlockState state = PaperLib.getBlockState(facedBlock, false).getState();
@@ -950,7 +948,7 @@ public class ProgrammableAndroid extends SlimefunItem
     }
 
     private boolean insertFuel(
-            BlockMenu menu, Inventory dispenser, int slot, ItemStack currentFuel, ItemStack newFuel) {
+            UniversalMenu menu, Inventory dispenser, int slot, ItemStack currentFuel, ItemStack newFuel) {
         if (currentFuel == null) {
             menu.replaceExistingItem(43, newFuel);
             dispenser.setItem(slot, null);
@@ -971,7 +969,7 @@ public class ProgrammableAndroid extends SlimefunItem
     }
 
     @ParametersAreNonnullByDefault
-    private void consumeFuel(Block b, BlockMenu menu) {
+    private void consumeFuel(Block b, UniversalMenu menu) {
         ItemStack item = menu.getItemInSlot(43);
 
         if (item != null && item.getType() != Material.AIR) {
@@ -991,7 +989,7 @@ public class ProgrammableAndroid extends SlimefunItem
         }
     }
 
-    private void constructMenu(@Nonnull BlockMenuPreset preset) {
+    private void constructMenu(@Nonnull UniversalMenuPreset preset) {
         preset.drawBackground(BORDER);
         preset.drawBackground(ChestMenuUtils.getOutputSlotTexture(), OUTPUT_BORDER);
 
@@ -1080,23 +1078,23 @@ public class ProgrammableAndroid extends SlimefunItem
         throw new UnsupportedOperationException("Non-butcher Android tried to butcher!");
     }
 
-    protected void fish(Block b, BlockMenu menu) {
+    protected void fish(Block b, UniversalMenu menu) {
         throw new UnsupportedOperationException("Non-fishing Android tried to fish!");
     }
 
-    protected void dig(Block b, BlockMenu menu, Block block) {
+    protected void dig(Block b, UniversalMenu menu, Block block) {
         throw new UnsupportedOperationException("Non-mining Android tried to mine!");
     }
 
-    protected void moveAndDig(Block b, BlockMenu menu, BlockFace face, Block block) {
+    protected void moveAndDig(Block b, UniversalMenu menu, BlockFace face, Block block) {
         throw new UnsupportedOperationException("Non-mining Android tried to mine!");
     }
 
-    protected boolean chopTree(Block b, BlockMenu menu, BlockFace face) {
+    protected boolean chopTree(Block b, UniversalMenu menu, BlockFace face) {
         throw new UnsupportedOperationException("Non-woodcutter Android tried to chop a Tree!");
     }
 
-    protected void farm(Block b, BlockMenu menu, Block block, boolean isAdvanced) {
+    protected void farm(Block b, UniversalMenu menu, Block block, boolean isAdvanced) {
         throw new UnsupportedOperationException("Non-farming Android tried to farm!");
     }
 }
