@@ -361,9 +361,7 @@ public final class SlimefunUtils {
                         .getItemData(possibleSfItemMeta)
                         .orElse(null);
                 // Prioritize SlimefunItem id comparison over ItemMeta comparison
-                if (id != null && id.equals(possibleItemId)) {
-                    Debug.log(TestCase.CARGO_INPUT_TESTING, "  Item IDs matched!");
-
+                if (id != null && possibleItemId != null) {
                     /*
                      * PR #3417
                      *
@@ -374,14 +372,20 @@ public final class SlimefunUtils {
                     if (optionalDistinctive.isPresent()) {
                         return optionalDistinctive.get().canStack(possibleSfItemMeta, itemMeta);
                     }
-                    return true;
+
+                    var match = id.equals(possibleItemId);
+
+                    Debug.log(TestCase.CARGO_INPUT_TESTING, "  Use Item ID match: {}", match);
+
+                    return match;
                 } else {
                     Debug.log(
                             TestCase.CARGO_INPUT_TESTING,
-                            "  Item IDs don't match, checking meta {} == {} (lore: {})",
+                            "  one of item have no Slimefun ID, checking meta {} == {} (lore: {})",
                             itemMeta,
                             possibleSfItemMeta,
                             checkLore);
+
                     return equalsItemMeta(itemMeta, possibleSfItemMeta, checkLore, checkCustomModelData);
                 }
             } else if (sfitem.hasItemMeta()) {
@@ -462,10 +466,12 @@ public final class SlimefunUtils {
             boolean checkLore,
             boolean checkCustomModelCheck) {
         if (itemMeta.hasDisplayName() != sfitemMeta.hasDisplayName()) {
+            Debug.log(TestCase.CARGO_INPUT_TESTING, "  Comparing has display name failed");
             return false;
         } else if (itemMeta.hasDisplayName()
                 && sfitemMeta.hasDisplayName()
                 && !itemMeta.getDisplayName().equals(sfitemMeta.getDisplayName())) {
+            Debug.log(TestCase.CARGO_INPUT_TESTING, "  Comparing display name failed");
             return false;
         } else if (checkLore) {
             boolean hasItemMetaLore = itemMeta.hasLore();
@@ -473,9 +479,11 @@ public final class SlimefunUtils {
 
             if (hasItemMetaLore && hasSfItemMetaLore) {
                 if (!equalsLore(itemMeta.getLore(), sfitemMeta.getLore())) {
+                    Debug.log(TestCase.CARGO_INPUT_TESTING, "  Comparing lore failed");
                     return false;
                 }
             } else if (hasItemMetaLore != hasSfItemMetaLore) {
+                Debug.log(TestCase.CARGO_INPUT_TESTING, "  Comparing has lore failed");
                 return false;
             }
         }
@@ -496,6 +504,8 @@ public final class SlimefunUtils {
         if (itemMeta instanceof PotionMeta && sfitemMeta instanceof PotionMeta) {
             return ((PotionMeta) itemMeta).getBasePotionType().equals(((PotionMeta) sfitemMeta).getBasePotionType());
         }
+
+        Debug.log(TestCase.CARGO_INPUT_TESTING, "  All meta checked.");
 
         return true;
     }
