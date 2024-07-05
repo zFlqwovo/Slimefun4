@@ -76,7 +76,7 @@ public class BlockDataService implements Keyed {
      *            The uuid linked to certain slimefun item
      */
     public void setUniversalDataUUID(@Nonnull Block b, @Nonnull String uuid) {
-        setBlockData(b, namespacedKey, uuid);
+        setBlockData(b, universalDataKey, uuid);
     }
 
     /**

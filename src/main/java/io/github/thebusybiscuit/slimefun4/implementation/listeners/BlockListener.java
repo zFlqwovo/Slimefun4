@@ -158,9 +158,11 @@ public class BlockListener implements Listener {
                             .getBlockDataController()
                             .createBlock(block.getLocation(), sfItem.getId());
 
-                    if (Slimefun.getBlockDataService().isTileEntity(block.getType())
-                            && data instanceof SlimefunUniversalData) {
+                    if (data instanceof SlimefunUniversalData
+                            && Slimefun.getBlockDataService().isTileEntity(block.getType())) {
                         Slimefun.getBlockDataService().setUniversalDataUUID(block, data.getKey());
+                    } else {
+                        throw new IllegalStateException("You must use pdc support material for this Slimefun item!");
                     }
 
                     sfItem.callItemHandler(BlockPlaceHandler.class, handler -> handler.onPlayerPlace(e));
