@@ -52,6 +52,12 @@ public enum MinecraftVersion {
     MINECRAFT_1_20_5(20, 5, "1.20.5+"),
 
     /**
+     * This constant represents Minecraft (Java Edition) Version 1.21
+     * ("The Tricky Trials Update")
+     */
+    MINECRAFT_1_21(21, "1.21.x"),
+
+    /**
      * This constant represents an exceptional state in which we were unable
      * to identify the Minecraft Version we are using
      */
@@ -168,17 +174,9 @@ public enum MinecraftVersion {
      * @return Whether this {@link MinecraftVersion} matches the specified version id
      */
     public boolean isMinecraftVersion(int minecraftVersion, int patchVersion) {
-        if (isVirtual()) {
-            return false;
-        }
-
-        if (this.majorVersion != 20) {
-            return this.majorVersion == minecraftVersion && this.minorVersion >= patchVersion;
-        } else {
-            return this.majorVersion == minecraftVersion && this.minorVersion == -1
-                    ? patchVersion < 5
-                    : patchVersion >= minorVersion;
-        }
+        return !isVirtual()
+                && this.majorVersion == minecraftVersion
+                && (this.minorVersion >= patchVersion || (this.majorVersion != 20 && this.minorVersion == -1));
     }
 
     /**
