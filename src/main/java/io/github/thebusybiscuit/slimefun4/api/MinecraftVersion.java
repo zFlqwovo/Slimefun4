@@ -174,9 +174,19 @@ public enum MinecraftVersion {
      * @return Whether this {@link MinecraftVersion} matches the specified version id
      */
     public boolean isMinecraftVersion(int minecraftVersion, int patchVersion) {
-        return !isVirtual()
-                && this.majorVersion == minecraftVersion
-                && (this.minorVersion >= patchVersion || (this.majorVersion != 20 && this.minorVersion == -1));
+        if (isVirtual()) {
+            return false;
+        }
+
+        if (this.majorVersion != minecraftVersion) {
+            return false;
+        }
+
+        if (this.majorVersion == 20) {
+            return this.minorVersion >= patchVersion;
+        } else {
+            return this.minorVersion == -1 || this.minorVersion >= patchVersion;
+        }
     }
 
     /**
