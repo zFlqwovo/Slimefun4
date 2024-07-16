@@ -1,5 +1,5 @@
 # Slimefun 中文版
-1
+
 Looking for English (or Original) Version? [**Click here**](https://github.com/Slimefun/Slimefun4/)
 
 想要直接下载吗? [**单击此处**](https://github.com/StarWishsama/Slimefun4/blob/master/README.md#floppy_disk-下载-slimefun4)
