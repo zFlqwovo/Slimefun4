@@ -53,6 +53,12 @@ public class ProfileDataController extends ADataController {
             return null;
         }
 
+        // check player name changed or not
+        var currentPlayerName = p.getName();
+        if (currentPlayerName != null && !currentPlayerName.equals(result.get(0).get(FieldKey.PLAYER_NAME))) {
+            updateUsername(uuid, currentPlayerName);
+        }
+
         var bNum = result.get(0).getInt(FieldKey.BACKPACK_NUMBER);
 
         var researches = new HashSet<Research>();
