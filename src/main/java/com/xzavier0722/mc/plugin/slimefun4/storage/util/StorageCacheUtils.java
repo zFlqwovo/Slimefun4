@@ -60,6 +60,12 @@ public class StorageCacheUtils {
     }
 
     @ParametersAreNonnullByDefault
+    @Nullable public static String getUniversalData(UUID uuid, Location loc, String key) {
+        var universalData = getUniversalData(uuid, loc);
+        return universalData == null ? null : universalData.getData(key);
+    }
+
+    @ParametersAreNonnullByDefault
     public static void setData(Location loc, String key, String val) {
         var block = getBlock(loc);
         Preconditions.checkNotNull(block);

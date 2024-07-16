@@ -183,24 +183,20 @@ public class TickerTask implements Runnable {
     @ParametersAreNonnullByDefault
     private void tickBlock(Location l, Block b, SlimefunItem item, ASlimefunDataContainer data, long timestamp) {
         try {
-            switch (data) {
-                case SlimefunBlockData blockData -> {
-                    if (item.getBlockTicker().isUniversal()) {
-                        Slimefun.logger()
-                                .log(Level.WARNING, "BlockTicker is universal even identified as non-universal!");
-                        return;
-                    }
-                    item.getBlockTicker().tick(b, item, blockData);
+            if (data instanceof SlimefunBlockData blockData) {
+                if (item.getBlockTicker().isUniversal()) {
+                    Slimefun.logger().log(Level.WARNING, "BlockTicker is universal even identified as non-universal!");
+                    return;
                 }
-                case SlimefunUniversalData universalData -> {
-                    if (!item.getBlockTicker().isUniversal()) {
-                        Slimefun.logger()
-                                .log(Level.WARNING, "BlockTicker is non-universal even identified as universal!");
-                        return;
-                    }
-                    item.getBlockTicker().tick(b, item, universalData);
+                item.getBlockTicker().tick(b, item, blockData);
+            } else if (data instanceof SlimefunUniversalData universalData) {
+                if (!item.getBlockTicker().isUniversal()) {
+                    Slimefun.logger().log(Level.WARNING, "BlockTicker is non-universal even identified as universal!");
+                    return;
                 }
-                default -> throw new IllegalStateException(
+                item.getBlockTicker().tick(b, item, universalData);
+            } else {
+                throw new IllegalStateException(
                         "Unable to tick abnormal blockdata @" + LocationUtils.locationToString(l));
             }
         } catch (Exception | LinkageError x) {
