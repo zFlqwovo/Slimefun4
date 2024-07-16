@@ -183,9 +183,9 @@ public enum MinecraftVersion {
         }
 
         if (this.majorVersion == 20) {
-            return this.minorVersion >= patchVersion;
+            return this.minorVersion == -1 ? patchVersion < 5 : patchVersion >= this.minorVersion;
         } else {
-            return this.minorVersion == -1 || this.minorVersion >= patchVersion;
+            return this.minorVersion == -1 || patchVersion >= this.minorVersion;
         }
     }
 
